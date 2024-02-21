@@ -97,56 +97,53 @@ class _AddScreenState extends State<AddScreen> {
     );
 
     try {
-      // List<String> downloadUrls = [];
+      // Offload to a background task
+      await Future.wait([
+        for (int i = 0; i < _images.length; i++)
+          if (_images[i] is File) _uploadFile(_images[i]),
+        _updateFirestore(text),
+      ]);
 
-      // Uploading and replacing File objects with URLs
-      for (int i = 0; i < _images.length; i++) {
-        if (_images[i] is File) {
-          // Compression
-          // final compressedFile = await FlutterImageCompress.compressAndGetFile(
-          //   (_images[i] as File).path,
-          //   (_images[i] as File).path,
-          //   quality: 80,
-          // );
-
-          // Uploading
-          final storageRef = FirebaseStorage.instance.ref().child(
-              'user_data/${user!.uid}/${DateTime.now().millisecondsSinceEpoch}');
-          final uploadTask = storageRef.putFile(_images[i] as File);
-          // final uploadTask = storageRef.putFile(compressedFile);
-          final url = await (await uploadTask).ref.getDownloadURL();
-          _images[i] = url;
-        }
-      }
-
-      // Firestore Update (await for completion)
-      widget.firestore.collection('posts').add({
-        'text': text,
-        'imageUrls': _images, // Image URLs will now be present
-        'createdAt': Timestamp.now(),
-        'userId': user!.uid,
-        'location': GeoPoint(_currentPosition!.latitude,
-            _currentPosition!.longitude), // Add this line
-      }).then((value) {
-        // Clear data
-        _textEditingController.clear();
-        _images.clear();
-        setState(() {});
-
-        Navigator.pushReplacementNamed(context, '/home');
-      });
-
-      // Show a success message
+      // Show success (on the main thread)
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Content added successfully'),
-        ),
+        const SnackBar(content: Text('Content added successfully')),
       );
     } catch (e) {
       debugPrint('Error adding post: $e');
+      // Handle error (still on the main thread)
     } finally {
-      Navigator.pop(context); // Close the dialog
+      Navigator.pop(context); // Close dialog
+      Navigator.of(context).pushReplacementNamed('/home');
     }
+  }
+
+// Helper functions for background tasks
+  Future<String> _uploadFile(File file) async {
+    final storageRef = FirebaseStorage.instance.ref().child(
+        'user_data/${user!.uid}/${DateTime.now().millisecondsSinceEpoch}');
+    final uploadTask = storageRef.putFile(file);
+    final url = await FirebaseStorage
+        .instance // Access the ref property of the uploadTask object
+        .ref(uploadTask.snapshot.ref.fullPath)
+        .getDownloadURL();
+    return url;
+  }
+
+  Future<void> _updateFirestore(String text) async {
+    // Rebuild _images with URLs if needed
+    await widget.firestore.collection('posts').add({
+      'text': text,
+      'imageUrls': _images,
+      'createdAt': Timestamp.now(),
+      'userId': user!.uid,
+      'location':
+          GeoPoint(_currentPosition!.latitude, _currentPosition!.longitude),
+    });
+
+    // Clear data
+    _textEditingController.clear();
+    _images.clear();
+    setState(() {});
   }
 
   void _openMapSelection() async {

@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggternal/screens/add_screen.dart';
+import 'package:eggternal/screens/list_screen.dart';
+import 'package:eggternal/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,6 +22,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initCenter();
+  }
+
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   void _initCenter() async {
@@ -48,76 +59,53 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFF67280),
-        ).copyWith(
-          primary: const Color(0xFFF67280),
-        ),
-        useMaterial3: true,
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          const MapScreen(),
+          const ListScreen(),
+          AddScreen(firestore: widget.firestore),
+          // CreateScreen(),
+          // SettingsScreen(),
+        ],
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Maps Test'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: true,
+        unselectedItemColor: Colors.grey,
+        unselectedIconTheme: const IconThemeData(
+          color: Colors.grey,
         ),
-        body: GoogleMap(
-          myLocationButtonEnabled: true,
-          myLocationEnabled: true,
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: _center,
-            zoom: 12,
-          ),
+        unselectedLabelStyle: const TextStyle(
+          color: Colors.grey,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          unselectedItemColor: Colors.grey,
-          unselectedIconTheme: const IconThemeData(
-            color: Colors.grey,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Map',
           ),
-          unselectedLabelStyle: const TextStyle(
-            color: Colors.grey,
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_outlined),
+            label: 'List',
           ),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.map),
-              label: 'Map',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list_outlined),
-              label: 'List',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_box_outlined),
-              label: 'Add',
-            ),
-            BottomNavigationBarItem(
-              backgroundColor: Colors.deepPurple,
-              icon: Icon(Icons.create),
-              label: 'Create',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          currentIndex: 0,
-          selectedItemColor: Colors.amber[800],
-          onTap: (index) {
-            // Handle navigation
-            debugPrint('Tapped item: $index');
-            if (index == 1) {
-              Navigator.pushNamed(context, '/list');
-            }
-            if (index == 2) {
-              Navigator.pushNamed(context, '/add');
-            }
-          },
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            backgroundColor: Colors.deepPurple,
+            icon: Icon(Icons.create),
+            label: 'Create',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }

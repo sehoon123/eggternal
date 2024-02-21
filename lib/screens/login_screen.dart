@@ -7,6 +7,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:eggternal/screens/nickname_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.firestore});
@@ -123,9 +124,54 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
     bool agreement = userData['agreement'] ?? false;
 
+    _requestPermissions();
+
     // Navigate to the appropriate screen
     Navigator.pushReplacementNamed(context, agreement ? '/home' : '/agreement');
     // Navigator.pushReplacementNamed(context, '/agreement');
+  }
+
+  Future<void> _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.camera,
+      Permission.storage,
+      // ... Add other required permissions
+  ].request();
+
+    // Handle the results of the request
+    // Example: For simplicity, let's assume all permissions are mandatory
+    if (statuses[Permission.location]!.isGranted &&
+        statuses[Permission.camera]!.isGranted && 
+        statuses[Permission.storage]!.isGranted) {
+      // All permissions are granted, proceed
+      
+    } else {
+      // Some permissions were denied. Guide the user to settings
+      _showPermissionRationaleDialog(); // Implement this function below
+    }
+  }
+
+// Implement a dialog to explain and enable manual permissions
+  void _showPermissionRationaleDialog() {  
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Permissions Needed'), 
+          content: const Text('This app requires location, camera, and storage permissions to function properly. Please grant these permissions in your settings.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Go to Settings'),
+              onPressed: () {
+                openAppSettings(); // Opens the app's settings
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
