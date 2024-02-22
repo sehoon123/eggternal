@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggternal/handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -125,7 +124,14 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
     bool agreement = userData['agreement'] ?? false;
 
-    await PermissionHandler.requestPermissions(context);
+    // Request permissions using the new Permission.request method
+    await Permission.camera.request();
+    await Permission.microphone.request();
+    await Permission.location.request();
+    await Permission.photos.request();
+
+    debugPrint('Permissions granted');
+    
 
     // Navigate to the appropriate screen
     Navigator.pushReplacementNamed(context, agreement ? '/home' : '/agreement');

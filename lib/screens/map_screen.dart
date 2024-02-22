@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/models/post.dart';
 import 'package:eggternal/services/location_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,7 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key});
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -18,6 +19,7 @@ class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
   LatLng _center = const LatLng(37.521563, 126.677433);
   LatLng? userLocation;
+  User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -69,7 +71,10 @@ class _MapScreenState extends State<MapScreen> {
         title: const Text('Map View'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('posts')
+            .where('userId', isEqualTo: currentUser?.uid)
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

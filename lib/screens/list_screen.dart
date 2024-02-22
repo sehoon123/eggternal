@@ -1,17 +1,19 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/models/post.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen({Key? key});
+  const ListScreen({super.key});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
 }
 
 class _ListScreenState extends State<ListScreen> {
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,6 +23,7 @@ class _ListScreenState extends State<ListScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('posts')
+            .where('userId', isEqualTo: currentUser!.uid)
             .snapshots(), // Adjust the collection name if needed
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
