@@ -18,6 +18,7 @@ class _ListScreenState extends State<ListScreen> {
   bool isMyPostsSelected = true; // Default to show My Posts
 
   int _postCount = 0;
+  int _sharedPostCount = 0;
   bool _isLoading = false;
 
   @override
@@ -37,6 +38,7 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       _isLoading = false;
       _postCount = count;
+      _sharedPostCount = count;
     });
   }
 
@@ -55,6 +57,7 @@ class _ListScreenState extends State<ListScreen> {
               onPressed: (index) {
                 setState(() {
                   isMyPostsSelected = index == 0;
+                  debugPrint(isMyPostsSelected.toString());
                   _loadPostCount();
                 });
               },
@@ -80,7 +83,9 @@ class _ListScreenState extends State<ListScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Text(
-                    '$_postCount images',
+                    isMyPostsSelected
+                        ? '$_postCount images'
+                        : '$_sharedPostCount images',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
@@ -92,7 +97,7 @@ class _ListScreenState extends State<ListScreen> {
               stream: FirebaseFirestore.instance
                   .collection('posts')
                   .where(
-                    isMyPostsSelected ? 'userId' : 'sharedUserId',
+                    isMyPostsSelected ? 'userId' : 'sharedUser',
                     isEqualTo: currentUser!.uid,
                   )
                   .snapshots(),
@@ -113,7 +118,6 @@ class _ListScreenState extends State<ListScreen> {
                           ]),
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
-                              debugPrint("I'm here");
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
@@ -163,7 +167,7 @@ class _ListScreenState extends State<ListScreen> {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('posts')
         .where(
-          isMyPostsSelected ? 'userId' : 'sharedUserId',
+          isMyPostsSelected ? 'userId' : 'sharedUser',
           isEqualTo: currentUser!.uid,
         )
         .get();
@@ -174,9 +178,15 @@ class _ListScreenState extends State<ListScreen> {
   Future<int> _getSharedPostCount() async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('posts')
-        .where('sharedUserId',
-            isEqualTo: currentUser!.uid) // Target shared posts
+        .where(
+          'sharedUser',
+          isEqualTo: currentUser!.uid,
+          // arrayContains: currentUser!.uid,
+        ) // Target shared posts
         .get();
+
+    // print currentUser!.uid
+    debugPrint(currentUser!.uid);
 
     return querySnapshot.size;
   }
