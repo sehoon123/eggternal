@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:eggternal/screens/map_selection_screen.dart';
+import 'package:intl/intl.dart';
 
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key, required this.firestore});
@@ -25,6 +26,7 @@ class _AddScreenState extends State<AddScreen> {
   bool _isImageSelectionInProgress = false;
   Position? _currentPosition;
   String? _locationAddress;
+  DateTime? _dueDate;
 
   @override
   void initState() {
@@ -131,6 +133,8 @@ class _AddScreenState extends State<AddScreen> {
       'userId': user!.uid,
       'location':
           GeoPoint(_currentPosition!.latitude, _currentPosition!.longitude),
+      'dueDate': _dueDate,
+      'sharedUser': '', // Add shared user if needed
     });
 
     // Clear data
@@ -232,6 +236,26 @@ class _AddScreenState extends State<AddScreen> {
               onPressed: _openMapSelection,
               child: const Text('Select Location on Map'),
             ),
+            const SizedBox( height: 16.0),
+            ElevatedButton(
+              onPressed: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    _dueDate = pickedDate;
+                  });
+                }
+              },
+              child: const Text('Select Due Date'),
+            ),
+            Text(_dueDate != null
+                ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
+                : 'No Due Date Selected'),
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _postContent,

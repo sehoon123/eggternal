@@ -10,6 +10,7 @@ class Post {
   final String userId;
   final GeoFirePoint location;
   final Timestamp dueDate;
+  final String sharedUser;
 
   Post({
     required this.text,
@@ -18,6 +19,7 @@ class Post {
     required this.userId,
     required this.location,
     required this.dueDate,
+    required this.sharedUser,
   });
 
   // Add a factory method to create a Post from a Firestore DocumentSnapshot
@@ -31,6 +33,7 @@ class Post {
       location:
           GeoFirePoint(data['location'].latitude, data['location'].longitude),
       dueDate: data['dueDate'],
+      sharedUser: data['sharedUser'],
     );
   }
 }

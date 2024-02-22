@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/models/post.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -104,19 +106,48 @@ class _ListScreenState extends State<ListScreen> {
                   return ListView.builder(
                     itemCount: posts.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(posts[index].text),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PostDetailsScreen(
-                                post: posts[index],
+                      return FutureBuilder(
+                          future: Future.wait([
+                            _getUsername(posts[index].userId),
+                            _calculateDistance(posts[index].location),
+                          ]),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              debugPrint("I'm here");
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            final username = snapshot.data![0] as String;
+                            final distance = snapshot.data![1] as double;
+                            final timeLeft =
+                                _calculateTimeLeft(posts[index].dueDate);
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                  child: Text(username.substring(0, 1))),
+                              title: Text(posts[index].text),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('User: $username'),
+                                  Text(
+                                      'Distance: ${distance.toStringAsFixed(2)} meters'),
+                                  Text('Time Left: $timeLeft'),
+                                ],
                               ),
-                            ),
-                          );
-                        },
-                      );
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PostDetailsScreen(
+                                      post: posts[index],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          });
                     },
                   );
                 }
@@ -148,5 +179,30 @@ class _ListScreenState extends State<ListScreen> {
         .get();
 
     return querySnapshot.size;
+  }
+
+  // Assuming Firebase for user data, modify as needed
+  Future<String> _getUsername(String userId) async {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    debugPrint('getUsername success');
+    debugPrint('userDoc: ${userDoc.data()}');
+    return userDoc
+        .data()!['nickname']; // Replace 'username' with the correct field
+  }
+
+  Future<double> _calculateDistance(GeoFirePoint postLocation) async {
+    final myLocation = await Geolocator.getCurrentPosition();
+    debugPrint('calculateDistance success');
+    return postLocation.distance(
+        lat: myLocation.latitude, lng: myLocation.longitude);
+  }
+
+  String _calculateTimeLeft(Timestamp dueDate) {
+    // ... Your logic to determine the time left
+    // Example:
+    final difference = dueDate.toDate().difference(DateTime.now());
+    return 'about ${difference.inDays} days left';
   }
 }
