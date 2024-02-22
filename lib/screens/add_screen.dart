@@ -76,6 +76,13 @@ class _AddScreenState extends State<AddScreen> {
   Future<void> _postContent() async {
     String text = _textEditingController.text;
 
+    if (_dueDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a due date')),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent user from dismissing the dialog
@@ -189,84 +196,85 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Content'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _textEditingController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter text',
-                ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Add Content'),
+    ),
+    body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _textEditingController,
+              decoration: const InputDecoration(
+                hintText: 'Enter text',
               ),
-              const SizedBox(height: 16.0),
-              SizedBox(
-                height: 500, // Set a fixed height for the container
-                child: _images.isEmpty
-                    ? const Center(child: Text('No Images Selected'))
-                    : GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8.0,
-                          mainAxisSpacing: 8.0,
-                        ),
-                        itemCount: _images.length,
-                        itemBuilder: (context, index) {
-                          if (_images[index] is File) {
-                            return Image.file(_images[index] as File);
-                          } else {
-                            return Image.network(_images[index] as String);
-                          }
-                        },
+            ),
+            const SizedBox(height: 16.0),
+            SizedBox(
+              height: 500, // Set a fixed height for the container
+              child: _images.isEmpty
+                  ? const Center(child: Text('No Images Selected'))
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
                       ),
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _selectImage,
-                child: const Text('Select Images'),
-              ),
-              const SizedBox(height: 16.0),
-              Text(_locationAddress ?? 'Location not available'),
-              ElevatedButton(
-                onPressed: _openMapSelection,
-                child: const Text('Select Location on Map'),
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _dueDate = pickedDate;
-                    });
-                  }
-                },
-                child: const Text('Select Due Date'),
-              ),
-              Text(_dueDate != null
-                  ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
-                  : 'No Due Date Selected'),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _postContent,
-                child: const Text('Post Content'),
-              ),
-            ],
-          ),
+                      itemCount: _images.length,
+                      itemBuilder: (context, index) {
+                        if (_images[index] is File) {
+                          return Image.file(_images[index] as File);
+                        } else {
+                          return Image.network(_images[index] as String);
+                        }
+                      },
+                    ),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _selectImage,
+              child: const Text('Select Images'),
+            ),
+            const SizedBox(height: 16.0),
+            Text(_locationAddress ?? 'Location not available'),
+            ElevatedButton(
+              onPressed: _openMapSelection,
+              child: const Text('Select Location on Map'),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    _dueDate = pickedDate;
+                  });
+                }
+              },
+              child: const Text('Select Due Date'),
+            ),
+            Text(_dueDate != null
+                ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
+                : 'No Due Date Selected'),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _postContent,
+              child: const Text('Post Content'),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
