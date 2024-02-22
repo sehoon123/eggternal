@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:eggternal/services/location_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -33,33 +34,19 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   void _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    final LocationService locationService = LocationService();
 
-    // Check location service & permission
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Handle the case where the location service is disabled
+    if (!await locationService.isLocationServiceEnabled()) {
       return;
     }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Handle permission denied
-        return;
-      }
+    try {
+      Position position = await locationService.getCurrentLocation();
+      _currentPosition = position;
+      _updateLocationAddress(); // Get address details
+    } catch (e) {
+      debugPrint('Error getting location: $e');
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Handle case when a user permanently denies permission
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-    _currentPosition = position;
-    _updateLocationAddress(); // Get address details
   }
 
   void _updateLocationAddress() async {
@@ -97,12 +84,7 @@ class _AddScreenState extends State<AddScreen> {
     );
 
     try {
-      // Offload to a background task
-      await Future.wait([
-        for (int i = 0; i < _images.length; i++)
-          if (_images[i] is File) _uploadFile(_images[i]),
-        _updateFirestore(text),
-      ]);
+      await _updateFirestore(text);
 
       // Show success (on the main thread)
       ScaffoldMessenger.of(context).showSnackBar(
@@ -118,18 +100,30 @@ class _AddScreenState extends State<AddScreen> {
   }
 
 // Helper functions for background tasks
-  Future<String> _uploadFile(File file) async {
-    final storageRef = FirebaseStorage.instance.ref().child(
-        'user_data/${user!.uid}/${DateTime.now().millisecondsSinceEpoch}');
-    final uploadTask = storageRef.putFile(file);
-    final url = await FirebaseStorage
-        .instance // Access the ref property of the uploadTask object
-        .ref(uploadTask.snapshot.ref.fullPath)
-        .getDownloadURL();
-    return url;
+  Future<String> _uploadFile(dynamic file) async {
+    if (file is File) {
+      final storageRef = FirebaseStorage.instance.ref().child(
+          'user_data/${user!.uid}/${DateTime.now().millisecondsSinceEpoch}');
+      final uploadTask = storageRef.putFile(file);
+      final snapshot = await uploadTask.whenComplete(() {});
+      final url = await snapshot.ref.getDownloadURL();
+      return url;
+    } else if (file is String) {
+      // If the file is already a URL, no need to upload
+      return file;
+    } else {
+      throw ArgumentError('Invalid file type: $file');
+    }
   }
 
   Future<void> _updateFirestore(String text) async {
+    // Modify _images with URLs
+    for (int i = 0; i < _images.length; i++) {
+      if (_images[i] is File) {
+        _images[i] = await _uploadFile(_images[i]); // Replace File with URL
+      }
+    }
+
     // Rebuild _images with URLs if needed
     await widget.firestore.collection('posts').add({
       'text': text,

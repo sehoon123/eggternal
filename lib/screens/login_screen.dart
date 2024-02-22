@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggternal/handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -124,54 +125,11 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
     bool agreement = userData['agreement'] ?? false;
 
-    _requestPermissions();
+    await PermissionHandler.requestPermissions(context);
 
     // Navigate to the appropriate screen
     Navigator.pushReplacementNamed(context, agreement ? '/home' : '/agreement');
     // Navigator.pushReplacementNamed(context, '/agreement');
-  }
-
-  Future<void> _requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.location,
-      Permission.camera,
-      Permission.storage,
-      // ... Add other required permissions
-  ].request();
-
-    // Handle the results of the request
-    // Example: For simplicity, let's assume all permissions are mandatory
-    if (statuses[Permission.location]!.isGranted &&
-        statuses[Permission.camera]!.isGranted && 
-        statuses[Permission.storage]!.isGranted) {
-      // All permissions are granted, proceed
-      
-    } else {
-      // Some permissions were denied. Guide the user to settings
-      _showPermissionRationaleDialog(); // Implement this function below
-    }
-  }
-
-// Implement a dialog to explain and enable manual permissions
-  void _showPermissionRationaleDialog() {  
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Permissions Needed'), 
-          content: const Text('This app requires location, camera, and storage permissions to function properly. Please grant these permissions in your settings.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Go to Settings'),
-              onPressed: () {
-                openAppSettings(); // Opens the app's settings
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override

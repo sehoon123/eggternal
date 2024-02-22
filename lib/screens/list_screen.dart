@@ -1,10 +1,11 @@
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/models/post.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen({super.key});
+  const ListScreen({Key? key});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -34,17 +35,16 @@ class _ListScreenState extends State<ListScreen> {
                 return ListTile(
                   title: Text(posts[index].text),
                   onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PostDetailsScreen(
-                        text: posts[index].text,
-                        imageUrls: posts[index].imageUrls,
-                        location: posts[index].location,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PostDetailsScreen(
+                          post: posts[index], // Pass the whole Post object
+                        ),
                       ),
-                    ),
-                  );
-                });
+                    );
+                  },
+                );
               },
             );
           }

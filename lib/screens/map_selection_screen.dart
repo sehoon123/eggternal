@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:eggternal/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,18 +20,16 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation().then((position) {
-      setState(() {
-        _initialPosition = position;
-      });
-    });
+    _initializeCenter();
   }
 
-  Future<LatLng> _getCurrentLocation() async {
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    return LatLng(position.latitude, position.longitude);
+  void _initializeCenter() async {
+    final LocationService locationService = LocationService();
+    LatLng? center = await locationService.initializeMapCenter();
+
+    setState(() {
+      _initialPosition = center;
+    });
   }
 
   @override
