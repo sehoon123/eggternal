@@ -15,6 +15,29 @@ class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
   bool isMyPostsSelected = true; // Default to show My Posts
 
+  int _postCount = 0;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPostCount();
+  }
+
+  void _loadPostCount() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final count =
+        isMyPostsSelected ? await _getPostCount() : await _getSharedPostCount();
+
+    setState(() {
+      _isLoading = false;
+      _postCount = count;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +53,7 @@ class _ListScreenState extends State<ListScreen> {
               onPressed: (index) {
                 setState(() {
                   isMyPostsSelected = index == 0;
+                  _loadPostCount();
                 });
               },
               borderRadius: BorderRadius.circular(8.0),
@@ -48,6 +72,18 @@ class _ListScreenState extends State<ListScreen> {
                 ),
               ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Text(
+                    '$_postCount images',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -90,5 +126,27 @@ class _ListScreenState extends State<ListScreen> {
         ],
       ),
     );
+  }
+
+  Future<int> _getPostCount() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where(
+          isMyPostsSelected ? 'userId' : 'sharedUserId',
+          isEqualTo: currentUser!.uid,
+        )
+        .get();
+
+    return querySnapshot.size;
+  }
+
+  Future<int> _getSharedPostCount() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('sharedUserId',
+            isEqualTo: currentUser!.uid) // Target shared posts
+        .get();
+
+    return querySnapshot.size;
   }
 }
