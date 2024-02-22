@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +9,7 @@ class Post {
   final Timestamp createdAt;
   final String userId;
   final GeoFirePoint location;
+  final Timestamp dueDate;
 
   Post({
     required this.text,
@@ -17,6 +17,7 @@ class Post {
     required this.createdAt,
     required this.userId,
     required this.location,
+    required this.dueDate,
   });
 
   // Add a factory method to create a Post from a Firestore DocumentSnapshot
@@ -27,7 +28,9 @@ class Post {
       imageUrls: List<String>.from(data['imageUrls']),
       createdAt: data['createdAt'],
       userId: data['userId'],
-      location: GeoFirePoint(data['location'].latitude, data['location'].longitude),
+      location:
+          GeoFirePoint(data['location'].latitude, data['location'].longitude),
+      dueDate: data['dueDate'],
     );
   }
 }
