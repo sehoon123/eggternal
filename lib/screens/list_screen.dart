@@ -17,6 +17,9 @@ class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
   Position? _currentPosition;
 
+  final List<Post> _posts = [];
+  List<double> _postDistances = [];
+
   bool isMyPostsSelected = true; // Default to show My Posts
   int _postCount = 0;
   int _sharedPostCount = 0;
@@ -27,6 +30,7 @@ class _ListScreenState extends State<ListScreen> {
     super.initState();
     _loadPostCount();
     _determineCurrentPosition();
+    _getPosts();
   }
 
   void _determineCurrentPosition() async {
@@ -34,14 +38,28 @@ class _ListScreenState extends State<ListScreen> {
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+
+      // Calculate distances for all posts
+      final List<double> distances = [];
+      for (final post in _posts) {
+        distances.add(await _calculateDistance(post.location, position));
+      }
+
       setState(() {
         _currentPosition = position;
+        _postDistances = distances;
       });
     } catch (e) {
       debugPrint('Error getting current location: $e');
-      // Handle the error, possibly by requesting location permissions
-      // or guiding the user to enable location services.
     }
+  }
+
+  Future<double> _calculateDistance(
+      GeoFirePoint postLocation, Position userPosition) async {
+    return postLocation.distance(
+      lat: userPosition.latitude,
+      lng: userPosition.longitude,
+    );
   }
 
   void _loadPostCount() async {
@@ -49,14 +67,63 @@ class _ListScreenState extends State<ListScreen> {
       _isLoading = true;
     });
 
-    final count =
-        isMyPostsSelected ? await _getPostCount() : await _getSharedPostCount();
+    final posts =
+        isMyPostsSelected ? await _getPosts() : await _getSharedPosts();
+    final postCount = posts.length;
 
     setState(() {
       _isLoading = false;
-      _postCount = count;
-      _sharedPostCount = count;
+      _postCount = postCount;
+      _sharedPostCount = postCount;
     });
+  }
+
+  Future<List<Post>> _getPosts() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('userId', isEqualTo: currentUser!.uid)
+        .get();
+
+    return querySnapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+  }
+
+  Future<List<Post>> _getSharedPosts() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('sharedUser', isEqualTo: currentUser!.uid)
+        .get();
+
+    return querySnapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+  }
+
+  Future<Map<String, String>> _getUsernames(List<String> userIds) async {
+    final Map<String, String> usernames = {};
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where(FieldPath.documentId, whereIn: userIds)
+        .get();
+
+    for (final doc in querySnapshot.docs) {
+      usernames[doc.id] = doc.data()['nickname'];
+    }
+
+    return usernames;
+  }
+
+  // Assuming Firebase for user data, modify as needed
+  Future<String> _getUsername(String userId) async {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    // debugPrint('getUsername success');
+    // debugPrint('userDoc: ${userDoc.data()}');
+    return userDoc.data()!['nickname'];
+  }
+
+  String _calculateTimeLeft(Timestamp dueDate) {
+    final difference = dueDate.toDate().difference(DateTime.now());
+    return 'about ${difference.inDays} days left';
   }
 
   @override
@@ -117,6 +184,7 @@ class _ListScreenState extends State<ListScreen> {
                     isMyPostsSelected ? 'userId' : 'sharedUser',
                     isEqualTo: currentUser!.uid,
                   )
+                  .limit(20)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -134,10 +202,12 @@ class _ListScreenState extends State<ListScreen> {
                       return FutureBuilder(
                           future: Future.wait([
                             _getUsername(posts[index].userId),
-                            _calculateDistance(posts[index].location),
+                            _calculateDistance(
+                                posts[index].location, _currentPosition!),
                           ]),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               // debugPrint('waiting for future to complete');
                               return const Center(
                                 // child: CircularProgressIndicator());
@@ -188,55 +258,5 @@ class _ListScreenState extends State<ListScreen> {
         ],
       ),
     );
-  }
-
-  Future<int> _getPostCount() async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('posts')
-        .where(
-          isMyPostsSelected ? 'userId' : 'sharedUser',
-          isEqualTo: currentUser!.uid,
-        )
-        .get();
-
-    return querySnapshot.size;
-  }
-
-  Future<int> _getSharedPostCount() async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('posts')
-        .where(
-          'sharedUser',
-          isEqualTo: currentUser!.uid,
-        ) // Target shared posts
-        .get();
-
-    return querySnapshot.size;
-  }
-
-  // Assuming Firebase for user data, modify as needed
-  Future<String> _getUsername(String userId) async {
-    final userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-
-    // debugPrint('getUsername success');
-    // debugPrint('userDoc: ${userDoc.data()}');
-    return userDoc.data()!['nickname'];
-  }
-
-  Future<double> _calculateDistance(GeoFirePoint postLocation) async {
-    if (_currentPosition != null) {
-      return postLocation.distance(
-        lat: _currentPosition!.latitude,
-        lng: _currentPosition!.longitude,
-      );
-    } else {
-      return Future.error('Error getting current location');
-    }
-  }
-
-  String _calculateTimeLeft(Timestamp dueDate) {
-    final difference = dueDate.toDate().difference(DateTime.now());
-    return 'about ${difference.inDays} days left';
   }
 }
