@@ -2,10 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/screens/add_screen.dart';
 import 'package:eggternal/screens/list_screen.dart';
 import 'package:eggternal/screens/map_screen.dart';
-import 'package:eggternal/services/location_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.firestore});

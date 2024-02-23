@@ -2,7 +2,6 @@ import 'package:eggternal/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggternal/models/post.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,10 +17,6 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
   Position? _currentPosition;
-
-  final int _postCount = 0;
-  final int _sharedPostCount = 0;
-  final bool _isLoading = false;
 
   @override
   void initState() {
@@ -74,7 +69,9 @@ class _ListScreenState extends State<ListScreen> {
 
   String _calculateTimeLeft(Timestamp dueDate) {
     final difference = dueDate.toDate().difference(DateTime.now());
-    return 'about ${difference.inDays} days left';
+    return difference.inDays < 0
+        ? "Ready to Open"
+        : 'about ${difference.inDays} days left';
   }
 
   @override
