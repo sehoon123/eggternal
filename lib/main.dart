@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggternal/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
@@ -12,6 +13,7 @@ import 'package:eggternal/screens/map_selection_screen.dart';
 import 'package:eggternal/screens/nickname_screen.dart';
 import 'package:eggternal/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -37,7 +39,12 @@ void main() async {
     javaScriptAppKey: dotenv.env['kakaoJavaScriptAppKey']!,
   );
 
-  runApp(MyApp(firestore: firestore)); // Pass firestore instance to app
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => PostsProvider(), // Create instance of PostsProvider
+      child: MyApp(firestore: firestore),
+    ),
+  ); // Pass firestore instance to app
 }
 
 class MyApp extends StatelessWidget {
@@ -56,9 +63,9 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
-        '/': (context) => const SplashScreen(),
+        // '/': (context) => const SplashScreen(),
         '/login': (context) => LoginPage(firestore: firestore),
         '/home': (context) => HomeScreen(firestore: firestore),
         '/agreement': (context) => AgreementScreen(firestore: firestore),

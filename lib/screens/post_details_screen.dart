@@ -94,7 +94,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
               Text(
                   'User Location: ${userLocation!.latitude}, ${userLocation!.longitude}'),
               // Display distance information
-              Text('Distance from user: $distance meters'),
+              Text(
+                  'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
               // Add additional information about the location as needed
               const SizedBox(height: 16.0),
               Expanded(

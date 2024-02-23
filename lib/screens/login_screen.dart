@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggternal/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:eggternal/screens/nickname_screen.dart';
@@ -131,7 +133,8 @@ class _LoginPageState extends State<LoginPage> {
     await Permission.photos.request();
 
     debugPrint('Permissions granted');
-    
+
+    Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
 
     // Navigate to the appropriate screen
     Navigator.pushReplacementNamed(context, agreement ? '/home' : '/agreement');

@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/models/post.dart';
 import 'package:eggternal/services/location_service.dart';
+import 'package:eggternal/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -71,10 +73,7 @@ class _MapScreenState extends State<MapScreen> {
         title: const Text('Map View'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('posts')
-            .where('userId', isEqualTo: currentUser?.uid)
-            .snapshots(),
+        stream: Provider.of<PostsProvider>(context).postsStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -107,7 +106,7 @@ class _MapScreenState extends State<MapScreen> {
                       LatLng(post.location.latitude, post.location.longitude),
                   infoWindow: InfoWindow(
                     title: post.text,
-                    snippet: 'Distance: ${distance.toStringAsFixed(2)} meters',
+                    snippet: 'Distance: ${distance.toStringAsFixed(2)}km',
                   ),
                   onTap: () {
                     Navigator.push(
