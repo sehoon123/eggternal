@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -22,12 +21,34 @@ class _MapScreenState extends State<MapScreen> {
   LatLng _center = const LatLng(37.521563, 126.677433);
   LatLng? userLocation;
   User? currentUser = FirebaseAuth.instance.currentUser;
+  final LocationService locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
     _initializeCenter();
     _initializeUserLocation();
+    _startTrackingLocation();
+  }
+
+  @override
+  void dispose() {
+    locationService.stopTrackingLocation();
+    super.dispose();
+  }
+
+  void _startTrackingLocation() {
+    locationService.startTrackingLocation(
+        onLocationUpdate: (LatLng newLocation) {
+      setState(() {
+        userLocation = newLocation;
+      });
+      _mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: newLocation, zoom: 12),
+        ),
+      );
+    });
   }
 
   // Function to Initialize the Map with User Location
