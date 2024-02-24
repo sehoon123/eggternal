@@ -28,6 +28,17 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     setState(() {
       _initialPosition = center;
     });
+
+    if (center != null && _controller != null) {
+      _controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: 14.0, // You can adjust the zoom level as needed
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -37,6 +48,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         title: const Text('Select Location'),
       ),
       body: GoogleMap(
+        myLocationButtonEnabled: true,
+        myLocationEnabled: true,
         onMapCreated: (controller) {
           _controller = controller;
         },

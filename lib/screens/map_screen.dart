@@ -19,7 +19,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
-  LatLng _center = const LatLng(37.521563, 126.677433);
+  LatLng _center = const LatLng(0, 0);
   LatLng? userLocation;
   User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -39,6 +39,14 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _center = center;
       });
+      _mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: 14.0, // Adjust the zoom level as needed
+          ),
+        ),
+      );
     }
   }
 
