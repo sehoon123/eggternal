@@ -1,3 +1,4 @@
+import 'package:eggternal/services/location_service.dart';
 import 'package:eggternal/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class ListScreen extends StatefulWidget {
@@ -16,15 +18,30 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
-  Position? _currentPosition;
+  LatLng? _currentPosition;
+  final LocationService locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
-    // _loadPostCount();
     _determineCurrentPosition();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+    });
+    _startTrackingLocation();
+  }
+
+  @override
+  void dispose() {
+    locationService.stopTrackingLocation();
+    super.dispose();
+  }
+
+  void _startTrackingLocation() {
+    locationService.startTrackingLocation(onLocationUpdate: (LatLng newPosition) {
+      setState(() {
+        _currentPosition = newPosition;
+      });
     });
   }
 
@@ -37,7 +54,7 @@ class _ListScreenState extends State<ListScreen> {
       debugPrint('Current position: $position');
 
       setState(() {
-        _currentPosition = position;
+        _currentPosition = position as LatLng?;
       });
     } catch (e) {
       debugPrint('Error getting current location: $e');

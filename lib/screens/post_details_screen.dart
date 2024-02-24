@@ -17,32 +17,49 @@ class PostDetailsScreen extends StatefulWidget {
 class _PostDetailsScreenState extends State<PostDetailsScreen> {
   late LatLng? userLocation;
   bool isLoading = true;
+  final LocationService locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
-    initializeUserLocation();
+    _startTrackingLocation();
   }
 
-  Future<void> initializeUserLocation() async {
-    LocationService locationService = LocationService();
-    debugPrint('Initializing user location...');
-
-    try {
-      debugPrint('location initialized:  0000');
-      LatLng? location = await locationService.getCurrentLatLng();
-      debugPrint('location initialized: $location');
-      if (location != null) {
-        setState(() {
-          userLocation = location;
-          isLoading = false;
-          debugPrint('User location initialized: $userLocation');
-        });
-      }
-    } catch (e) {
-      debugPrint('Error initializing user location in postDetail: $e');
-    }
+  @override
+  void dispose() {
+    locationService.stopTrackingLocation();
+    super.dispose();
   }
+
+  void _startTrackingLocation() {
+    locationService.startTrackingLocation(onLocationUpdate: (LatLng newPosition) {
+      setState(() {
+        userLocation = LatLng(newPosition.latitude, newPosition.longitude);
+        isLoading = false;
+      });
+    });
+  }
+
+
+  // Future<void> initializeUserLocation() async {
+  //   LocationService locationService = LocationService();
+  //   debugPrint('Initializing user location...');
+
+  //   try {
+  //     debugPrint('location initialized:  0000');
+  //     LatLng? location = await locationService.getCurrentLatLng();
+  //     debugPrint('location initialized: $location');
+  //     if (location != null) {
+  //       setState(() {
+  //         userLocation = location;
+  //         isLoading = false;
+  //         debugPrint('User location initialized: $userLocation');
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error initializing user location in postDetail: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

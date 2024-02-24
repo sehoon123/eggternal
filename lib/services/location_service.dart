@@ -41,7 +41,7 @@ class LocationService {
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter:
-          10, // Only emit a new position if the device has moved at least   10 meters
+          30, // Only emit a new position if the device has moved at least 30 meters
     );
 
     return Geolocator.getPositionStream(locationSettings: locationSettings);
