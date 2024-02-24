@@ -18,13 +18,13 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
-  LatLng? _currentPosition;
+  final ValueNotifier<LatLng?> userLocationNotifier =
+      ValueNotifier<LatLng?>(null);
   final LocationService locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
-    _determineCurrentPosition();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
@@ -34,14 +34,14 @@ class _ListScreenState extends State<ListScreen> {
   @override
   void dispose() {
     locationService.stopTrackingLocation();
+    userLocationNotifier.dispose();
     super.dispose();
   }
 
   void _startTrackingLocation() {
-    locationService.startTrackingLocation(onLocationUpdate: (LatLng newPosition) {
-      setState(() {
-        _currentPosition = newPosition;
-      });
+    locationService.startTrackingLocation(
+        onLocationUpdate: (LatLng newPosition) {
+      userLocationNotifier.value = newPosition;
     });
   }
 
@@ -53,9 +53,8 @@ class _ListScreenState extends State<ListScreen> {
 
       debugPrint('Current position: $position');
 
-      setState(() {
-        _currentPosition = position as LatLng?;
-      });
+      userLocationNotifier.value =
+          LatLng(position.latitude, position.longitude);
     } catch (e) {
       debugPrint('Error getting current location: $e');
       // Handle the error, possibly by requesting location permissions
@@ -74,10 +73,10 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   double _calculateDistance(GeoFirePoint postLocation) {
-    if (_currentPosition != null) {
+    if (userLocationNotifier.value != null) {
       return postLocation.distance(
-        lat: _currentPosition!.latitude,
-        lng: _currentPosition!.longitude,
+        lat: userLocationNotifier.value!.latitude,
+        lng: userLocationNotifier.value!.longitude,
       );
     } else {
       return -1;
@@ -94,11 +93,10 @@ class _ListScreenState extends State<ListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Posts'),
-      ),
-      body: Consumer<PostsProvider>(
-        builder: (context, postsProvider, child) {
+        appBar: AppBar(
+          title: const Text('Posts'),
+        ),
+        body: Consumer<PostsProvider>(builder: (context, postsProvider, child) {
           if (postsProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -152,63 +150,66 @@ class _ListScreenState extends State<ListScreen> {
                   itemCount: postsProvider.posts.length,
                   itemBuilder: (context, index) {
                     final post = postsProvider.posts[index];
-                    final distance = _currentPosition != null
-                        ? _calculateDistance(post.location)
-                        : -1;
                     final timeLeft = _calculateTimeLeft(post.dueDate);
 
                     return FutureBuilder<String>(
-                        future: _getUsername(post.userId),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState !=
-                              ConnectionState.done) {
-                            return ListTile(
-                              leading: const CircularProgressIndicator(),
-                              title: Text(post.text),
-                              subtitle: const Text('Loading user nickname...'),
-                            );
-                          } else if (snapshot.hasError) {
-                            return ListTile(
-                              leading: const Icon(Icons.error),
-                              title: Text(post.text),
-                              subtitle:
-                                  const Text('Error loading user nickname'),
-                            );
-                          } else {
-                            return ListTile(
-                              leading: CircleAvatar(
-                                  child: Text(snapshot.data!.substring(0, 1))),
-                              title: Text(post.text),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'User: ${snapshot.data}'), // Assuming you want to display the user ID for simplicity
-                                  Text(
-                                      'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                  Text('Time Left: $timeLeft'),
-                                ],
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PostDetailsScreen(
-                                      post: post,
+                      future: _getUsername(post.userId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return ListTile(
+                            leading: const CircularProgressIndicator(),
+                            title: Text(post.text),
+                            subtitle: const Text('Loading user nickname...'),
+                          );
+                        } else if (snapshot.hasError) {
+                          return ListTile(
+                            leading: const Icon(Icons.error),
+                            title: Text(post.text),
+                            subtitle: const Text('Error loading user nickname'),
+                          );
+                        } else {
+                          return ValueListenableBuilder<LatLng?>(
+                            valueListenable: userLocationNotifier,
+                            builder: (context, userLocation, child) {
+                              final distance = userLocation != null
+                                  ? _calculateDistance(post.location)
+                                  : -1;
+
+                              return ListTile(
+                                leading: CircleAvatar(
+                                    child:
+                                        Text(snapshot.data!.substring(0, 1))),
+                                title: Text(post.text),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('User: ${snapshot.data}'),
+                                    Text(
+                                        'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                    Text('Time Left: $timeLeft'),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PostDetailsScreen(
+                                        post: post,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                        });
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
-              ),
+              )
             ],
           );
-        },
-      ),
-    );
+        }));
   }
 }
