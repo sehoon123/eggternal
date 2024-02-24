@@ -29,7 +29,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
       _initialPosition = center;
     });
 
-    if (center != null && _controller != null) {
+    if (center != null) {
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(

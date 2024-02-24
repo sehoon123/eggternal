@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:eggternal/screens/post_details_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +18,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
-  LatLng _center = const LatLng(0, 0);
+  LatLng? _initialPosition;
   LatLng? userLocation;
   User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -27,7 +26,6 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _initializeCenter();
-    _initializeUserLocation();
   }
 
   // Function to Initialize the Map with User Location
@@ -35,10 +33,13 @@ class _MapScreenState extends State<MapScreen> {
     final LocationService locationService = LocationService();
     LatLng? center = await locationService.getCurrentLatLng();
 
-    if (center != null) {
+    debugPrint('Center: $center');
+
       setState(() {
-        _center = center;
+        _initialPosition = center;
       });
+
+    if (center != null) {
       _mapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -50,30 +51,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Function to Initialize the User's Location
-  void _initializeUserLocation() async {
-    final LocationService locationService = LocationService();
-
-    try {
-      LatLng? location = await locationService.getCurrentLatLng();
-      setState(() {
-        userLocation = location;
-      });
-    } catch (e) {
-      debugPrint('Error initializing user location: $e');
-    }
-  }
-
   // Function when Map is Created
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    _mapController.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: _center, zoom: 12),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,8 +67,11 @@ class _MapScreenState extends State<MapScreen> {
             return GoogleMap(
               myLocationButtonEnabled: true,
               myLocationEnabled: true,
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(target: _center, zoom: 12),
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              initialCameraPosition: CameraPosition(
+                  target: _initialPosition ?? const LatLng(0, 0), zoom: 12),
               markers: snapshot.data!.docs.map((doc) {
                 final post = Post.fromFirestore(doc);
                 Coordinates postLocation = Coordinates(
