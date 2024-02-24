@@ -23,7 +23,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
 
   void _initializeCenter() async {
     final LocationService locationService = LocationService();
-    LatLng? center = await locationService.initializeMapCenter();
+    LatLng? center = await locationService.getCurrentLatLng();
 
     setState(() {
       _initialPosition = center;

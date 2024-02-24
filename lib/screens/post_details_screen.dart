@@ -30,7 +30,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 
     try {
       debugPrint('location initialized:  0000');
-      LatLng? location = await locationService.initializeMapCenter();
+      LatLng? location = await locationService.getCurrentLatLng();
       debugPrint('location initialized: $location');
       if (location != null) {
         setState(() {

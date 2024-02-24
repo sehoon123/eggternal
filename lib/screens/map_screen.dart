@@ -33,7 +33,7 @@ class _MapScreenState extends State<MapScreen> {
   // Function to Initialize the Map with User Location
   void _initializeCenter() async {
     final LocationService locationService = LocationService();
-    LatLng? center = await locationService.initializeMapCenter();
+    LatLng? center = await locationService.getCurrentLatLng();
 
     if (center != null) {
       setState(() {
@@ -47,9 +47,9 @@ class _MapScreenState extends State<MapScreen> {
     final LocationService locationService = LocationService();
 
     try {
-      Position location = await locationService.getCurrentLocation();
+      LatLng? location = await locationService.getCurrentLatLng();
       setState(() {
-        userLocation = LatLng(location.latitude, location.longitude);
+        userLocation = location;
       });
     } catch (e) {
       debugPrint('Error initializing user location: $e');
