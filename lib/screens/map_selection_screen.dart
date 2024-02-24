@@ -13,20 +13,44 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   LatLng? _selectedPosition;
-  LatLng? _initialPosition;
+  final LocationService locationService = LocationService();
+  bool _mapCentered = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCenter();
+    _startTrackingLocation();
   }
 
-  void _initializeCenter() async {
-    final LocationService locationService = LocationService();
-    LatLng? center = await locationService.getCurrentLatLng();
+  @override
+  void dispose() {
+    locationService.stopTrackingLocation();
+    super.dispose();
+  }
 
-    setState(() {
-      _initialPosition = center;
+  void _startTrackingLocation() {
+    debugPrint("Ping");
+    locationService.startTrackingLocation(
+        onLocationUpdate: (LatLng newPosition) {
+      setState(() {
+        _selectedPosition = newPosition;
+        if (!_mapCentered) {
+          _markers.clear();
+          _markers.add(Marker(
+            markerId: const MarkerId('current Location'),
+            position: newPosition,
+          ));
+          _controller.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: newPosition,
+                zoom: 18,
+              ),
+            ),
+          );
+          _mapCentered = true;
+        }
+      });
     });
   }
 
@@ -37,8 +61,19 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         title: const Text('Select Location'),
       ),
       body: GoogleMap(
+        myLocationEnabled: true,
         onMapCreated: (controller) {
           _controller = controller;
+          if (_selectedPosition != null) {
+            _controller.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: _selectedPosition!,
+                  zoom: 14,
+                ),
+              ),
+            );
+          }
         },
         onTap: (position) {
           setState(() {
@@ -51,10 +86,15 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           });
         },
         markers: _markers,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(37.7749, -122.4194), // San Francisco
-          zoom: 10,
-        ),
+        initialCameraPosition: _selectedPosition != null
+            ? CameraPosition(
+                target: _selectedPosition!,
+                zoom: 14,
+              )
+            : const CameraPosition(
+                target: LatLng(0, 0), // San Francisco
+                zoom: 14,
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

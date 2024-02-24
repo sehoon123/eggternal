@@ -18,15 +18,14 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _mapController;
-  LatLng _center = const LatLng(37.521563, 126.677433);
   LatLng? userLocation;
   User? currentUser = FirebaseAuth.instance.currentUser;
   final LocationService locationService = LocationService();
+  bool _mapCentered = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCenter();
     _initializeUserLocation();
     _startTrackingLocation();
   }
@@ -40,28 +39,21 @@ class _MapScreenState extends State<MapScreen> {
   void _startTrackingLocation() {
     locationService.startTrackingLocation(
         onLocationUpdate: (LatLng newLocation) {
-      setState(() {
-        userLocation = newLocation;
-      });
-      _mapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: newLocation, zoom: 12),
-        ),
-      );
+      if (!_mapCentered) {
+        setState(() {
+          userLocation = newLocation;
+          _mapCentered = true;
+        });
+        _mapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: newLocation, zoom: 12),
+          ),
+        );
+      }
     });
   }
 
   // Function to Initialize the Map with User Location
-  void _initializeCenter() async {
-    final LocationService locationService = LocationService();
-    LatLng? center = await locationService.getCurrentLatLng();
-
-    if (center != null) {
-      setState(() {
-        _center = center;
-      });
-    }
-  }
 
   // Function to Initialize the User's Location
   void _initializeUserLocation() async {
@@ -82,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
     _mapController = controller;
     _mapController.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: _center, zoom: 12),
+        CameraPosition(target: userLocation ?? const LatLng(40.689167, -74.044444), zoom: 12),
       ),
     );
   }
@@ -103,7 +95,9 @@ class _MapScreenState extends State<MapScreen> {
               myLocationButtonEnabled: true,
               myLocationEnabled: true,
               onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(target: _center, zoom: 12),
+              initialCameraPosition:
+                  CameraPosition(target: userLocation!, zoom: 12),
+
               markers: snapshot.data!.docs.map((doc) {
                 final post = Post.fromFirestore(doc);
                 Coordinates postLocation = Coordinates(
