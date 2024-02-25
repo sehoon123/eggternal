@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggternal/screens/add_screen.dart';
 import 'package:eggternal/screens/list_screen.dart';
 import 'package:eggternal/screens/map_screen.dart';
+import 'package:eggternal/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const ListScreen(),
           AddScreen(firestore: widget.firestore),
           // CreateScreen(),
-          // SettingsScreen(),
+          const SettingsScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
