@@ -194,29 +194,36 @@ class _AddScreenState extends State<AddScreen> {
     });
   }
 
+  void _removeImage(int index) {
+    setState(() {
+      _images.removeAt(index);
+    });
+  }
+
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Add Content'),
-    ),
-    body: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _textEditingController,
-              decoration: const InputDecoration(
-                hintText: 'Enter text',
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Content'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter text',
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            SizedBox(
-              height: 500, // Set a fixed height for the container
-              child: _images.isEmpty
+              const SizedBox(height: 16.0),
+              _images.isEmpty
                   ? const Center(child: Text('No Images Selected'))
                   : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
@@ -225,55 +232,82 @@ Widget build(BuildContext context) {
                       ),
                       itemCount: _images.length,
                       itemBuilder: (context, index) {
-                        if (_images[index] is File) {
-                          return Image.file(_images[index] as File);
-                        } else {
-                          return Image.network(_images[index] as String);
-                        }
+                        final image = _images[index];
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (image is File)
+                              Image.file(
+                                image,
+                                fit: BoxFit.cover,
+                              )
+                            else
+                              Image.network(
+                                image,
+                                fit: BoxFit.cover,
+                              ),
+                            Positioned(
+                              right: 5,
+                              top: 5,
+                              child: GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.remove_circle,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
                       },
                     ),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _selectImage,
-              child: const Text('Select Images'),
-            ),
-            const SizedBox(height: 16.0),
-            Text(_locationAddress ?? 'Location not available'),
-            ElevatedButton(
-              onPressed: _openMapSelection,
-              child: const Text('Select Location on Map'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (pickedDate != null) {
-                  setState(() {
-                    _dueDate = pickedDate;
-                  });
-                }
-              },
-              child: const Text('Select Due Date'),
-            ),
-            Text(_dueDate != null
-                ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
-                : 'No Due Date Selected'),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _postContent,
-              child: const Text('Post Content'),
-            ),
-          ],
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _selectImage,
+                child: const Text('Select Images'),
+              ),
+              const SizedBox(height: 16.0),
+              Text(_locationAddress ?? 'Location not available'),
+              ElevatedButton(
+                onPressed: _openMapSelection,
+                child: const Text('Select Location on Map'),
+              ),
+              const SizedBox(height: 16.0),
+              Text(_dueDate != null
+                  ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
+                  : 'No Due Date Selected'),
+              ElevatedButton(
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _dueDate = pickedDate;
+                    });
+                  }
+                },
+                child: const Text('Select Due Date'),
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _postContent,
+                child: const Text('Post Content'),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
