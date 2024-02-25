@@ -17,7 +17,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late GoogleMapController _mapController;
+  GoogleMapController? _mapController;
   LatLng? userLocation;
   User? currentUser = FirebaseAuth.instance.currentUser;
   final LocationService locationService = LocationService();
@@ -44,7 +44,7 @@ class _MapScreenState extends State<MapScreen> {
           userLocation = newLocation;
           _mapCentered = true;
         });
-        _mapController.animateCamera(
+        _mapController!.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(target: newLocation, zoom: 12),
           ),
@@ -72,9 +72,11 @@ class _MapScreenState extends State<MapScreen> {
   // Function when Map is Created
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    _mapController.animateCamera(
+    _mapController?.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: userLocation ?? const LatLng(40.689167, -74.044444), zoom: 12),
+        CameraPosition(
+            target: userLocation ?? const LatLng(40.689167, -74.044444),
+            zoom: 12),
       ),
     );
   }
@@ -95,9 +97,10 @@ class _MapScreenState extends State<MapScreen> {
               myLocationButtonEnabled: true,
               myLocationEnabled: true,
               onMapCreated: _onMapCreated,
-              initialCameraPosition:
-                  CameraPosition(target: userLocation!, zoom: 12),
-
+              initialCameraPosition: CameraPosition(
+                target: userLocation ?? const LatLng(0, 0),
+                zoom: 12,
+              ),
               markers: snapshot.data!.docs.map((doc) {
                 final post = Post.fromFirestore(doc);
                 Coordinates postLocation = Coordinates(
