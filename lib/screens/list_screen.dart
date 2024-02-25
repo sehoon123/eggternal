@@ -195,6 +195,7 @@ class _ListScreenState extends State<ListScreen> {
                                     MaterialPageRoute(
                                       builder: (context) => PostDetailsScreen(
                                         post: post,
+                                        userLocation: userLocationNotifier.value!,
                                       ),
                                     ),
                                   );

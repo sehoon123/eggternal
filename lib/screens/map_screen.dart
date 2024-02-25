@@ -26,29 +26,26 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeUserLocation();
+    // _initializeUserLocation();
     _startTrackingLocation();
   }
 
   @override
   void dispose() {
     locationService.stopTrackingLocation();
+    _mapController?.dispose();
     super.dispose();
   }
 
   void _startTrackingLocation() {
     locationService.startTrackingLocation(
         onLocationUpdate: (LatLng newLocation) {
-      if (!_mapCentered) {
-        setState(() {
-          userLocation = newLocation;
-          _mapCentered = true;
-        });
-        _mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(target: newLocation, zoom: 12),
-          ),
-        );
+      setState(() => userLocation = newLocation);
+      if (!_mapCentered && _mapController != null) {
+        _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: newLocation, zoom: 12)));
+        _mapCentered =
+            true; // Ensure the map is centered only once or as needed
       }
     });
   }
@@ -56,29 +53,25 @@ class _MapScreenState extends State<MapScreen> {
   // Function to Initialize the Map with User Location
 
   // Function to Initialize the User's Location
-  void _initializeUserLocation() async {
-    final LocationService locationService = LocationService();
+  // void _initializeUserLocation() async {
+  //   final LocationService locationService = LocationService();
 
-    try {
-      LatLng? location = await locationService.getCurrentLatLng();
-      setState(() {
-        userLocation = location;
-      });
-    } catch (e) {
-      debugPrint('Error initializing user location: $e');
-    }
-  }
+  //   try {
+  //     LatLng? location = await locationService.getCurrentLatLng();
+  //     setState(() {
+  //       userLocation = location;
+  //     });
+  //   } catch (e) {
+  //     debugPrint('Error initializing user location: $e');
+  //   }
+  // }
 
-  // Function when Map is Created
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-            target: userLocation ?? const LatLng(40.689167, -74.044444),
-            zoom: 12),
-      ),
-    );
+    if (userLocation != null) {
+      _mapController!.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: userLocation!, zoom: 12)));
+    }
   }
 
   @override
@@ -130,7 +123,10 @@ class _MapScreenState extends State<MapScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PostDetailsScreen(post: post),
+                        builder: (context) => PostDetailsScreen(
+                          post: post,
+                          userLocation: userLocation!,
+                        ),
                       ),
                     );
                   },

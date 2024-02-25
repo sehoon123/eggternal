@@ -6,8 +6,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PostDetailsScreen extends StatefulWidget {
   final Post post;
+  final LatLng userLocation;
 
-  const PostDetailsScreen({super.key, required this.post});
+  const PostDetailsScreen({
+    super.key,
+    required this.post,
+    required this.userLocation,
+  });
 
   @override
   _PostDetailsScreenState createState() => _PostDetailsScreenState();
@@ -21,6 +26,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    userLocation = widget.userLocation;
+    isLoading = false;
+
     _startTrackingLocation();
   }
 
