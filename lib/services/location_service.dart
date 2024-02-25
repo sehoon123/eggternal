@@ -48,11 +48,18 @@ class LocationService {
   }
 
   void startTrackingLocation({required Function(LatLng) onLocationUpdate}) {
-    _positionStreamSubscription =
-        getPositionStream().listen((Position position) {
-      debugPrint('New location: ${position.latitude}, ${position.longitude}');
-      onLocationUpdate(LatLng(position.latitude, position.longitude));
-    });
+    _positionStreamSubscription = getPositionStream().listen(
+      (Position position) {
+        debugPrint('New location: ${position.latitude}, ${position.longitude}');
+        debugPrint('Type of latitude: ${position.latitude.runtimeType}');
+        debugPrint('Type of longitude: ${position.longitude.runtimeType}');
+
+        onLocationUpdate(LatLng(position.latitude, position.longitude));
+      },
+      onError: (error) {
+        debugPrint('Error getting location: $error');
+      },
+    );
   }
 
   // Method to stop tracking the user's location
