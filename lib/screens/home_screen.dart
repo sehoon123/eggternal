@@ -32,7 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserNickname() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? nickname = prefs.getString('nickname');
+    String? userId = FirebaseAuth.instance.currentUser!.uid;
+    String? nickname = prefs.getString('nickname_$userId');
 
     if (nickname == null) {
       // If the nickname is not in shared_preferences, fetch it from Firestore
@@ -43,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (doc.exists) {
         nickname = doc.data()?['nickname'] ?? '';
         // Store the fetched nickname in shared_preferences
-        await prefs.setString('nickname', nickname!);
+        await prefs.setString('nickname_$userId', nickname!);
       }
     }
 

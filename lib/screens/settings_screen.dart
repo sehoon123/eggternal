@@ -27,8 +27,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? nickname = prefs.getString('nickname');
-    String? profileImageUrl = prefs.getString('profileImageUrl');
+    String? nickname = prefs.getString('nickname_${user!.uid}');
+    String? profileImageUrl = prefs.getString('profileImageUrl_${user!.uid}');
+
 
     if (nickname != null && profileImageUrl != null) {
       setState(() {
@@ -46,8 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _profileImageUrl = doc.data()?['profileImageUrl'] ?? '';
         });
         // Store the fetched values in shared_preferences
-        await prefs.setString('nickname', _nameController.text);
-        await prefs.setString('profileImageUrl', _profileImageUrl!);
+        await prefs.setString('nickname_${user!.uid}', _nameController.text);
+        await prefs.setString('profileImageUrl_${user!.uid}', _profileImageUrl!);
       }
     }
   }
@@ -82,7 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // Store the new image URL in shared_preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileImageUrl', imageUrl);
+    await prefs.setString('profileImageUrl_${user!.uid}', imageUrl);
   }
 
   Future<void> _updateProfile() async {
@@ -105,7 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // Store the new nickname in shared_preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nickname', _nameController.text.trim());
+    await prefs.setString('nickname_${user!.uid}', _nameController.text.trim());
 
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')));

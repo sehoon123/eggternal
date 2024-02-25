@@ -8,6 +8,7 @@ import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -62,14 +63,27 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  // Assuming Firebase for user data, modify as needed
   Future<String> _getUsername(String userId) async {
-    final userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? nickname = prefs.getString('nickname_$userId');
 
-    // debugPrint('getUsername success');
-    // debugPrint('userDoc: ${userDoc.data()}');
-    return userDoc.data()!['nickname'];
+    if (nickname != null) {
+      return nickname;
+    } else {
+      final userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+      if (userDoc.exists) {
+        nickname = userDoc.data()!['nickname'];
+        // Store the fetched nickname in shared_preferences with a unique key
+        await prefs.setString('nickname_$userId', nickname!);
+        return nickname;
+      } else {
+        // Handle the case where the user document does not exist
+        // You might want to return a default value or show an error message
+        return 'Unknown User';
+      }
+    }
   }
 
   double _calculateDistance(GeoFirePoint postLocation) {
