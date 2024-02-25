@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,16 +25,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadUserProfile();
   }
 
-  void _loadUserProfile() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .get();
-    if (doc.exists) {
+  Future<void> _loadUserProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? nickname = prefs.getString('nickname');
+    String? profileImageUrl = prefs.getString('profileImageUrl');
+
+    if (nickname != null && profileImageUrl != null) {
       setState(() {
-        _nameController.text = doc.data()?['nickname'] ?? '';
-        _profileImageUrl = doc.data()?['profileImageUrl'] ?? '';
+        _nameController.text = nickname;
+        _profileImageUrl = profileImageUrl;
       });
+    } else {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          _nameController.text = doc.data()?['nickname'] ?? '';
+          _profileImageUrl = doc.data()?['profileImageUrl'] ?? '';
+        });
+        // Store the fetched values in shared_preferences
+        await prefs.setString('nickname', _nameController.text);
+        await prefs.setString('profileImageUrl', _profileImageUrl!);
+      }
     }
   }
 
@@ -64,6 +79,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
       'profileImageUrl': imageUrl,
     });
+
+    // Store the new image URL in shared_preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileImageUrl', imageUrl);
   }
 
   Future<void> _updateProfile() async {
@@ -83,6 +102,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
       'nickname': _nameController.text.trim(),
     });
+
+    // Store the new nickname in shared_preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nickname', _nameController.text.trim());
 
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')));

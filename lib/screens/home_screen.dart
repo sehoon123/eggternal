@@ -3,7 +3,9 @@ import 'package:eggternal/screens/add_screen.dart';
 import 'package:eggternal/screens/list_screen.dart';
 import 'package:eggternal/screens/map_screen.dart';
 import 'package:eggternal/screens/settings_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.firestore});
@@ -16,10 +18,37 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserNickname();
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _loadUserNickname() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? nickname = prefs.getString('nickname');
+
+    if (nickname == null) {
+      // If the nickname is not in shared_preferences, fetch it from Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      if (doc.exists) {
+        nickname = doc.data()?['nickname'] ?? '';
+        // Store the fetched nickname in shared_preferences
+        await prefs.setString('nickname', nickname!);
+      }
+    }
+
+    // You can now use the nickname variable as needed
+    // For example, you might want to update the UI or pass the nickname to another widget
   }
 
   @override

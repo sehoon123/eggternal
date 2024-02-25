@@ -50,22 +50,6 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  // Function to Initialize the Map with User Location
-
-  // Function to Initialize the User's Location
-  // void _initializeUserLocation() async {
-  //   final LocationService locationService = LocationService();
-
-  //   try {
-  //     LatLng? location = await locationService.getCurrentLatLng();
-  //     setState(() {
-  //       userLocation = location;
-  //     });
-  //   } catch (e) {
-  //     debugPrint('Error initializing user location: $e');
-  //   }
-  // }
-
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
     if (userLocation != null) {

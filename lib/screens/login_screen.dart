@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:eggternal/screens/nickname_screen.dart';
@@ -21,6 +22,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _storeUserInfo(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', user.uid);
+    await prefs.setString('userName', user.displayName ?? '');
+    await prefs.setString('userEmail', user.email ?? '');
+    // Store any other user information you need
+  }
 
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
@@ -78,7 +87,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<UserCredential> signInWithKakao() async {
     try {
       // ... (Get OAuthToken code remains the same) ...
-      OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+      kakao.OAuthToken token =
+          await kakao.UserApi.instance.loginWithKakaoAccount();
 
       var credential = OAuthProvider('oidc.kakao').credential(
         idToken: token.idToken,
@@ -86,13 +96,13 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       return await FirebaseAuth.instance.signInWithCredential(credential);
-    } on KakaoAuthException catch (e) {
+    } on kakao.KakaoAuthException catch (e) {
       // Handle common Kakao Auth errors
       switch (e.error) {
-        case AuthErrorCause.accessDenied:
+        case kakao.AuthErrorCause.accessDenied:
           debugPrint('User canceled Kakao sign-in');
           break;
-        case AuthErrorCause.invalidGrant:
+        case kakao.AuthErrorCause.invalidGrant:
           debugPrint('Invalid Kakao login credentials');
           break;
         default:
@@ -109,15 +119,19 @@ class _LoginPageState extends State<LoginPage> {
   void _handleSuccessfulSignIn(UserCredential userCredential) async {
     final user = userCredential.user;
 
+    debugPrint("User info in _handleSuccessfulSignIn: ${user?.uid}");
+
+    await _storeUserInfo(user!);
+
     // Check if the user already exists in Firestore
-    final userDoc = widget.firestore.collection('users').doc(user?.uid);
+    final userDoc = widget.firestore.collection('users').doc(user.uid);
     final userSnapshot = await userDoc.get();
 
     if (!userSnapshot.exists) {
       // Create a new user document
       await userDoc.set({
-        'name': user?.displayName,
-        'email': user?.email,
+        'name': user.displayName,
+        'email': user.email,
         'agreement': false, // Set agreement to 'false' by default
         // Add other fields as needed
       });
