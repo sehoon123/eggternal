@@ -1,7 +1,9 @@
+import 'package:eggternal/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:eggternal/services/auth_service.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,6 +31,8 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacementNamed(context, '/login');
       } else {
         // If the user is logged in, navigate to the HomeScreen
+        Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
+
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {

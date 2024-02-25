@@ -63,9 +63,9 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
-        // '/': (context) => const SplashScreen(),
+        '/': (context) => const SplashScreen(),
         '/login': (context) => LoginPage(firestore: firestore),
         '/home': (context) => HomeScreen(firestore: firestore),
         '/agreement': (context) => AgreementScreen(firestore: firestore),
