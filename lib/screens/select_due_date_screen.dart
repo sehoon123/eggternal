@@ -11,12 +11,12 @@ class SelectDueDateScreen extends StatefulWidget {
   final LatLng? selectedLocation; // Add this line
 
   const SelectDueDateScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.images,
     this.selectedLocation, // Update this line
-  }) : super(key: key);
+  });
 
   @override
   _SelectDueDateScreenState createState() => _SelectDueDateScreenState();
@@ -24,6 +24,8 @@ class SelectDueDateScreen extends StatefulWidget {
 
 class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
   DateTime? _selectedDate;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
@@ -32,52 +34,70 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
         title: const Text('Select Due Date'),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Push the button to the bottom
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          TableCalendar(
-            firstDay: DateTime.utc(2010,   10,   16),
-            lastDay: DateTime.utc(2030,   3,   14),
-            focusedDay: DateTime.now(),
-            calendarFormat: CalendarFormat.month,
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDate = selectedDay;
-              });
-            },
-            calendarBuilders: CalendarBuilders(
-              selectedBuilder: (context, date, _) {
-                return Container(
-                  margin: const EdgeInsets.all(4.0),
-                  padding: const EdgeInsets.only(top:   5.0, left:   6.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Text(
-                    '${date.day}',
-                    style: TextStyle().copyWith(fontSize:   16.0),
-                  ),
-                );
+          Theme(
+            // Wrap TableCalendar with Theme
+            data: ThemeData(
+              // Provide custom ThemeData
+              primaryColor: Colors.red, // Set primary color to red
+              hintColor: Colors.red, // Set accent color to red for selection
+              colorScheme: const ColorScheme.light(
+                  primary: Colors.red), // For newer versions of Flutter
+            ),
+            child: TableCalendar(
+              firstDay: DateTime.utc(2010, 10, 16),
+              lastDay: DateTime.utc(2030, 3, 14),
+              focusedDay: _focusedDay,
+              calendarFormat: CalendarFormat.month,
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
               },
-              // Remove the markersBuilder property if you're not using markers
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                  _selectedDate = selectedDay;
+                });
+              },
+              calendarBuilders: CalendarBuilders(
+                selectedBuilder: (context, date, _) {
+                  return Container(
+                    margin: const EdgeInsets.all(4.0),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.red, // Ensure this is red
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Text(
+                      '${date.day}',
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 16.0),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           ElevatedButton(
-            onPressed: _selectedDate != null ? () {
-              // Navigate to the next screen with the title, content, selected images, due date, and selected location
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => WarningScreen(
-                    title: widget.title,
-                    content: widget.content,
-                    images: widget.images, // Pass the images to the next screen
-                    dueDate: _selectedDate!,
-                    selectedLocation: widget.selectedLocation, // Pass the selected location
-                  ),
-                ),
-              );
-            } : null,
+            onPressed: _selectedDate != null
+                ? () {
+                    // Your existing navigation logic
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WarningScreen(
+                          title: widget.title,
+                          content: widget.content,
+                          images: widget.images,
+                          dueDate:
+                              _selectedDate!, // Ensure _selectedDate is passed correctly
+                          selectedLocation: widget.selectedLocation,
+                        ),
+                      ),
+                    );
+                  }
+                : null,
             child: const Text('Next'),
           ),
         ],
