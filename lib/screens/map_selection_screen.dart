@@ -1,6 +1,7 @@
-import 'package:eggciting/services/location_service.dart';
+import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class MapSelectionScreen extends StatefulWidget {
   const MapSelectionScreen({super.key});
@@ -13,49 +14,24 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   LatLng? _selectedPosition;
-  final LocationService locationService = LocationService();
-  bool _mapCentered = false;
+  late LocationProvider _locationProvider; // Reference to LocationProvider
 
   @override
   void initState() {
     super.initState();
-    _startTrackingLocation();
+    _locationProvider = Provider.of<LocationProvider>(context, listen: false); // Store reference
+    _locationProvider.startTrackingLocation();
   }
 
   @override
   void dispose() {
-    locationService.stopTrackingLocation();
+    _locationProvider.stopTrackingLocation(); // Use stored reference
     super.dispose();
-  }
-
-  void _startTrackingLocation() {
-    debugPrint("Ping");
-    locationService.startTrackingLocation(
-        onLocationUpdate: (LatLng newPosition) {
-      setState(() {
-        _selectedPosition = newPosition;
-        if (!_mapCentered) {
-          _markers.clear();
-          _markers.add(Marker(
-            markerId: const MarkerId('current Location'),
-            position: newPosition,
-          ));
-          _controller.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: newPosition,
-                zoom: 18,
-              ),
-            ),
-          );
-          _mapCentered = true;
-        }
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final userLocation = _locationProvider.userLocation; // Use stored reference
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location'),
@@ -64,12 +40,12 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         myLocationEnabled: true,
         onMapCreated: (controller) {
           _controller = controller;
-          if (_selectedPosition != null) {
+          if (userLocation != null) {
             _controller.animateCamera(
               CameraUpdate.newCameraPosition(
                 CameraPosition(
-                  target: _selectedPosition!,
-                  zoom: 14,
+                  target: userLocation,
+                  zoom:   14,
                 ),
               ),
             );
@@ -86,14 +62,14 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           });
         },
         markers: _markers,
-        initialCameraPosition: _selectedPosition != null
+        initialCameraPosition: userLocation != null
             ? CameraPosition(
-                target: _selectedPosition!,
-                zoom: 14,
+                target: userLocation,
+                zoom:   14,
               )
             : const CameraPosition(
-                target: LatLng(0, 0), // San Francisco
-                zoom: 14,
+                target: LatLng(0,   0), // Default location
+                zoom:  14,
               ),
       ),
       floatingActionButton: FloatingActionButton(

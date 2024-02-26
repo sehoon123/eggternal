@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PostSuccessScreen extends StatelessWidget {
-  final String text;
-  final List<String> imageUrls;
+  final List<String> imageAssetPaths;
 
-  const PostSuccessScreen({Key? key, required this.text, required this.imageUrls}) : super(key: key);
+  const PostSuccessScreen({super.key, required this.imageAssetPaths});
 
   @override
   Widget build(BuildContext context) {
@@ -12,33 +11,38 @@ class PostSuccessScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Post Success'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(text, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height:  16.0),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:  3,
-                  crossAxisSpacing:  8.0,
-                  mainAxisSpacing:  8.0,
+      body: Stack(
+        children: [
+          // Centered image
+          Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width *
+                  0.9, //   80% of screen width
+              height: MediaQuery.of(context).size.height *
+                  0.5, //   60% of screen height
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(imageAssetPaths
+                      .first), // Assuming you want the first image
+                  fit: BoxFit.cover,
                 ),
-                itemCount: imageUrls.length,
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    imageUrls[index],
-                    fit: BoxFit.cover,
-                  );
-                },
               ),
-            ],
+            ),
           ),
-        ),
+          // Continue button
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            right: 16.0,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/home', (route) => false);
+              },
+              child: const Text('Continue'),
+            ),
+          ),
+        ],
       ),
     );
   }

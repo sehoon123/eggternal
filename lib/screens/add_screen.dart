@@ -94,15 +94,17 @@ class _AddScreenState extends State<AddScreen> {
       await _updateFirestore(text);
 
       // Show success (on the main thread)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Content added successfully')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Content added successfully')),
+      // );
     } catch (e) {
       debugPrint('Error adding post: $e');
       // Handle error (still on the main thread)
     } finally {
       Navigator.pop(context); // Close dialog
-      Navigator.of(context).pushReplacementNamed('/home');
+      // move to  PostSuccessScreen
+
+      Navigator.of(context).pushReplacementNamed('/postSuccess');
     }
   }
 

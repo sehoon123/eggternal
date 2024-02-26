@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/screens/add_page_screen.dart';
 import 'package:eggciting/screens/add_screen.dart';
 import 'package:eggciting/screens/list_screen.dart';
 import 'package:eggciting/screens/map_screen.dart';
+import 'package:eggciting/screens/payment_screen.dart';
 import 'package:eggciting/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -60,8 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const MapScreen(),
           const ListScreen(),
-          AddScreen(firestore: widget.firestore),
-          // CreateScreen(),
+          const AddPageScreen(),
+          PaymentScreen(),
           const SettingsScreen(),
         ],
       ),

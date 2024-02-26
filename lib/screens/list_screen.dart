@@ -1,13 +1,13 @@
-import 'package:eggciting/services/location_service.dart';
+import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/post_details_screen.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListScreen extends StatefulWidget {
@@ -19,48 +19,22 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
-  final ValueNotifier<LatLng?> userLocationNotifier =
-      ValueNotifier<LatLng?>(null);
-  final LocationService locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
+    Provider.of<LocationProvider>(context, listen: false)
+        .startTrackingLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
-    _startTrackingLocation();
   }
 
   @override
   void dispose() {
-    locationService.stopTrackingLocation();
-    userLocationNotifier.dispose();
+    Provider.of<LocationProvider>(context, listen: false)
+        .stopTrackingLocation();
     super.dispose();
-  }
-
-  void _startTrackingLocation() {
-    locationService.startTrackingLocation(
-        onLocationUpdate: (LatLng newPosition) {
-      userLocationNotifier.value = newPosition;
-    });
-  }
-
-  void _determineCurrentPosition() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      debugPrint('Current position: $position');
-
-      userLocationNotifier.value =
-          LatLng(position.latitude, position.longitude);
-    } catch (e) {
-      debugPrint('Error getting current location: $e');
-      // Handle the error, possibly by requesting location permissions
-      // or guiding the user to enable location services.
-    }
   }
 
   Future<String> _getUsername(String userId) async {
@@ -89,18 +63,20 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   double _calculateDistance(GeoFirePoint postLocation) {
-    if (userLocationNotifier.value != null) {
+    final userLocation =
+        Provider.of<LocationProvider>(context, listen: false).userLocation;
+    if (userLocation != null) {
       return postLocation.distance(
-        lat: userLocationNotifier.value!.latitude,
-        lng: userLocationNotifier.value!.longitude,
+        lat: userLocation.latitude,
+        lng: userLocation.longitude,
       );
     } else {
       return -1;
     }
   }
 
-  String _calculateTimeLeft(Timestamp dueDate) {
-    final difference = dueDate.toDate().difference(DateTime.now());
+  String _calculateTimeLeft(DateTime dueDate) {
+    final difference = dueDate.difference(DateTime.now());
     return difference.inDays < 0
         ? "Ready to Open"
         : 'about ${difference.inDays} days left';
@@ -119,48 +95,7 @@ class _ListScreenState extends State<ListScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: ToggleButtons(
-                  isSelected: [
-                    postsProvider.isMyPostsSelected,
-                    !postsProvider.isMyPostsSelected
-                  ],
-                  onPressed: (index) {
-                    Provider.of<PostsProvider>(context, listen: false)
-                        .togglePostsView();
-                  },
-                  borderRadius: BorderRadius.circular(8.0),
-                  selectedColor: Colors.white,
-                  fillColor: Theme.of(context).primaryColor,
-                  renderBorder: true,
-                  constraints:
-                      const BoxConstraints(minHeight: 36, minWidth: 100),
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text('My Posts'),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text('Shared Posts'),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: postsProvider.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : Text(
-                        postsProvider.isMyPostsSelected
-                            ? '${postsProvider.postCount} images'
-                            : '${postsProvider.sharedPostCount} images',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-              ),
+              // ... (other widgets)
               Expanded(
                 child: ListView.builder(
                   itemCount: postsProvider.posts.length,
@@ -174,49 +109,53 @@ class _ListScreenState extends State<ListScreen> {
                         if (snapshot.connectionState != ConnectionState.done) {
                           return ListTile(
                             leading: const CircularProgressIndicator(),
-                            title: Text(post.text),
+                            title: Text(post.title),
                             subtitle: const Text('Loading user nickname...'),
                           );
                         } else if (snapshot.hasError) {
                           return ListTile(
                             leading: const Icon(Icons.error),
-                            title: Text(post.text),
+                            title: Text(post.title),
                             subtitle: const Text('Error loading user nickname'),
                           );
                         } else {
-                          return ValueListenableBuilder<LatLng?>(
-                            valueListenable: userLocationNotifier,
-                            builder: (context, userLocation, child) {
-                              final distance = userLocation != null
-                                  ? _calculateDistance(post.location)
-                                  : -1;
+                          final userLocation = Provider.of<LocationProvider>(
+                                  context,
+                                  listen: false)
+                              .userLocation;
+                          final distance = userLocation != null
+                              ? _calculateDistance(post.location)
+                              : -1;
 
-                              return ListTile(
-                                leading: CircleAvatar(
-                                    child:
-                                        Text(snapshot.data!.substring(0, 1))),
-                                title: Text(post.text),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('User: ${snapshot.data}'),
-                                    Text(
-                                        'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                    Text('Time Left: $timeLeft'),
-                                  ],
+                          return ListTile(
+                            leading: CircleAvatar(
+                                child: Text(snapshot.data!.substring(0, 1))),
+                            title: Text(post.title),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('User: ${snapshot.data}'),
+                                Text(
+                                    'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                Text('Time Left: $timeLeft'),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.share),
+                              onPressed: () {
+                                // Share the post
+                                Share.share(
+                                  'Check out this post: ${post.title}',
+                                );
+                              },
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PostDetailsScreen(post: post),
                                 ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PostDetailsScreen(
-                                        post: post,
-                                        userLocation:
-                                            userLocationNotifier.value!,
-                                      ),
-                                    ),
-                                  );
-                                },
                               );
                             },
                           );

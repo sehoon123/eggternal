@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/screens/payment_screen.dart';
+import 'package:eggciting/screens/post_success_screen.dart';
+import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -39,12 +42,19 @@ void main() async {
     javaScriptAppKey: dotenv.env['kakaoJavaScriptAppKey']!,
   );
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => PostsProvider(), // Create instance of PostsProvider
+runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => PostsProvider(), // Create instance of PostsProvider
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LocationProvider(), // Create instance of LocationProvider
+        ),
+      ],
       child: MyApp(firestore: firestore),
     ),
-  ); // Pass firestore instance to app
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -73,6 +83,10 @@ class MyApp extends StatelessWidget {
         '/add': (context) => AddScreen(firestore: firestore),
         '/mapSelection': (context) => const MapSelectionScreen(),
         '/list': (context) => const ListScreen(),
+        '/postSuccess': (context) => const PostSuccessScreen(
+              imageAssetPaths: ['assets/images/logo.png'],
+            ),
+        '/payment': (context) => PaymentScreen(),
       },
     );
   }
