@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggternal/models/post.dart'; // Ensure this path is correct
+import 'package:eggciting/models/post.dart'; // Ensure this path is correct
 
 class PostsProvider with ChangeNotifier {
   User? _currentUser;

@@ -1,5 +1,5 @@
-import 'package:eggternal/models/post.dart';
-import 'package:eggternal/services/location_service.dart';
+import 'package:eggciting/models/post.dart';
+import 'package:eggciting/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

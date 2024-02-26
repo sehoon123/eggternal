@@ -1,8 +1,8 @@
-import 'package:eggternal/services/post_provider.dart';
+import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:eggternal/services/auth_service.dart';
+import 'package:eggciting/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {

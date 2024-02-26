@@ -1,9 +1,9 @@
-import 'package:eggternal/services/location_service.dart';
-import 'package:eggternal/services/post_provider.dart';
+import 'package:eggciting/services/location_service.dart';
+import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggternal/screens/post_details_screen.dart';
+import 'package:eggciting/screens/post_details_screen.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -70,8 +70,10 @@ class _ListScreenState extends State<ListScreen> {
     if (nickname != null) {
       return nickname;
     } else {
-      final userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
 
       if (userDoc.exists) {
         nickname = userDoc.data()!['nickname'];
@@ -209,7 +211,8 @@ class _ListScreenState extends State<ListScreen> {
                                     MaterialPageRoute(
                                       builder: (context) => PostDetailsScreen(
                                         post: post,
-                                        userLocation: userLocationNotifier.value!,
+                                        userLocation:
+                                            userLocationNotifier.value!,
                                       ),
                                     ),
                                   );

@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggternal/screens/add_screen.dart';
-import 'package:eggternal/screens/list_screen.dart';
-import 'package:eggternal/screens/map_screen.dart';
-import 'package:eggternal/screens/settings_screen.dart';
+import 'package:eggciting/screens/add_screen.dart';
+import 'package:eggciting/screens/list_screen.dart';
+import 'package:eggciting/screens/map_screen.dart';
+import 'package:eggciting/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

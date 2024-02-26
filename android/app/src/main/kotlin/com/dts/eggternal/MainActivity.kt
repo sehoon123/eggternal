@@ -1,4 +1,4 @@
-package com.dts.eggternal
+package com.dts.eggciting
 
 import io.flutter.embedding.android.FlutterActivity
 

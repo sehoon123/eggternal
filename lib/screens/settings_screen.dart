@@ -30,7 +30,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String? nickname = prefs.getString('nickname_${user!.uid}');
     String? profileImageUrl = prefs.getString('profileImageUrl_${user!.uid}');
 
-
     if (nickname != null && profileImageUrl != null) {
       setState(() {
         _nameController.text = nickname;
@@ -48,7 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
         // Store the fetched values in shared_preferences
         await prefs.setString('nickname_${user!.uid}', _nameController.text);
-        await prefs.setString('profileImageUrl_${user!.uid}', _profileImageUrl!);
+        await prefs.setString(
+            'profileImageUrl_${user!.uid}', _profileImageUrl!);
       }
     }
   }
@@ -129,12 +129,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           children: [
             CircleAvatar(
-              radius: 80,
+              radius: 140,
               backgroundColor: Colors.grey,
               backgroundImage: _profileImageUrl != null &&
                       Uri.parse(_profileImageUrl!).host.isNotEmpty
                   ? NetworkImage(_profileImageUrl!)
-                  : const AssetImage('assets/default_profile_image.png')
+                  : const AssetImage('assets/images/default_profile_image.png')
                       as ImageProvider,
             ),
             const SizedBox(height: 16),
