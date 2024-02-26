@@ -22,18 +22,7 @@ class _MapScreenState extends State<MapScreen> {
   final bool _mapCentered = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Access the LocationProvider without listening for changes
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
-  }
-
-  @override
   void dispose() {
-    // Access the LocationProvider without listening for changes
-    Provider.of<LocationProvider>(context, listen: false)
-        .stopTrackingLocation();
     _mapController?.dispose();
     super.dispose();
   }

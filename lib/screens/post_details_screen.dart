@@ -20,19 +20,19 @@ class PostDetailsScreen extends StatefulWidget {
 }
 
 class _PostDetailsScreenState extends State<PostDetailsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Provider.of<LocationProvider>(context, listen: false)
+  //       .startTrackingLocation();
+  // }
 
-  @override
-  void dispose() {
-    Provider.of<LocationProvider>(context, listen: false)
-        .stopTrackingLocation();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   Provider.of<LocationProvider>(context, listen: false)
+  //       .stopTrackingLocation();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {

@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
 
-class WarningScreen extends StatelessWidget {
+class WarningScreen extends StatefulWidget {
   final String title;
   final String content;
   final DateTime dueDate;
@@ -21,6 +21,13 @@ class WarningScreen extends StatelessWidget {
     required this.images,
     this.selectedLocation, // Update this line
   });
+
+  @override
+  State<WarningScreen> createState() => _WarningScreenState();
+}
+
+class _WarningScreenState extends State<WarningScreen> {
+  Future<void>? _uploadPostFuture;
 
   Future<String> _uploadFile(File file) async {
     // Get the current user
@@ -45,19 +52,19 @@ class WarningScreen extends StatelessWidget {
   Future<void> _uploadPost() async {
     // Upload images to Firebase Storage and get their download URLs
     List<String> imageUrls = [];
-    for (File image in images) {
+    for (File image in widget.images) {
       String imageUrl = await _uploadFile(image);
       imageUrls.add(imageUrl);
     }
 
     // Add the post to Firestore
     await FirebaseFirestore.instance.collection('posts').add({
-      'title': title,
-      'content': content,
-      'dueDate': dueDate,
+      'title': widget.title,
+      'content': widget.content,
+      'dueDate': widget.dueDate,
       'createdAt': DateTime.now(),
-      'location': GeoPoint(selectedLocation!.latitude,
-          selectedLocation!.longitude), // Add this line
+      'location': GeoPoint(widget.selectedLocation!.latitude,
+          widget.selectedLocation!.longitude), // Add this line
       'imageUrls': imageUrls,
       'userId': FirebaseAuth.instance.currentUser?.uid,
       'sharedUser': [], // Add this line
@@ -73,32 +80,58 @@ class WarningScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Warning'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('You can\'t modify this post after posting.'),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                // Upload the post
-                await _uploadPost();
-
-                // Navigate to the PostSuccessScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PostSuccessScreen(
-                        imageAssetPaths: [
-                          'assets/images/logo.png'
-                        ]), // Replace with actual image paths
-                  ),
-                );
-              },
-              child: const Text('Post'),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('You can\'t modify this post after posting.'),
+                const SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _uploadPostFuture = _uploadPost();
+                    });
+                  },
+                  child: const Text('Post'),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (_uploadPostFuture != null)
+            FutureBuilder(
+              future: _uploadPostFuture,
+              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    color: Colors.black.withOpacity(0.6),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                } else {
+                  // Navigate to the PostSuccessScreen
+                  WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PostSuccessScreen(
+                            imageAssetPaths: [
+                              'assets/images/logo.png'
+                            ]), // Replace with actual image paths
+                      ),
+                    );
+                  });
+                  return Container(); // Return an empty container when not uploading
+                }
+              },
+            ),
+        ],
       ),
     );
   }

@@ -19,7 +19,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _locationProvider = Provider.of<LocationProvider>(context, listen: false); // Store reference
+    _locationProvider = Provider.of<LocationProvider>(context,
+        listen: false); // Store reference
     _locationProvider.startTrackingLocation();
   }
 
@@ -45,7 +46,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
               CameraUpdate.newCameraPosition(
                 CameraPosition(
                   target: userLocation,
-                  zoom:   14,
+                  zoom: 14,
                 ),
               ),
             );
@@ -65,11 +66,11 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         initialCameraPosition: userLocation != null
             ? CameraPosition(
                 target: userLocation,
-                zoom:   14,
+                zoom: 14,
               )
             : const CameraPosition(
-                target: LatLng(0,   0), // Default location
-                zoom:  14,
+                target: LatLng(0, 0), // Default location
+                zoom: 14,
               ),
       ),
       floatingActionButton: FloatingActionButton(

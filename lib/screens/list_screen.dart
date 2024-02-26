@@ -23,18 +23,9 @@ class _ListScreenState extends State<ListScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
-  }
-
-  @override
-  void dispose() {
-    Provider.of<LocationProvider>(context, listen: false)
-        .stopTrackingLocation();
-    super.dispose();
   }
 
   Future<String> _getUsername(String userId) async {

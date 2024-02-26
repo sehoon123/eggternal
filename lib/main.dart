@@ -57,9 +57,21 @@ runApp(
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key, required this.firestore});
   final FirebaseFirestore firestore;
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<LocationProvider>(context, listen: false)
+        .startTrackingLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +88,11 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         // '/': (context) => const SplashScreen(),
-        '/login': (context) => LoginPage(firestore: firestore),
-        '/home': (context) => HomeScreen(firestore: firestore),
-        '/agreement': (context) => AgreementScreen(firestore: firestore),
-        '/nickname': (context) => NicknameScreen(firestore: firestore),
-        '/add': (context) => AddScreen(firestore: firestore),
+        '/login': (context) => LoginPage(firestore: widget.firestore),
+        '/home': (context) => HomeScreen(firestore: widget.firestore),
+        '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
+        '/nickname': (context) => NicknameScreen(firestore: widget.firestore),
+        '/add': (context) => AddScreen(firestore: widget.firestore),
         '/mapSelection': (context) => const MapSelectionScreen(),
         '/list': (context) => const ListScreen(),
         '/postSuccess': (context) => const PostSuccessScreen(
