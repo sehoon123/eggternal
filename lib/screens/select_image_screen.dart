@@ -53,77 +53,75 @@ class _SelectImageScreenState extends State<SelectImageScreen> {
       appBar: AppBar(
         title: const Text('Select Image'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Display the selected images using GridView.builder
-            if (_images.isNotEmpty) // Use _images instead of widget.images
-              Expanded( // Wrap the GridView in an Expanded widget
-                child: GridView.builder(
-                  itemCount: _images.length, // Use _images instead of widget.images
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount:   3,
-                    crossAxisSpacing:   8.0,
-                    mainAxisSpacing:   8.0,
-                  ),
-                  itemBuilder: (context, index) {
-                    final image = _images[index]; // Use _images instead of widget.images
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.file(
-                          image,
-                          fit: BoxFit.cover,
-                        ),
-                        Positioned(
-                          right:   5,
-                          top:   5,
-                          child: GestureDetector(
-                            onTap: () => _removeImage(index),
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.remove_circle,
-                                color: Theme.of(context).primaryColor,
-                                size:   24,
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: _images.isNotEmpty
+                  ? GridView.builder(
+                      itemCount: _images.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                      ),
+                      itemBuilder: (context, index) {
+                        final image = _images[index];
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.file(
+                              image,
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              right: 5,
+                              top: 5,
+                              child: GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.remove_circle,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 24,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height:   16.0),
-            ElevatedButton(
-              onPressed: _selectImages, // Call the _selectImages method
-              child: const Text('Select Images'),
+                          ],
+                        );
+                      },
+                    )
+                  : const Text('No images selected.'),
             ),
-            const SizedBox(height:   16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Navigate to the next screen with the title, content, and selected images
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SelectDueDateScreen(
-                      title: widget.title,
-                      content: widget.content,
-                      images: _images, // Pass the _images list to the next screen
-                      selectedLocation: widget.selectedLocation, // Pass the selected location
-                    ),
+          ),
+          ElevatedButton(
+            onPressed: _selectImages,
+            child: const Text('Select Images'),
+          ),
+          const SizedBox(height: 16.0),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SelectDueDateScreen(
+                    title: widget.title,
+                    content: widget.content,
+                    images: _images,
+                    selectedLocation: widget.selectedLocation,
                   ),
-                );
-              },
-              child: const Text('Next'),
-            ),
-          ],
-        ),
+                ),
+              );
+            },
+            child: const Text('Next'),
+          ),
+          const SizedBox(height: 16.0), // Add some spacing at the bottom for better UI
+        ],
       ),
     );
   }
