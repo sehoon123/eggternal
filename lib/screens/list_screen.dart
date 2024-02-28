@@ -86,7 +86,50 @@ class _ListScreenState extends State<ListScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ... (other widgets)
+              Center(
+                child: ToggleButtons(
+                  isSelected: [
+                    postsProvider.isMyPostsSelected,
+                    !postsProvider.isMyPostsSelected
+                  ],
+                  onPressed: (index) {
+                    Provider.of<PostsProvider>(context, listen: false)
+                        .togglePostsView();
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  selectedColor: Theme.of(context).primaryColor,
+                  renderBorder: true,
+                  constraints: const BoxConstraints(
+                    minWidth: 100,
+                    minHeight: 36,
+                  ),
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('My Posts'),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Shared Posts'),
+                    )
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: postsProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Text(
+                      postsProvider.isMyPostsSelected
+                          ? '${postsProvider.postCount} posts'
+                          : '${postsProvider.sharedPostCount} shared posts',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+              ),
+              const Divider(),
               Expanded(
                 child: ListView.builder(
                   itemCount: postsProvider.posts.length,
