@@ -52,8 +52,7 @@ class PostsProvider with ChangeNotifier {
             _isMyPostsSelected ? 'userId' : 'sharedUser',
             isEqualTo: _currentUser!.uid,
           )
-          .orderBy('dueDate',
-              descending: true) // Assuming you have a timestamp field
+          .orderBy('dueDate', descending: false)
           .limit(10); // Adjust the limit as needed
 
       debugPrint('Last document: $_lastDocument');
@@ -98,7 +97,7 @@ class PostsProvider with ChangeNotifier {
         .collection('posts')
         .where(field, isEqualTo: _currentUser?.uid)
         .orderBy('dueDate',
-            descending: true) // Assuming you have a timestamp field
+            descending: false) // Assuming you have a timestamp field
         .snapshots();
   }
 }

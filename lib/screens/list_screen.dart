@@ -31,7 +31,9 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) { // Fetch more posts 200 pixels before reaching the bottom
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      // Fetch more posts 200 pixels before reaching the bottom
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     }
   }
@@ -80,11 +82,22 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-
   String _calculateTimeLeft(DateTime dueDate) {
-    final difference = dueDate.difference(DateTime.now());
-    if (difference.inDays < 0) {
-      return "Ready to Open";
+    final now = DateTime.now();
+    final difference = dueDate.difference(now);
+
+    // Check if the due date is in the past
+    if (dueDate.isBefore(now)) {
+      // If the due date is today but earlier, show "Ready to Open"
+      if (dueDate.day == now.day &&
+          dueDate.month == now.month &&
+          dueDate.year == now.year) {
+        return "Ready to Open";
+      } else {
+        // If the due date is before today, show how many days ago
+        final daysAgo = -difference.inDays; // Make positive for display
+        return '$daysAgo days ago';
+      }
     } else if (difference.inDays == 0) {
       // When the difference is less than a day, show hours left
       final hours = difference.inHours;
@@ -94,13 +107,6 @@ class _ListScreenState extends State<ListScreen> {
       return 'about ${difference.inDays} days left';
     }
   }
-
-  // String _calculateTimeLeft(DateTime dueDate) {
-  //   final difference = dueDate.difference(DateTime.now());
-  //   return difference.inDays < 0
-  //       ? "Ready to Open"
-  //       : 'about ${difference.inDays} days left';
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -149,14 +155,14 @@ class _ListScreenState extends State<ListScreen> {
                 child: postsProvider.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : Text(
-                      postsProvider.isMyPostsSelected
-                          ? '${postsProvider.postCount} posts'
-                          : '${postsProvider.sharedPostCount} shared posts',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        postsProvider.isMyPostsSelected
+                            ? '${postsProvider.postCount} posts'
+                            : '${postsProvider.sharedPostCount} shared posts',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
               ),
               const Divider(),
               Expanded(
@@ -170,8 +176,9 @@ class _ListScreenState extends State<ListScreen> {
                           ? const Center(child: CircularProgressIndicator())
                           : const Padding(
                               padding: EdgeInsets.symmetric(vertical: 32.0),
-                              child: Center(child: Text('You have reached the end')),
-                          );
+                              child: Center(
+                                  child: Text('You have reached the end')),
+                            );
                     }
                     final post = postsProvider.posts[index];
                     final timeLeft = _calculateTimeLeft(post.dueDate);
