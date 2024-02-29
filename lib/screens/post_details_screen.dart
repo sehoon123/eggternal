@@ -1,4 +1,3 @@
-
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +33,11 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   //   super.dispose();
   // }
 
+  bool _isReadyToOpen(DateTime dueDate) {
+    final difference = dueDate.difference(DateTime.now());
+    return difference.inDays < 0 || (difference.inDays == 0 && difference.inHours <= 0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<LocationProvider>(
@@ -54,6 +58,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 
         // Set your threshold distance
         double thresholdDistance =  30.0; // in meters
+
+        // Check if the post is ready to open based on time
+        bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
 
         return Scaffold(
           appBar: AppBar(
@@ -124,7 +131,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal:  0), // Adjust the padding as needed
                       child: ElevatedButton(
-                        onPressed: distance *  1000 <= thresholdDistance
+                        onPressed: distance *  1000 <= thresholdDistance && isReadyToOpen
                             ? () {
                                 // Implement the logic for opening the post or any other interaction
                                 // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => OpenPostScreen(post: widget.post)));

@@ -66,12 +66,27 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+
   String _calculateTimeLeft(DateTime dueDate) {
     final difference = dueDate.difference(DateTime.now());
-    return difference.inDays < 0
-        ? "Ready to Open"
-        : 'about ${difference.inDays} days left';
+    if (difference.inDays < 0) {
+      return "Ready to Open";
+    } else if (difference.inDays == 0) {
+      // When the difference is less than a day, show hours left
+      final hours = difference.inHours;
+      return 'about $hours hours left';
+    } else {
+      // For more than one day, show days left
+      return 'about ${difference.inDays} days left';
+    }
   }
+
+  // String _calculateTimeLeft(DateTime dueDate) {
+  //   final difference = dueDate.difference(DateTime.now());
+  //   return difference.inDays < 0
+  //       ? "Ready to Open"
+  //       : 'about ${difference.inDays} days left';
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -103,12 +118,12 @@ class _ListScreenState extends State<ListScreen> {
                     minWidth: 100,
                     minHeight: 36,
                   ),
-                  children: [
-                    const Padding(
+                  children: const [
+                    Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text('My Posts'),
                     ),
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text('Shared Posts'),
                     )
