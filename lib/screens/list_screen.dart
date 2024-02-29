@@ -19,6 +19,7 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   User? currentUser = FirebaseAuth.instance.currentUser;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -26,6 +27,19 @@ class _ListScreenState extends State<ListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) { // Fetch more posts 200 pixels before reaching the bottom
+      Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<String> _getUsername(String userId) async {
@@ -147,8 +161,18 @@ class _ListScreenState extends State<ListScreen> {
               const Divider(),
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   itemCount: postsProvider.posts.length,
                   itemBuilder: (context, index) {
+                    // debugPrint("building list item $index");
+                    if (index >= postsProvider.posts.length) {
+                      return postsProvider.hasMorePosts
+                          ? const Center(child: CircularProgressIndicator())
+                          : const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32.0),
+                              child: Center(child: Text('You have reached the end')),
+                          );
+                    }
                     final post = postsProvider.posts[index];
                     final timeLeft = _calculateTimeLeft(post.dueDate);
 

@@ -47,6 +47,7 @@ class _MapScreenState extends State<MapScreen> {
         stream: Provider.of<PostsProvider>(context).postsStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
+            debugPrint('No data');
             return const Center(child: CircularProgressIndicator());
           } else {
             final userLocation =
