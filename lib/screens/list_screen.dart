@@ -88,16 +88,8 @@ class _ListScreenState extends State<ListScreen> {
 
     // Check if the due date is in the past
     if (dueDate.isBefore(now)) {
-      // If the due date is today but earlier, show "Ready to Open"
-      if (dueDate.day == now.day &&
-          dueDate.month == now.month &&
-          dueDate.year == now.year) {
-        return "Ready to Open";
-      } else {
-        // If the due date is before today, show how many days ago
-        final daysAgo = -difference.inDays; // Make positive for display
-        return '$daysAgo days ago';
-      }
+      // For any past due date, just show "Ready to Open"
+      return "Ready to Open";
     } else if (difference.inDays == 0) {
       // When the difference is less than a day, show hours left
       final hours = difference.inHours;
