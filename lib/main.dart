@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/screens/ar_test.dart';
 import 'package:eggciting/screens/payment_screen.dart';
 import 'package:eggciting/screens/post_success_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
@@ -42,14 +43,16 @@ void main() async {
     javaScriptAppKey: dotenv.env['kakaoJavaScriptAppKey']!,
   );
 
-runApp(
+  runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => PostsProvider(), // Create instance of PostsProvider
+          create: (context) =>
+              PostsProvider(), // Create instance of PostsProvider
         ),
         ChangeNotifierProvider(
-          create: (context) => LocationProvider(), // Create instance of LocationProvider
+          create: (context) =>
+              LocationProvider(), // Create instance of LocationProvider
         ),
       ],
       child: MyApp(firestore: firestore),
@@ -66,12 +69,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Provider.of<LocationProvider>(context, listen: false)
+  //       .startTrackingLocation();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +95,12 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => HomeScreen(firestore: widget.firestore),
         '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
         '/nickname': (context) => NicknameScreen(firestore: widget.firestore),
-        '/add': (context) => AddScreen(firestore: widget.firestore),
-        '/mapSelection': (context) => const MapSelectionScreen(),
-        '/list': (context) => const ListScreen(),
-        '/postSuccess': (context) => const PostSuccessScreen(
-              imageAssetPaths: ['assets/images/logo.png'],
-            ),
+        // '/add': (context) => AddScreen(firestore: widget.firestore),
+        // '/mapSelection': (context) => const MapSelectionScreen(),
+        // '/list': (context) => const ListScreen(),
+        // '/postSuccess': (context) => const PostSuccessScreen(
+        //       imageAssetPaths: ['assets/images/logo.png'],
+        //     ),
         '/payment': (context) => PaymentScreen(),
       },
     );

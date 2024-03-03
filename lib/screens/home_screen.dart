@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/add_page_screen.dart';
 import 'package:eggciting/screens/add_screen.dart';
+import 'package:eggciting/screens/ar_test.dart';
 import 'package:eggciting/screens/list_screen.dart';
 import 'package:eggciting/screens/map_screen.dart';
 import 'package:eggciting/screens/payment_screen.dart';
 import 'package:eggciting/screens/settings_screen.dart';
+import 'package:eggciting/services/location_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserNickname();
+    Provider.of<LocationProvider>(context, listen: false).startTrackingLocation();
   }
 
   void _onItemTapped(int index) {
@@ -63,7 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
           const MapScreen(),
           const ListScreen(),
           const AddPageScreen(),
-          PaymentScreen(),
+          ARViewPage(),
+          // PaymentScreen(),
           const SettingsScreen(),
         ],
       ),
