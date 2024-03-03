@@ -1,4 +1,5 @@
 import 'package:eggciting/models/post.dart';
+import 'package:eggciting/screens/ar_test.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
@@ -135,6 +136,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                             ? () {
                                 // Implement the logic for opening the post or any other interaction
                                 // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => OpenPostScreen(post: widget.post)));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => ARViewPage(post: widget.post)));
                               }
                             : null, // Disables the button if distance is greater than thresholdDistance
                         style: ButtonStyle(

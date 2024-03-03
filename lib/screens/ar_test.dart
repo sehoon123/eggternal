@@ -5,6 +5,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
+import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
@@ -12,19 +13,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
-class ARTestApp extends StatelessWidget {
-  const ARTestApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ARViewPage(),
-    );
-  }
-}
 
 class ARViewPage extends StatefulWidget {
-  const ARViewPage({super.key});
+  final Post post;
+  const ARViewPage({super.key, required this.post});
 
   @override
   _ARViewPageState createState() => _ARViewPageState();

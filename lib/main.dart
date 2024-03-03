@@ -100,7 +100,6 @@ class _MyAppState extends State<MyApp> {
               imageAssetPaths: ['assets/images/logo.png'],
             ),
         '/payment': (context) => PaymentScreen(),
-        '/artest': (context) => ARViewPage(),
       },
     );
   }

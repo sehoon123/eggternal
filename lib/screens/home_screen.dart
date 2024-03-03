@@ -28,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserNickname();
-    Provider.of<LocationProvider>(context, listen: false).startTrackingLocation();
+    Provider.of<LocationProvider>(context, listen: false)
+        .startTrackingLocation();
   }
 
   void _onItemTapped(int index) {
@@ -42,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void refreshListScreenData() {
-    Provider.of<PostsProvider>(context, listen: false).fetchPosts(isInitialFetch: true);
+    Provider.of<PostsProvider>(context, listen: false)
+        .fetchPosts(isInitialFetch: true);
   }
 
   Future<void> _loadUserNickname() async {
@@ -76,8 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const MapScreen(),
           const ListScreen(),
           const AddPageScreen(),
-          ARViewPage(),
-          // PaymentScreen(),
+          PaymentScreen(),
           const SettingsScreen(),
         ],
       ),
