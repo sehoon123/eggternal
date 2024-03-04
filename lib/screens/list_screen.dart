@@ -199,37 +199,53 @@ class _ListScreenState extends State<ListScreen> {
                               ? _calculateDistance(post.location)
                               : -1;
 
-                          return ListTile(
-                            leading: CircleAvatar(
-                                child: Text(snapshot.data!.substring(0, 1))),
-                            title: Text(post.title),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('User: ${snapshot.data}'),
-                                Text(
-                                    'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                Text('Time Left: $timeLeft'),
-                              ],
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.share),
-                              onPressed: () {
-                                // Share the post
-                                Share.share(
-                                  'Check out this post: ${post.title}',
-                                );
-                              },
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PostDetailsScreen(post: post),
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: timeLeft == 'Ready to Open'
+                                      ? Colors.green[100]
+                                      : Colors.white,
+                                  border: Border.all(color: Colors.grey[300]!),
                                 ),
-                              );
-                            },
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                      child:
+                                          Text(snapshot.data!.substring(0, 1))),
+                                  title: Text(post.title),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('User: ${snapshot.data}'),
+                                      Text(
+                                          'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                      Text('Time Left: $timeLeft'),
+                                    ],
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.share),
+                                    onPressed: () {
+                                      // Share the post
+                                      Share.share(
+                                        'Check out this post: ${post.title}',
+                                      );
+                                    },
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PostDetailsScreen(post: post),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Divider(color: Colors.grey[300]),
+                            ],
                           );
                         }
                       },
