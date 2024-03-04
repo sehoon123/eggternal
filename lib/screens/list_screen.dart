@@ -156,7 +156,7 @@ class _ListScreenState extends State<ListScreen> {
                         ),
                       ),
               ),
-              const Divider(),
+              // const Divider(),
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
@@ -202,12 +202,11 @@ class _ListScreenState extends State<ListScreen> {
                           return Column(
                             children: [
                               Container(
-                                margin: const EdgeInsets.symmetric(vertical: 1),
                                 decoration: BoxDecoration(
                                   color: timeLeft == 'Ready to Open'
                                       ? Colors.green[100]
                                       : Colors.white,
-                                  border: Border.all(color: Colors.grey[300]!),
+                                  border: Border.all(color: Colors.grey[400]!),
                                 ),
                                 child: ListTile(
                                   leading: CircleAvatar(
