@@ -4,6 +4,8 @@ import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:eggciting/screens/post_details_screen.dart';
@@ -19,7 +21,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
   User? currentUser = FirebaseAuth.instance.currentUser;
-  final bool _mapCentered = false;
+  final TextEditingController _searchController = TextEditingController();
+  final GoogleMapsPlaces _places =
+      GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
+  List<Prediction> _predictions = [];
 
   @override
   void dispose() {
@@ -37,6 +42,26 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _searchPlace() async {
+    if (_searchController.text.isEmpty) return;
+    final response = await _places.autocomplete(_searchController.text);
+    setState(() {
+      _predictions = response.predictions;
+    });
+  }
+
+  void _moveToSearchedPlace(String placeId) async {
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(placeId);
+    final lat = detail.result.geometry!.location.lat;
+    final lng = detail.result.geometry!.location.lng;
+
+    _mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(lat, lng), zoom: 12),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +72,6 @@ class _MapScreenState extends State<MapScreen> {
         stream: Provider.of<PostsProvider>(context).postsStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            debugPrint('No data');
             return const Center(child: CircularProgressIndicator());
           } else {
             final userLocation =
@@ -63,29 +87,10 @@ class _MapScreenState extends State<MapScreen> {
               ),
               markers: snapshot.data!.docs.map((doc) {
                 final post = Post.fromFirestore(doc);
-                Coordinates postLocation = Coordinates(
-                  post.location.latitude,
-                  post.location.longitude,
-                );
-
-                double distance = userLocation != null
-                    ? GeoFirePoint.distanceBetween(
-                        to: postLocation,
-                        from: Coordinates(
-                          userLocation.latitude,
-                          userLocation.longitude,
-                        ),
-                      )
-                    : double.infinity;
-
                 return Marker(
                   markerId: MarkerId(doc.id),
-                  position:
-                      LatLng(post.location.latitude, post.location.longitude),
-                  infoWindow: InfoWindow(
-                    title: post.title,
-                    snippet: 'Distance: ${distance.toStringAsFixed(2)}km',
-                  ),
+                  position: LatLng(post.location.latitude, post.location.longitude),
+                  infoWindow: InfoWindow(title: post.title),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -99,6 +104,54 @@ class _MapScreenState extends State<MapScreen> {
             );
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onChanged: (value) => _searchPlace(),
+                    decoration: InputDecoration(
+                      hintText: 'Search for a place...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search),
+                        onPressed: _searchPlace,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _predictions.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(_predictions[index].description ?? 'No description'),
+                          onTap: () {
+                            _moveToSearchedPlace(_predictions[index].placeId!);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        child: Icon(Icons.search),
       ),
     );
   }
