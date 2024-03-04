@@ -20,7 +20,6 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
-  User? currentUser = FirebaseAuth.instance.currentUser;
   final TextEditingController _searchController = TextEditingController();
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
@@ -42,9 +41,14 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _searchPlace() async {
-    if (_searchController.text.isEmpty) return;
-    final response = await _places.autocomplete(_searchController.text);
+  void _searchPlace(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _predictions = [];
+      });
+      return;
+    }
+    final response = await _places.autocomplete(query);
     setState(() {
       _predictions = response.predictions;
     });
@@ -68,90 +72,82 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text('Map View'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: Provider.of<PostsProvider>(context).postsStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            final userLocation =
-                Provider.of<LocationProvider>(context, listen: false)
-                    .userLocation;
-            return GoogleMap(
-              myLocationButtonEnabled: true,
-              myLocationEnabled: true,
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: userLocation ?? const LatLng(0, 0),
-                zoom: 12,
-              ),
-              markers: snapshot.data!.docs.map((doc) {
-                final post = Post.fromFirestore(doc);
-                return Marker(
-                  markerId: MarkerId(doc.id),
-                  position: LatLng(post.location.latitude, post.location.longitude),
-                  infoWindow: InfoWindow(title: post.title),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostDetailsScreen(post: post),
-                      ),
-                    );
-                  },
-                );
-              }).toSet(),
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(
-                    controller: _searchController,
-                    textInputAction: TextInputAction.search,
-                    onChanged: (value) => _searchPlace(),
-                    decoration: InputDecoration(
-                      hintText: 'Search for a place...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.search),
-                        onPressed: _searchPlace,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _predictions.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_predictions[index].description ?? 'No description'),
-                          onTap: () {
-                            _moveToSearchedPlace(_predictions[index].placeId!);
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onChanged: _searchPlace,
+              decoration: InputDecoration(
+                hintText: 'Search for a place...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+                suffixIcon: Icon(Icons.search),
               ),
             ),
-          );
-        },
-        child: Icon(Icons.search),
+          ),
+          Expanded(
+            child: _predictions.isNotEmpty
+                ? ListView.builder(
+                    itemCount: _predictions.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(_predictions[index].description ?? 'No description'),
+                        onTap: () {
+                          _moveToSearchedPlace(_predictions[index].placeId!);
+                          _searchController.clear();
+                          setState(() {
+                            _predictions = [];
+                          });
+                        },
+                      );
+                    },
+                  )
+                : StreamBuilder<QuerySnapshot>(
+                    stream: Provider.of<PostsProvider>(context).postsStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else {
+                        final userLocation =
+                            Provider.of<LocationProvider>(context, listen: false)
+                                .userLocation;
+                        return GoogleMap(
+                          myLocationButtonEnabled: true,
+                          myLocationEnabled: true,
+                          onMapCreated: _onMapCreated,
+                          initialCameraPosition: CameraPosition(
+                            target: userLocation ?? const LatLng(0, 0),
+                            zoom: 12,
+                          ),
+                          markers: snapshot.data!.docs.map((doc) {
+                            final post = Post.fromFirestore(doc);
+                            return Marker(
+                              markerId: MarkerId(doc.id),
+                              position: LatLng(post.location.latitude, post.location.longitude),
+                              infoWindow: InfoWindow(title: post.title),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PostDetailsScreen(post: post),
+                                  ),
+                                );
+                              },
+                            );
+                          }).toSet(),
+                        );
+                      }
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
