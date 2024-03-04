@@ -37,7 +37,7 @@ class _MapScreenState extends State<MapScreen> {
         Provider.of<LocationProvider>(context, listen: false).userLocation;
     if (userLocation != null) {
       _mapController!.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: userLocation, zoom: 12)));
+          CameraPosition(target: userLocation, zoom: 16)));
     }
   }
 
@@ -61,7 +61,7 @@ class _MapScreenState extends State<MapScreen> {
 
     _mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 12),
+        CameraPosition(target: LatLng(lat, lng), zoom: 16),
       ),
     );
   }
@@ -72,80 +72,90 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text('Map View'),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              textInputAction: TextInputAction.search,
-              onChanged: _searchPlace,
-              decoration: InputDecoration(
-                hintText: 'Search for a place...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-                suffixIcon: Icon(Icons.search),
-              ),
-            ),
-          ),
-          Expanded(
-            child: _predictions.isNotEmpty
-                ? ListView.builder(
-                    itemCount: _predictions.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_predictions[index].description ?? 'No description'),
-                        onTap: () {
-                          _moveToSearchedPlace(_predictions[index].placeId!);
-                          _searchController.clear();
-                          setState(() {
-                            _predictions = [];
-                          });
-                        },
-                      );
-                    },
-                  )
-                : StreamBuilder<QuerySnapshot>(
-                    stream: Provider.of<PostsProvider>(context).postsStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else {
-                        final userLocation =
-                            Provider.of<LocationProvider>(context, listen: false)
-                                .userLocation;
-                        return GoogleMap(
-                          myLocationButtonEnabled: true,
-                          myLocationEnabled: true,
-                          onMapCreated: _onMapCreated,
-                          initialCameraPosition: CameraPosition(
-                            target: userLocation ?? const LatLng(0, 0),
-                            zoom: 12,
-                          ),
-                          markers: snapshot.data!.docs.map((doc) {
-                            final post = Post.fromFirestore(doc);
-                            return Marker(
-                              markerId: MarkerId(doc.id),
-                              position: LatLng(post.location.latitude, post.location.longitude),
-                              infoWindow: InfoWindow(title: post.title),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PostDetailsScreen(post: post),
-                                  ),
-                                );
-                              },
-                            );
-                          }).toSet(),
-                        );
-                      }
-                    },
+          StreamBuilder<QuerySnapshot>(
+            stream: Provider.of<PostsProvider>(context).postsStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                final userLocation =
+                    Provider.of<LocationProvider>(context, listen: false)
+                        .userLocation;
+                return GoogleMap(
+                  myLocationButtonEnabled: true,
+                  myLocationEnabled: true,
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: userLocation ?? const LatLng(0, 0),
+                    zoom: 12,
                   ),
+                  markers: snapshot.data!.docs.map((doc) {
+                    final post = Post.fromFirestore(doc);
+                    return Marker(
+                      markerId: MarkerId(doc.id),
+                      position: LatLng(
+                          post.location.latitude, post.location.longitude),
+                      infoWindow: InfoWindow(title: post.title),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostDetailsScreen(post: post),
+                          ),
+                        );
+                      },
+                    );
+                  }).toSet(),
+                );
+              }
+            },
+          ),
+          Positioned(
+            top: 10,
+            right: 15,
+            left: 15,
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  onChanged: _searchPlace,
+                  decoration: InputDecoration(
+                    hintText: 'Search for a place...',
+                    fillColor: Colors.white,
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: const Icon(Icons.search),
+                  ),
+                ),
+                if (_predictions.isNotEmpty)
+                  Container(
+                    color: Colors.white,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _predictions.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(_predictions[index].description ??
+                              'No description'),
+                          onTap: () {
+                            _moveToSearchedPlace(_predictions[index].placeId!);
+                            _searchController.clear();
+                            setState(() {
+                              _predictions = [];
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
