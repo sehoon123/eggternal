@@ -47,8 +47,36 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
             ),
             child: TableCalendar(
               firstDay: DateTime.utc(2010, 10, 16),
-              lastDay: DateTime.utc(2030, 3, 14),
+              lastDay: DateTime.utc(2100, 3, 14),
               focusedDay: _focusedDay,
+              onHeaderTapped: (focusedDay) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                          title: const Text('Select Year'),
+                          content: SizedBox(
+                              width: double.maxFinite,
+                              child: ListView.builder(
+                                itemCount: 31,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title:
+                                        Text('${DateTime.now().year + index}'),
+                                    onTap: () {
+                                      setState(() {
+                                        _focusedDay = DateTime(
+                                            DateTime.now().year + index,
+                                            _focusedDay.month,
+                                            _focusedDay.day);
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                  );
+                                },
+                              )));
+                    });
+              },
               calendarFormat: CalendarFormat.month,
               selectedDayPredicate: (day) {
                 return isSameDay(_selectedDay, day);
