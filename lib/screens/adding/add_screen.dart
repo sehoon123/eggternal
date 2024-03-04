@@ -7,7 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:eggciting/screens/map_selection_screen.dart';
+import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:intl/intl.dart';
 
 class AddScreen extends StatefulWidget {

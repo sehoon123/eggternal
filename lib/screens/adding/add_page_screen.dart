@@ -1,5 +1,5 @@
-import 'package:eggciting/screens/map_selection_screen.dart'; // Make sure to import MapSelectionScreen
-import 'package:eggciting/screens/write_content_screen.dart';
+import 'package:eggciting/screens/adding/map_selection_screen.dart'; // Make sure to import MapSelectionScreen
+import 'package:eggciting/screens/adding/write_content_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
