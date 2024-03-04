@@ -11,40 +11,32 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen({super.key});
+ const ListScreen({super.key});
 
-  @override
-  State<ListScreen> createState() => _ListScreenState();
+ @override
+ State<ListScreen> createState() => _ListScreenState();
 }
 
 class _ListScreenState extends State<ListScreen> {
-  User? currentUser = FirebaseAuth.instance.currentUser;
-  final ScrollController _scrollController = ScrollController();
+ User? currentUser = FirebaseAuth.instance.currentUser;
+ final ScrollController _scrollController = ScrollController();
 
-  @override
-  void initState() {
+ @override
+ void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
-    _scrollController.addListener(_onScroll);
-  }
+    // Removed _scrollController.addListener(_onScroll); as it's not needed for non-lazy loading
+ }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      // Fetch more posts 200 pixels before reaching the bottom
-      Provider.of<PostsProvider>(context, listen: false).fetchPosts();
-    }
-  }
-
-  @override
-  void dispose() {
+ @override
+ void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
+ }
 
-  Future<String> _getUsername(String userId) async {
+ Future<String> _getUsername(String userId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? nickname = prefs.getString('nickname_$userId');
 
@@ -58,18 +50,15 @@ class _ListScreenState extends State<ListScreen> {
 
       if (userDoc.exists) {
         nickname = userDoc.data()!['nickname'];
-        // Store the fetched nickname in shared_preferences with a unique key
         await prefs.setString('nickname_$userId', nickname!);
         return nickname;
       } else {
-        // Handle the case where the user document does not exist
-        // You might want to return a default value or show an error message
         return 'Unknown User';
       }
     }
-  }
+ }
 
-  double _calculateDistance(GeoFirePoint postLocation) {
+ double _calculateDistance(GeoFirePoint postLocation) {
     final userLocation =
         Provider.of<LocationProvider>(context, listen: false).userLocation;
     if (userLocation != null) {
@@ -80,28 +69,24 @@ class _ListScreenState extends State<ListScreen> {
     } else {
       return -1;
     }
-  }
+ }
 
-  String _calculateTimeLeft(DateTime dueDate) {
+ String _calculateTimeLeft(DateTime dueDate) {
     final now = DateTime.now();
     final difference = dueDate.difference(now);
 
-    // Check if the due date is in the past
     if (dueDate.isBefore(now)) {
-      // For any past due date, just show "Ready to Open"
       return "Ready to Open";
     } else if (difference.inDays == 0) {
-      // When the difference is less than a day, show hours left
       final hours = difference.inHours;
       return 'about $hours hours left';
     } else {
-      // For more than one day, show days left
       return 'about ${difference.inDays} days left';
     }
-  }
+ }
 
-  @override
-  Widget build(BuildContext context) {
+ @override
+ Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Posts'),
@@ -115,22 +100,22 @@ class _ListScreenState extends State<ListScreen> {
             children: [
               Center(
                 child: ToggleButtons(
-                  isSelected: [
+                 isSelected: [
                     postsProvider.isMyPostsSelected,
                     !postsProvider.isMyPostsSelected
-                  ],
-                  onPressed: (index) {
+                 ],
+                 onPressed: (index) {
                     Provider.of<PostsProvider>(context, listen: false)
                         .togglePostsView();
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  selectedColor: Theme.of(context).primaryColor,
-                  renderBorder: true,
-                  constraints: const BoxConstraints(
+                 },
+                 borderRadius: BorderRadius.circular(10),
+                 selectedColor: Theme.of(context).primaryColor,
+                 renderBorder: true,
+                 constraints: const BoxConstraints(
                     minWidth: 100,
                     minHeight: 36,
-                  ),
-                  children: const [
+                 ),
+                 children: const [
                     Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text('My Posts'),
@@ -139,7 +124,7 @@ class _ListScreenState extends State<ListScreen> {
                       padding: EdgeInsets.all(8.0),
                       child: Text('Shared Posts'),
                     )
-                  ],
+                 ],
                 ),
               ),
               Padding(
@@ -156,22 +141,11 @@ class _ListScreenState extends State<ListScreen> {
                         ),
                       ),
               ),
-              // const Divider(),
               Expanded(
                 child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: postsProvider.posts.length,
-                  itemBuilder: (context, index) {
-                    // debugPrint("building list item $index");
-                    if (index >= postsProvider.posts.length) {
-                      return postsProvider.hasMorePosts
-                          ? const Center(child: CircularProgressIndicator())
-                          : const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 32.0),
-                              child: Center(
-                                  child: Text('You have reached the end')),
-                            );
-                    }
+                 controller: _scrollController,
+                 itemCount: postsProvider.posts.length,
+                 itemBuilder: (context, index) {
                     final post = postsProvider.posts[index];
                     final timeLeft = _calculateTimeLeft(post.dueDate);
 
@@ -192,8 +166,8 @@ class _ListScreenState extends State<ListScreen> {
                           );
                         } else {
                           final userLocation = Provider.of<LocationProvider>(
-                                  context,
-                                  listen: false)
+                                 context,
+                                 listen: false)
                               .userLocation;
                           final distance = userLocation != null
                               ? _calculateDistance(post.location)
@@ -203,17 +177,17 @@ class _ListScreenState extends State<ListScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: timeLeft == 'Ready to Open'
+                                 color: timeLeft == 'Ready to Open'
                                       ? Colors.green[100]
                                       : Colors.white,
-                                  border: Border.all(color: Colors.grey[400]!),
+                                 border: Border.all(color: Colors.grey[400]!),
                                 ),
                                 child: ListTile(
-                                  leading: CircleAvatar(
+                                 leading: CircleAvatar(
                                       child:
                                           Text(snapshot.data!.substring(0, 1))),
-                                  title: Text(post.title),
-                                  subtitle: Column(
+                                 title: Text(post.title),
+                                 subtitle: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -222,17 +196,16 @@ class _ListScreenState extends State<ListScreen> {
                                           'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
                                       Text('Time Left: $timeLeft'),
                                     ],
-                                  ),
-                                  trailing: IconButton(
+                                 ),
+                                 trailing: IconButton(
                                     icon: const Icon(Icons.share),
                                     onPressed: () {
-                                      // Share the post
                                       Share.share(
                                         'Check out this post: ${post.title}',
                                       );
                                     },
-                                  ),
-                                  onTap: () {
+                                 ),
+                                 onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -240,20 +213,19 @@ class _ListScreenState extends State<ListScreen> {
                                             PostDetailsScreen(post: post),
                                       ),
                                     );
-                                  },
+                                 },
                                 ),
                               ),
-                              // Divider(color: Colors.grey[300]),
                             ],
                           );
                         }
                       },
                     );
-                  },
+                 },
                 ),
               )
             ],
           );
         }));
-  }
+ }
 }

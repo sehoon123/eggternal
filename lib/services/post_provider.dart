@@ -52,8 +52,7 @@ class PostsProvider with ChangeNotifier {
             _isMyPostsSelected ? 'userId' : 'sharedUser',
             isEqualTo: _currentUser!.uid,
           )
-          .orderBy('dueDate', descending: false)
-          .limit(10); // Adjust the limit as needed
+          .orderBy('dueDate', descending: false);
 
       debugPrint('Last document: $_lastDocument');
 
