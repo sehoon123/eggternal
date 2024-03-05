@@ -234,8 +234,8 @@ class _AddScreenState extends State<AddScreen> {
                   configurations: QuillEditorConfigurations(
                     controller: _controller,
                     readOnly: false,
-                    sharedConfigurations: QuillSharedConfigurations(
-                      locale: const Locale('en', 'US'),
+                    sharedConfigurations: const QuillSharedConfigurations(
+                      locale: Locale('en', 'US'),
                     ),
                   ),
                 ),
