@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const MapScreen(),
           const ListScreen(),
-          const AddPageScreen(),
+          AddScreen(firestore: widget.firestore),
           PaymentScreen(),
           const SettingsScreen(),
         ],

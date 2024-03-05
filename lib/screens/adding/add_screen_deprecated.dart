@@ -3,12 +3,15 @@ import 'package:eggciting/services/location_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart'
+    hide Text; // Avoid conflicts with Flutter's Text widget
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert'; // For converting Delta to JSON
 
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key, required this.firestore});
@@ -19,7 +22,7 @@ class AddScreen extends StatefulWidget {
 }
 
 class _AddScreenState extends State<AddScreen> {
-  final TextEditingController _textEditingController = TextEditingController();
+  late QuillController _controller;
   final List<dynamic> _images = []; // Can hold either File or String (URLs)
   User? user = FirebaseAuth.instance.currentUser;
   bool _isImageSelectionInProgress = false;
@@ -30,6 +33,7 @@ class _AddScreenState extends State<AddScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = QuillController.basic();
     _getCurrentLocation();
   }
 
@@ -73,7 +77,9 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _postContent() async {
-    String text = _textEditingController.text;
+    // Convert Quill's Delta format to JSON
+    final String richTextJson =
+        jsonEncode(_controller.document.toDelta().toJson());
 
     if (_dueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,7 +97,8 @@ class _AddScreenState extends State<AddScreen> {
     );
 
     try {
-      await _updateFirestore(text);
+      await _updateFirestore(
+          richTextJson); // Pass the rich text JSON instead of plain text
 
       // Show success (on the main thread)
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +115,6 @@ class _AddScreenState extends State<AddScreen> {
     }
   }
 
-// Helper functions for background tasks
   Future<String> _uploadFile(dynamic file) async {
     if (file is File) {
       final storageRef = FirebaseStorage.instance.ref().child(
@@ -125,7 +131,7 @@ class _AddScreenState extends State<AddScreen> {
     }
   }
 
-  Future<void> _updateFirestore(String text) async {
+  Future<void> _updateFirestore(String richTextJson) async {
     // Modify _images with URLs
     for (int i = 0; i < _images.length; i++) {
       if (_images[i] is File) {
@@ -135,7 +141,7 @@ class _AddScreenState extends State<AddScreen> {
 
     // Rebuild _images with URLs if needed
     await widget.firestore.collection('posts').add({
-      'text': text,
+      'richText': richTextJson, // Store the rich text content
       'imageUrls': _images,
       'createdAt': Timestamp.now(),
       'userId': user!.uid,
@@ -146,7 +152,7 @@ class _AddScreenState extends State<AddScreen> {
     });
 
     // Clear data
-    _textEditingController.clear();
+    _controller = QuillController.basic(); // Reset the Quill editor
     _images.clear();
     setState(() {});
   }
@@ -214,10 +220,24 @@ class _AddScreenState extends State<AddScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: _textEditingController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter text',
+              QuillToolbar.simple(
+                configurations: QuillSimpleToolbarConfigurations(
+                  controller: _controller,
+                  sharedConfigurations: const QuillSharedConfigurations(
+                    locale: Locale('en', 'US'),
+                  ),
+                ),
+              ), // Add a toolbar for the Quill editor
+              SizedBox(
+                height: 200, // Set a fixed height for the editor
+                child: QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
+                    controller: _controller,
+                    readOnly: false,
+                    sharedConfigurations: QuillSharedConfigurations(
+                      locale: const Locale('en', 'US'),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16.0),
