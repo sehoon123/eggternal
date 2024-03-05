@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -22,7 +21,7 @@ class LocationService {
 
     if (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse) {
-      debugPrint('Location permission granted');
+      debugPrint('Location permission granted in getCurrentLocation()');
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
 
@@ -41,18 +40,26 @@ class LocationService {
   Stream<Position> getPositionStream() {
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter:   10, // Only emit a new position if the device has moved at least   10 meters
+      distanceFilter:
+          30, // Only emit a new position if the device has moved at least 30 meters
     );
 
     return Geolocator.getPositionStream(locationSettings: locationSettings);
   }
 
-  void startTrackingLocation() {
-    _positionStreamSubscription = getPositionStream().listen((Position position) {
-      // Update the user's location whenever a new position is emitted
-      debugPrint('New location: ${position.latitude}, ${position.longitude}');
-      // You can call a callback or update a state variable here to reflect the new location in your app
-    });
+  void startTrackingLocation({required Function(LatLng) onLocationUpdate}) {
+    _positionStreamSubscription = getPositionStream().listen(
+      (Position position) {
+        debugPrint('New location: ${position.latitude}, ${position.longitude}');
+        // debugPrint('Type of latitude: ${position.latitude.runtimeType}');
+        // debugPrint('Type of longitude: ${position.longitude.runtimeType}');
+
+        onLocationUpdate(LatLng(position.latitude, position.longitude));
+      },
+      onError: (error) {
+        debugPrint('Error getting location: $error');
+      },
+    );
   }
 
   // Method to stop tracking the user's location

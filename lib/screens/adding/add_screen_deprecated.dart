@@ -1,14 +1,17 @@
 import 'dart:io';
-import 'package:eggternal/services/location_service.dart';
+import 'package:eggciting/services/location_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart'
+    hide Text; // Avoid conflicts with Flutter's Text widget
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:eggternal/screens/map_selection_screen.dart';
+import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert'; // For converting Delta to JSON
 
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key, required this.firestore});
@@ -19,7 +22,7 @@ class AddScreen extends StatefulWidget {
 }
 
 class _AddScreenState extends State<AddScreen> {
-  final TextEditingController _textEditingController = TextEditingController();
+  late QuillController _controller;
   final List<dynamic> _images = []; // Can hold either File or String (URLs)
   User? user = FirebaseAuth.instance.currentUser;
   bool _isImageSelectionInProgress = false;
@@ -30,6 +33,7 @@ class _AddScreenState extends State<AddScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = QuillController.basic();
     _getCurrentLocation();
   }
 
@@ -73,7 +77,9 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _postContent() async {
-    String text = _textEditingController.text;
+    // Convert Quill's Delta format to JSON
+    final String richTextJson =
+        jsonEncode(_controller.document.toDelta().toJson());
 
     if (_dueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,22 +97,24 @@ class _AddScreenState extends State<AddScreen> {
     );
 
     try {
-      await _updateFirestore(text);
+      await _updateFirestore(
+          richTextJson); // Pass the rich text JSON instead of plain text
 
       // Show success (on the main thread)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Content added successfully')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Content added successfully')),
+      // );
     } catch (e) {
       debugPrint('Error adding post: $e');
       // Handle error (still on the main thread)
     } finally {
       Navigator.pop(context); // Close dialog
-      Navigator.of(context).pushReplacementNamed('/home');
+      // move to  PostSuccessScreen
+
+      Navigator.of(context).pushReplacementNamed('/postSuccess');
     }
   }
 
-// Helper functions for background tasks
   Future<String> _uploadFile(dynamic file) async {
     if (file is File) {
       final storageRef = FirebaseStorage.instance.ref().child(
@@ -123,7 +131,7 @@ class _AddScreenState extends State<AddScreen> {
     }
   }
 
-  Future<void> _updateFirestore(String text) async {
+  Future<void> _updateFirestore(String richTextJson) async {
     // Modify _images with URLs
     for (int i = 0; i < _images.length; i++) {
       if (_images[i] is File) {
@@ -133,7 +141,7 @@ class _AddScreenState extends State<AddScreen> {
 
     // Rebuild _images with URLs if needed
     await widget.firestore.collection('posts').add({
-      'text': text,
+      'richText': richTextJson, // Store the rich text content
       'imageUrls': _images,
       'createdAt': Timestamp.now(),
       'userId': user!.uid,
@@ -144,7 +152,7 @@ class _AddScreenState extends State<AddScreen> {
     });
 
     // Clear data
-    _textEditingController.clear();
+    _controller = QuillController.basic(); // Reset the Quill editor
     _images.clear();
     setState(() {});
   }
@@ -194,29 +202,50 @@ class _AddScreenState extends State<AddScreen> {
     });
   }
 
+  void _removeImage(int index) {
+    setState(() {
+      _images.removeAt(index);
+    });
+  }
+
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Add Content'),
-    ),
-    body: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _textEditingController,
-              decoration: const InputDecoration(
-                hintText: 'Enter text',
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Content'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              QuillToolbar.simple(
+                configurations: QuillSimpleToolbarConfigurations(
+                  controller: _controller,
+                  sharedConfigurations: const QuillSharedConfigurations(
+                    locale: Locale('en', 'US'),
+                  ),
+                ),
+              ), // Add a toolbar for the Quill editor
+              SizedBox(
+                height: 200, // Set a fixed height for the editor
+                child: QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
+                    controller: _controller,
+                    readOnly: false,
+                    sharedConfigurations: QuillSharedConfigurations(
+                      locale: const Locale('en', 'US'),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            SizedBox(
-              height: 500, // Set a fixed height for the container
-              child: _images.isEmpty
+              const SizedBox(height: 16.0),
+              _images.isEmpty
                   ? const Center(child: Text('No Images Selected'))
                   : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
@@ -225,55 +254,82 @@ Widget build(BuildContext context) {
                       ),
                       itemCount: _images.length,
                       itemBuilder: (context, index) {
-                        if (_images[index] is File) {
-                          return Image.file(_images[index] as File);
-                        } else {
-                          return Image.network(_images[index] as String);
-                        }
+                        final image = _images[index];
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (image is File)
+                              Image.file(
+                                image,
+                                fit: BoxFit.cover,
+                              )
+                            else
+                              Image.network(
+                                image,
+                                fit: BoxFit.cover,
+                              ),
+                            Positioned(
+                              right: 5,
+                              top: 5,
+                              child: GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.remove_circle,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
                       },
                     ),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _selectImage,
-              child: const Text('Select Images'),
-            ),
-            const SizedBox(height: 16.0),
-            Text(_locationAddress ?? 'Location not available'),
-            ElevatedButton(
-              onPressed: _openMapSelection,
-              child: const Text('Select Location on Map'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (pickedDate != null) {
-                  setState(() {
-                    _dueDate = pickedDate;
-                  });
-                }
-              },
-              child: const Text('Select Due Date'),
-            ),
-            Text(_dueDate != null
-                ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
-                : 'No Due Date Selected'),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _postContent,
-              child: const Text('Post Content'),
-            ),
-          ],
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _selectImage,
+                child: const Text('Select Images'),
+              ),
+              const SizedBox(height: 16.0),
+              Text(_locationAddress ?? 'Location not available'),
+              ElevatedButton(
+                onPressed: _openMapSelection,
+                child: const Text('Select Location on Map'),
+              ),
+              const SizedBox(height: 16.0),
+              Text(_dueDate != null
+                  ? 'Due Date: ${DateFormat.yMMMd().format(_dueDate!)}'
+                  : 'No Due Date Selected'),
+              ElevatedButton(
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _dueDate = pickedDate;
+                    });
+                  }
+                },
+                child: const Text('Select Due Date'),
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _postContent,
+                child: const Text('Post Content'),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
