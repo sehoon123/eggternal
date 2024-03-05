@@ -151,12 +151,6 @@ PODS:
     - Flutter
     - FlutterMacOS
     - GoogleSignIn (~> 7.0)
-<<<<<<< HEAD
-  - GoogleMaps (7.4.0):
-    - GoogleMaps/Maps (= 7.4.0)
-  - GoogleMaps/Base (7.4.0)
-  - GoogleMaps/Maps (7.4.0):
-=======
   - GoogleDataTransport (9.4.0):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
@@ -165,7 +159,6 @@ PODS:
     - GoogleMaps/Maps (= 5.2.0)
   - GoogleMaps/Base (5.2.0)
   - GoogleMaps/Maps (5.2.0):
->>>>>>> deb
     - GoogleMaps/Base
   - GoogleSignIn (7.0.0):
     - AppAuth (~> 1.5)
@@ -460,12 +453,8 @@ SPEC CHECKSUMS:
   GLTFSceneKit: d1b437c514ba2aed5555afb0fddd64e030612d57
   google_maps_flutter_ios: d1318b4ff711612cab16862d7a87e31a7403d458
   google_sign_in_ios: 1bfaf6607b44cd1b24c4d4bc39719870440f9ce1
-<<<<<<< HEAD
-  GoogleMaps: 032f676450ba0779bd8ce16840690915f84e57ac
-=======
   GoogleDataTransport: bed3a36c04c8552479fbb9b76326e0fc69bddcb2
   GoogleMaps: 025272d5876d3b32604e5c080dc25eaf68764693
->>>>>>> deb
   GoogleSignIn: b232380cf495a429b8095d3178a8d5855b42e842
   GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
   GTMAppAuth: 99fb010047ba3973b7026e45393f51f27ab965ae
