@@ -119,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   void _handleSuccessfulSignIn(UserCredential userCredential) async {
     final user = userCredential.user;
 
-    debugPrint("User info in _handleSuccessfulSignIn: ${user?.uid}");
+    // debugPrint("User info in _handleSuccessfulSignIn: ${user?.uid}");
 
     await _storeUserInfo(user!);
 

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/adding/add_page_screen.dart';
-import 'package:eggciting/screens/adding/add_screen.dart';
+import 'package:eggciting/screens/adding/add_screen_deprecated.dart';
 import 'package:eggciting/screens/ar_test.dart';
 import 'package:eggciting/screens/list_screen.dart';
 import 'package:eggciting/screens/map_screen.dart';

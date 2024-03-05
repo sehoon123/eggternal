@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:eggciting/screens/adding/add_screen.dart';
+import 'package:eggciting/screens/adding/add_screen_deprecated.dart';
 import 'package:eggciting/screens/agreement_screen.dart';
 import 'package:eggciting/screens/home_screen.dart';
 import 'package:eggciting/screens/list_screen.dart';
@@ -32,25 +32,27 @@ void main() async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   await LineSDK.instance.setup(dotenv.env['lineChannelId']!).then((_) {
-    debugPrint('LineSDK Prepared');
+    // debugPrint('LineSDK Prepared');
   });
 
-  String apiKey = dotenv.env['kakaoNativeAppKey']!;
-  debugPrint('API Key: $apiKey');
+  // String apiKey = dotenv.env['kakaoNativeAppKey']!;
+  // debugPrint('API Key: $apiKey');
 
   KakaoSdk.init(
     nativeAppKey: dotenv.env['kakaoNativeAppKey']!,
     javaScriptAppKey: dotenv.env['kakaoJavaScriptAppKey']!,
   );
 
-runApp(
+  runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => PostsProvider(), // Create instance of PostsProvider
+          create: (context) =>
+              PostsProvider(), // Create instance of PostsProvider
         ),
         ChangeNotifierProvider(
-          create: (context) => LocationProvider(), // Create instance of LocationProvider
+          create: (context) =>
+              LocationProvider(), // Create instance of LocationProvider
         ),
       ],
       child: MyApp(firestore: firestore),
@@ -77,7 +79,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Eggciting',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFF67280),
@@ -86,14 +88,14 @@ class _MyAppState extends State<MyApp> {
         ),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
-        // '/': (context) => const SplashScreen(),
+        '/': (context) => const SplashScreen(),
         '/login': (context) => LoginPage(firestore: widget.firestore),
         '/home': (context) => HomeScreen(firestore: widget.firestore),
         '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
         '/nickname': (context) => NicknameScreen(firestore: widget.firestore),
-        '/add': (context) => AddScreen(firestore: widget.firestore),
+        // '/add': (context) => AddScreen(firestore: widget.firestore),
         '/mapSelection': (context) => const MapSelectionScreen(),
         '/list': (context) => const ListScreen(),
         '/postSuccess': (context) => const PostSuccessScreen(

@@ -43,7 +43,7 @@ class PostsProvider with ChangeNotifier {
     if (!_hasMorePosts || _isLoading) return;
 
     setIsLoading(true);
-    debugPrint('Fetching posts...');
+    // debugPrint('Fetching posts...');
 
     try {
       Query query = FirebaseFirestore.instance
@@ -54,7 +54,7 @@ class PostsProvider with ChangeNotifier {
           )
           .orderBy('dueDate', descending: false);
 
-      debugPrint('Last document: $_lastDocument');
+      // debugPrint('Last document: $_lastDocument');
 
       if (_lastDocument != null) {
         query = query.startAfterDocument(_lastDocument!);

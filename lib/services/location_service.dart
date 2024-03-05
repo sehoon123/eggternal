@@ -51,8 +51,8 @@ class LocationService {
     _positionStreamSubscription = getPositionStream().listen(
       (Position position) {
         debugPrint('New location: ${position.latitude}, ${position.longitude}');
-        debugPrint('Type of latitude: ${position.latitude.runtimeType}');
-        debugPrint('Type of longitude: ${position.longitude.runtimeType}');
+        // debugPrint('Type of latitude: ${position.latitude.runtimeType}');
+        // debugPrint('Type of longitude: ${position.longitude.runtimeType}');
 
         onLocationUpdate(LatLng(position.latitude, position.longitude));
       },

@@ -91,6 +91,9 @@ class _MapScreenState extends State<MapScreen> {
                     target: userLocation ?? const LatLng(0, 0),
                     zoom: 12,
                   ),
+                  onTap: (LatLng position) {
+                    FocusScope.of(context).unfocus();
+                  },
                   markers: snapshot.data!.docs.map((doc) {
                     final post = Post.fromFirestore(doc);
                     return Marker(

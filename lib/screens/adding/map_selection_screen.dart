@@ -18,7 +18,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   LatLng? _selectedPosition;
   late LocationProvider _locationProvider;
   final TextEditingController _searchController = TextEditingController();
-  final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
+  final GoogleMapsPlaces _places =
+      GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
   List<Prediction> _predictions = [];
 
   @override
@@ -100,6 +101,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
                   position: position,
                 ));
               });
+              FocusScope.of(context).unfocus();
             },
             markers: _markers,
             initialCameraPosition: userLocation != null
@@ -130,7 +132,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    suffixIcon: Icon(Icons.search),
+                    suffixIcon: const Icon(Icons.search),
                   ),
                 ),
                 if (_predictions.isNotEmpty)
@@ -141,9 +143,11 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
                       itemCount: _predictions.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(_predictions[index].description ?? 'No description'),
+                          title: Text(_predictions[index].description ??
+                              'No description'),
                           onTap: () {
-                            _searchController.text = _predictions[index].description ?? '';
+                            _searchController.text =
+                                _predictions[index].description ?? '';
                             _moveToSearchedPlace(_predictions[index].placeId!);
                             setState(() {
                               _predictions = [];
