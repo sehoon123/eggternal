@@ -46,23 +46,23 @@ class _AddPageScreenState extends State<AddPageScreen> {
               },
               child: const Text('Select Location on Map'),
             ),
-            const SizedBox(height: 16.0),
-            if (selectedLocation != null)
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to the WriteContentScreen with the selected location
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WriteContentScreen(
-                        selectedLocation:
-                            selectedLocation, // Pass the selected location
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Next'),
-              ),
+            // const SizedBox(height: 16.0),
+            // if (selectedLocation != null)
+            //   ElevatedButton(
+            //     onPressed: () {
+            //       // Navigate to the WriteContentScreen with the selected location
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => WriteContentScreen(
+            //             selectedLocation:
+            //                 selectedLocation, // Pass the selected location
+            //           ),
+            //         ),
+            //       );
+            //     },
+            //     child: const Text('Next'),
+            //   ),
           ],
         ),
       ),
