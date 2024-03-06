@@ -30,6 +30,16 @@ class _NewAddingPageState extends State<NewAddingPage> {
           QuillToolbar.simple(
             configurations: QuillSimpleToolbarConfigurations(
               controller: _controller,
+              showSubscript: false,
+              showSuperscript: false,
+              showInlineCode: false,
+              showColorButton: false,
+              showBackgroundColorButton: false,
+              showIndent: false,
+              showListBullets: false,
+              showListNumbers: false,
+              showCodeBlock: false,
+              showListCheck: false,
               sharedConfigurations: const QuillSharedConfigurations(
                 locale: Locale('en'), // Set English locale
               ),
@@ -67,9 +77,9 @@ class _NewAddingPageState extends State<NewAddingPage> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
     final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
+        await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       final String imagePath = pickedImage.path;
       // Calculate the current cursor position
