@@ -87,11 +87,14 @@ class _NewAddingPageState extends State<NewAddingPage> {
       // Create a Delta with an insert operation for the image
       final Delta delta = Delta()
         ..retain(cursorPosition)
-        ..insert({'image': imagePath});
+        ..insert('\n') // Insert a line break before the image
+        ..insert({'image': imagePath})
+        ..insert('\n'); // Insert a line break after the image
       // Compose the Delta to insert the image at the cursor position
       _controller.compose(
           delta,
-          TextSelection.collapsed(offset: cursorPosition + 1),
+          TextSelection.collapsed(
+              offset: cursorPosition + 3), // Adjust the cursor position
           ChangeSource.local);
     }
   }

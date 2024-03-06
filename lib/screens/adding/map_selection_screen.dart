@@ -1,3 +1,4 @@
+import 'package:eggciting/screens/adding/new_adding_page.dart';
 import 'package:eggciting/screens/adding/write_content_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WriteContentScreen(
+              builder: (context) => NewAddingPage(
                 selectedLocation: _selectedPosition!,
               ),
             ),
