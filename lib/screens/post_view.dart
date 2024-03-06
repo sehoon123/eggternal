@@ -15,9 +15,11 @@ class DisplayPostScreen extends StatefulWidget {
 
 class _DisplayPostScreenState extends State<DisplayPostScreen> {
   fq.QuillController _controller = fq.QuillController.basic();
-  ScrollController _scrollController = ScrollController();
-  double _imageCardHeight = 0; 
-  double _imageOpacity = 1.0; 
+  final ScrollController _scrollController = ScrollController();
+  double _imageCardHeight = 0;
+  double _imageOpacity = 1.0;
+  double _titleOpacity = 1.0; // For fading out title/location
+  final double _expandedHeight = 0.0;
 
   @override
   void initState() {
@@ -25,7 +27,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
     _loadContent();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        _imageCardHeight = MediaQuery.of(context).size.height * 0.8; 
+        _imageCardHeight = MediaQuery.of(context).size.height * 0.8;
       });
     });
     _scrollController.addListener(_onScroll);
@@ -34,10 +36,11 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   void _onScroll() {
     setState(() {
       double scrollOffset = _scrollController.offset;
-      _imageCardHeight = MediaQuery.of(context).size.height * 0.8 - (scrollOffset * 0.2); 
-      _imageCardHeight = _imageCardHeight.clamp(100.0, MediaQuery.of(context).size.height * 0.8);
 
-      _imageOpacity = (1 - (scrollOffset / 300)).clamp(0.0, 1.0); 
+      _imageOpacity = (1 - (scrollOffset / 300)).clamp(0.0, 1.0);
+
+      // Control the opacity of the title and location
+      _titleOpacity = (1 - (scrollOffset / 100)).clamp(0.0, 1.0);
     });
   }
 
@@ -59,27 +62,55 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
       body: GestureDetector(
         onVerticalDragUpdate: (details) {
           setState(() {
-            _imageCardHeight -= details.delta.dy; 
-            _imageCardHeight = _imageCardHeight.clamp(100.0, MediaQuery.of(context).size.height * 0.8); 
+            _imageCardHeight -= details.delta.dy;
+            _imageCardHeight = _imageCardHeight.clamp(
+                100.0, MediaQuery.of(context).size.height * 0.8);
           });
         },
         child: CustomScrollView(
-          controller: _scrollController, // Attach controller for scrolling
+          controller: _scrollController,
           slivers: [
             SliverAppBar(
-              expandedHeight: MediaQuery.of(context).size.height * 0.8,
+              expandedHeight: MediaQuery.of(context).size.height * 0.6,
               flexibleSpace: FlexibleSpaceBar(
-                background: widget.post.imageUrls.isNotEmpty
-                    ? Image.network(
-                        widget.post.imageUrls.first,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(), 
+                background: Stack(
+                  children: [
+                    widget.post.imageUrls.isNotEmpty
+                        ? Image.network(
+                            widget.post.imageUrls.first,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(),
+                    Positioned(
+                      bottom: 70.0,
+                      left: 20.0,
+                      child: Opacity(
+                        opacity: _titleOpacity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.post.title,
+                              style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            Text(
+                              widget.post.location.toString(),
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             SliverList(
               delegate: SliverChildListDelegate([
-                // SizedBox(height: _imageCardHeight), 
                 Container(
                   color: Colors.white,
                   child: fq.QuillEditor.basic(
