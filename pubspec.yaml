@@ -76,6 +76,7 @@ dependencies:
   fluttertoast: ^8.2.4
   flutter_google_maps_webservices: ^1.1.1
   flutter_quill: ^9.3.1
+  flutter_quill_extensions: ^9.3.1
 
 dev_dependencies:
   flutter_test:
