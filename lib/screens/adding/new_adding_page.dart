@@ -1,11 +1,19 @@
+import 'dart:convert';
+
+import 'package:eggciting/models/post.dart';
+import 'package:eggciting/screens/adding/map_selection_screen.dart';
+import 'package:eggciting/screens/adding/select_due_date_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_quill_extensions/embeds/image/editor/image_embed.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart'; // Add this import
-import 'dart:io'; // Add this import for File
+import 'dart:io';
+
+import 'package:shared_preferences/shared_preferences.dart'; // Add this import for File
 
 class NewAddingPage extends StatefulWidget {
   final LatLng? selectedLocation;
@@ -18,6 +26,12 @@ class NewAddingPage extends StatefulWidget {
 
 class _NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
+  final Map<String, File> _imagePaths = {};
+
+  Future<String> _getUserIdFromSharedPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userId') ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +54,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
               showListNumbers: false,
               showCodeBlock: false,
               showListCheck: false,
+              showSearchButton: false,
               sharedConfigurations: const QuillSharedConfigurations(
                 locale: Locale('en'), // Set English locale
               ),
@@ -66,14 +81,66 @@ class _NewAddingPageState extends State<NewAddingPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Handle the submission of the content and images
-          // You can access the content with _controller.document.toDelta().toList()
-          // For images, you'll need to handle them separately, possibly by uploading them to a server
+        onPressed: () async {
+          // Collect the rich text content and convert it to a JSON string
+          final String contentDelta =
+              jsonEncode(_controller.document.toDelta().toList());
+
+          // Collect the images
+          // Assuming you have a method to get the image paths or URLs
+          final List<File> images = _getImagePathsOrURLs();
+
+          final List<String> imagePaths =
+              images.map((file) => file.path).toList();
+
+          // Extract the first line of text from the contentDelta
+          final List<dynamic> contentDeltaList = jsonDecode(contentDelta);
+          String title =
+              'No Title'; // Default title in case the content is empty
+          for (var item in contentDeltaList) {
+            if (item is Map && item.containsKey('insert')) {
+              String insertText = item['insert'];
+              if (insertText.contains('\n')) {
+                title = insertText.split('\n')[0]; // Get the first line of text
+                break;
+              } else {
+                title =
+                    insertText; // If there's no line break, use the entire text as the title
+                break;
+              }
+            }
+          }
+
+          // Create a Post object with the collected data
+          final Post post = Post(
+            title: title, // You might want to collect this from the user
+            contentDelta: contentDelta,
+            dueDate: DateTime.now(), // Adjust as needed
+            createdAt: DateTime.now(), // Adjust as needed
+            userId: await _getUserIdFromSharedPrefs(), // Adjust as needed
+            location: GeoFirePoint(
+              widget.selectedLocation!.latitude,
+              widget.selectedLocation!.longitude,
+            ),
+            imageUrls: imagePaths,
+            sharedUser: [], // Adjust as needed
+          );
+
+          // Navigate to the MapSelectionScreen, passing the Post object along
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SelectDueDateScreen(post: post),
+            ),
+          );
         },
         child: const Icon(Icons.check),
       ),
     );
+  }
+
+  List<File> _getImagePathsOrURLs() {
+    return _imagePaths.values.toList();
   }
 
   Future<void> _pickImage() async {
@@ -81,14 +148,14 @@ class _NewAddingPageState extends State<NewAddingPage> {
     final XFile? pickedImage =
         await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
-      final String imagePath = pickedImage.path;
+      final File imageFile = File(pickedImage.path); // Convert XFile to File
       // Calculate the current cursor position
       final int cursorPosition = _controller.selection.baseOffset;
       // Create a Delta with an insert operation for the image
       final Delta delta = Delta()
         ..retain(cursorPosition)
         ..insert('\n') // Insert a line break before the image
-        ..insert({'image': imagePath})
+        ..insert({'image': imageFile.path}) // Use the file path as the key
         ..insert('\n'); // Insert a line break after the image
       // Compose the Delta to insert the image at the cursor position
       _controller.compose(
@@ -96,6 +163,9 @@ class _NewAddingPageState extends State<NewAddingPage> {
           TextSelection.collapsed(
               offset: cursorPosition + 3), // Adjust the cursor position
           ChangeSource.local);
+
+      // Store the File object in the map
+      _imagePaths[imageFile.path] = imageFile;
     }
   }
 }

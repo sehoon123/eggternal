@@ -1,5 +1,4 @@
 import 'package:eggciting/screens/adding/map_selection_screen.dart'; // Make sure to import MapSelectionScreen
-import 'package:eggciting/screens/adding/write_content_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -46,23 +45,6 @@ class _AddPageScreenState extends State<AddPageScreen> {
               },
               child: const Text('Select Location on Map'),
             ),
-            // const SizedBox(height: 16.0),
-            // if (selectedLocation != null)
-            //   ElevatedButton(
-            //     onPressed: () {
-            //       // Navigate to the WriteContentScreen with the selected location
-            //       Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder: (context) => WriteContentScreen(
-            //             selectedLocation:
-            //                 selectedLocation, // Pass the selected location
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //     child: const Text('Next'),
-            //   ),
           ],
         ),
       ),

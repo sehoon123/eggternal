@@ -43,19 +43,12 @@ class PostsProvider with ChangeNotifier {
     if (!_hasMorePosts || _isLoading) return;
 
     setIsLoading(true);
-    // debugPrint('Fetching posts...');
 
     try {
-      Query query = FirebaseFirestore.instance
-          .collection('posts')
-          .where(
+      Query query = FirebaseFirestore.instance.collection('posts').where(
             _isMyPostsSelected ? 'userId' : 'sharedUser',
             isEqualTo: _currentUser!.uid,
-          )
-          .orderBy('dueDate', descending: false);
-
-      // debugPrint('Last document: $_lastDocument');
-
+          );
       if (_lastDocument != null) {
         query = query.startAfterDocument(_lastDocument!);
       }
@@ -64,8 +57,12 @@ class PostsProvider with ChangeNotifier {
 
       if (querySnapshot.docs.isNotEmpty) {
         _lastDocument = querySnapshot.docs.last;
-        _posts.addAll(
-            querySnapshot.docs.map((doc) => Post.fromFirestore(doc)).toList());
+        // Convert each DocumentSnapshot to a Map (JSON data) and then to a Post object
+        _posts.addAll(querySnapshot.docs.map((doc) {
+          Map<String, dynamic> jsonData = doc.data() as Map<String, dynamic>;
+          // debugPrint('Post data: $jsonData');
+          return Post.fromJson(jsonData);
+        }).toList());
       } else {
         _hasMorePosts = false;
       }
@@ -89,14 +86,26 @@ class PostsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Stream<QuerySnapshot> get postsStream {
+  Stream<List<Post>> get postsStream {
     // Adjust the query based on whether "My Posts" or "Shared Posts" is selected
     String field = _isMyPostsSelected ? 'userId' : 'sharedUser';
     return FirebaseFirestore.instance
         .collection('posts')
         .where(field, isEqualTo: _currentUser?.uid)
-        .orderBy('dueDate',
-            descending: false) // Assuming you have a timestamp field
-        .snapshots();
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data();
+        // Convert Timestamp objects to String objects
+        // for (final key in data.keys) {
+        //   if (data[key] is Timestamp) {
+        //     data[key] = (data[key] as Timestamp).toDate().toIso8601String();
+        //   }
+        // }
+        // debugPrint('snapshot data: $data');
+        // debugPrint('hi im here: ${Post.fromJson(data).toString()}');
+        return Post.fromJson(data);
+      }).toList();
+    });
   }
 }

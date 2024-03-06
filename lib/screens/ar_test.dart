@@ -7,12 +7,12 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/map_screen.dart';
+import 'package:eggciting/screens/post_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
-
 
 class ARViewPage extends StatefulWidget {
   final Post post;
@@ -115,7 +115,7 @@ class _ARViewPageState extends State<ARViewPage> {
       count = 0;
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MapScreen()),
+        MaterialPageRoute(builder: (context) => DisplayPostScreen(post: widget.post)),
       );
     } else {
       int remainingTaps = 5 - count;

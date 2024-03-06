@@ -1,5 +1,4 @@
 import 'package:eggciting/screens/adding/new_adding_page.dart';
-import 'package:eggciting/screens/adding/write_content_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

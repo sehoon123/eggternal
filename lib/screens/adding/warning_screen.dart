@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,19 +9,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
 
 class WarningScreen extends StatefulWidget {
-  final String title;
-  final String content;
-  final DateTime dueDate;
-  final List<File> images; // Assuming you're passing a list of File objects
-  final LatLng? selectedLocation; // Add this line
+  final Post post;
 
   const WarningScreen({
     super.key,
-    required this.title,
-    required this.content,
-    required this.dueDate,
-    required this.images,
-    this.selectedLocation, // Update this line
+    required this.post,
   });
 
   @override
@@ -51,26 +45,42 @@ class _WarningScreenState extends State<WarningScreen> {
 
   Future<void> _uploadPost() async {
     // Upload images to Firebase Storage and get their download URLs
-    List<String> imageUrls = [];
-    for (File image in widget.images) {
-      String imageUrl = await _uploadFile(image);
-      imageUrls.add(imageUrl);
+    Map<String, String> imagePathToUrlMap = {};
+    for (String imagePath in widget.post.imageUrls) {
+      File imageFile = File(imagePath);
+      // Upload the image to Firebase Storage
+      String imageUrl = await _uploadFile(imageFile);
+      imagePathToUrlMap[imagePath] =
+          imageUrl; // Map the local path to the Firebase URL
     }
 
-    // Add the post to Firestore
+    // Replace the local image paths in the contentDelta with the Firebase Storage URLs
+    List<dynamic> contentDeltaList = jsonDecode(widget.post.contentDelta);
+    for (var item in contentDeltaList) {
+      if (item is Map && item.containsKey('insert') && item['insert'] is Map) {
+        Map<String, dynamic> insertMap = item['insert'] as Map<String, dynamic>;
+        if (insertMap.containsKey('image') &&
+            imagePathToUrlMap.containsKey(insertMap['image'])) {
+          insertMap['image'] = imagePathToUrlMap[insertMap[
+              'image']]!; // Replace the local path with the Firebase URL
+        }
+      }
+    }
+    String updatedContentDelta = jsonEncode(contentDeltaList);
+
+    // Add the post to Firestore with the updated contentDelta
     await FirebaseFirestore.instance.collection('posts').add({
-      'title': widget.title,
-      'content': widget.content,
-      'dueDate': widget.dueDate,
-      'createdAt': DateTime.now(),
-      'location': GeoPoint(widget.selectedLocation!.latitude,
-          widget.selectedLocation!.longitude), // Add this line
-      'imageUrls': imageUrls,
-      'userId': FirebaseAuth.instance.currentUser?.uid,
-      'sharedUser': [], // Add this line
+      'title': widget.post.title,
+      'contentDelta': updatedContentDelta, // Use the updated contentDelta
+      'dueDate': widget.post.dueDate,
+      'createdAt': widget.post.createdAt,
+      'location': GeoPoint(
+          widget.post.location.latitude, widget.post.location.longitude),
+      'imageUrls':
+          imagePathToUrlMap.values.toList(), // Use the list of Firebase URLs
+      'userId': widget.post.userId,
+      'sharedUser': widget.post.sharedUser,
       // Add any other necessary fields
-      // Optionally, you can add the selected location here if you want to store it
-      // 'location': selectedLocation?.toJson(), // Assuming LatLng has a toJson method
     });
   }
 
@@ -116,7 +126,7 @@ class _WarningScreenState extends State<WarningScreen> {
                   );
                 } else {
                   // Navigate to the PostSuccessScreen
-                  WidgetsBinding.instance!.addPostFrameCallback((_) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:eggciting/screens/adding/add_screen_deprecated.dart';
 import 'package:eggciting/screens/agreement_screen.dart';
 import 'package:eggciting/screens/home_screen.dart';
 import 'package:eggciting/screens/list_screen.dart';

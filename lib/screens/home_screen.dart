@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/adding/add_page_screen.dart';
-import 'package:eggciting/screens/adding/add_screen_deprecated.dart';
 import 'package:eggciting/screens/adding/new_adding_page.dart';
 import 'package:eggciting/screens/ar_test.dart';
 import 'package:eggciting/screens/list_screen.dart';
 import 'package:eggciting/screens/map_screen.dart';
 import 'package:eggciting/screens/payment_screen.dart';
+import 'package:eggciting/screens/post_view.dart';
 import 'package:eggciting/screens/settings_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';

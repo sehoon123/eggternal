@@ -74,12 +74,15 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Stack(
         children: [
-          StreamBuilder<QuerySnapshot>(
+          StreamBuilder<List<Post>>(
             stream: Provider.of<PostsProvider>(context).postsStream,
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
+              // debugPrint('snapshot: $snapshot');
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else {
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
                 final userLocation =
                     Provider.of<LocationProvider>(context, listen: false)
                         .userLocation;
@@ -94,10 +97,10 @@ class _MapScreenState extends State<MapScreen> {
                   onTap: (LatLng position) {
                     FocusScope.of(context).unfocus();
                   },
-                  markers: snapshot.data!.docs.map((doc) {
-                    final post = Post.fromFirestore(doc);
+                  markers: snapshot.data!.map((post) {
                     return Marker(
-                      markerId: MarkerId(doc.id),
+                      markerId: MarkerId(post
+                          .userId), // Assuming the Post class has an 'id' field
                       position: LatLng(
                           post.location.latitude, post.location.longitude),
                       infoWindow: InfoWindow(title: post.title),
@@ -112,6 +115,8 @@ class _MapScreenState extends State<MapScreen> {
                     );
                   }).toSet(),
                 );
+              } else {
+                return const Center(child: Text('No data available'));
               }
             },
           ),
