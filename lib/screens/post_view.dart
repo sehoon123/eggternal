@@ -49,28 +49,46 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   void _loadImage() {
-    setState(() {
-      _isloading = true;
-    });
-    Image image = Image.network(widget.post.imageUrls.first);
+ setState(() {
+    _isloading = true;
+ });
+
+ int loadedImages = 0;
+ double firstImageHeight = 0.0; // To store the height of the first image
+
+ for (String imageUrl in widget.post.imageUrls) {
+    Image image = Image.network(imageUrl);
     image.image.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener((info, _) {
-        if (!_imageLoaded) {
+      ImageStreamListener((ImageInfo info, bool _) {
+        if (loadedImages == 0) {
+          // This is the first image, calculate its height
           double aspectRatio = info.image.width / info.image.height;
           double deviceWidth = MediaQuery.of(context).size.width;
-          double calculatedHeight = deviceWidth / aspectRatio;
-          debugPrint('image height: ${info.image.height}');
-          debugPrint('image width: ${info.image.width}');
-          debugPrint('calculated height: $calculatedHeight');
+          firstImageHeight = deviceWidth / aspectRatio;
+        }
+
+        loadedImages++;
+        if (loadedImages == widget.post.imageUrls.length) {
+          // All images have been loaded
           setState(() {
-            _expandedHeight = calculatedHeight;
+            _expandedHeight = firstImageHeight; // Use the height of the first image
             _imageLoaded = true;
             _isloading = false;
           });
         }
       }),
     );
-  }
+ }
+
+ if (widget.post.imageUrls.isEmpty) {
+    // Handle case where there are no images
+    setState(() {
+      _imageLoaded = true;
+      _isloading = false;
+    });
+ }
+}
+
 
   @override
   Widget build(BuildContext context) {
