@@ -124,12 +124,16 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                         onPressed: distance * 1000 <= thresholdDistance &&
                                 isReadyToOpen
                             ? () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             ARViewPage(post: widget.post)));
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            ARViewPage(post: widget.post)));
-                                // Navigator.push( context, MaterialPageRoute( builder: (context) => DisplayPostScreen( post: widget.post)));
+                                        builder: (context) => DisplayPostScreen(
+                                            post: widget.post)));
                               }
                             : null, // Disables the button if distance is greater than thresholdDistance
                         style: ButtonStyle(
