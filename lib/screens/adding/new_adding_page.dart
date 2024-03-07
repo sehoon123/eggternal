@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:eggciting/models/post.dart';
@@ -27,6 +28,30 @@ class NewAddingPage extends StatefulWidget {
 class _NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
   final Map<String, File> _imagePaths = {};
+  final ScrollController _scrollController = ScrollController();
+  late final StreamSubscription _documentChangeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _documentChangeSubscription = _controller.document.changes.listen((_) { 
+      _scrollToBottomAfterImageInsert();
+    });
+  }
+
+  @override
+  void dispose() {
+    _documentChangeSubscription.cancel();
+    super.dispose();
+  }
+
+  void _scrollToBottomAfterImageInsert() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  });
+}
+
+
 
   Future<String> _getUserIdFromSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -67,19 +92,23 @@ class _NewAddingPageState extends State<NewAddingPage> {
             ),
           ),
           Expanded(
-            child: QuillEditor.basic(
-              configurations: QuillEditorConfigurations(
-                controller: _controller,
-                readOnly: false, // true for view only mode
-                sharedConfigurations: const QuillSharedConfigurations(
-                  locale: Locale('en'),
-                ),
-                embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-              ),
-            ),
+            child: Scrollable(
+                controller: _scrollController,
+                viewportBuilder: (context, viewportOffset) {
+                  return QuillEditor.basic(
+                    configurations: QuillEditorConfigurations(
+                      controller: _controller,
+                      readOnly: false, // true for view only mode
+                      sharedConfigurations: const QuillSharedConfigurations(
+                        locale: Locale('en'),
+                      ),
+                      embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                    ),
+                  );
+                }),
           ),
           const SizedBox(
-            height: 80,
+            height: 100,
           )
         ],
       ),
@@ -174,6 +203,10 @@ class _NewAddingPageState extends State<NewAddingPage> {
         ),
         ChangeSource.local,
       );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) { 
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
 
       // Store the File object in the map
       _imagePaths[imageFile.path] = imageFile;
