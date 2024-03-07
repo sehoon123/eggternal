@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as fq;
 import 'package:eggciting/models/post.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -193,21 +194,23 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Container(
-                    color: Colors.white,
-                    child: fq.QuillEditor.basic(
-                      configurations: fq.QuillEditorConfigurations(
-                        controller: _controller,
-                        readOnly: true,
-                        showCursor: false,
-                        autoFocus: false,
-                        embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+              SliverToBoxAdapter(
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Container(
+                      color: Colors.white,
+                      child: fq.QuillEditor.basic(
+                        configurations: fq.QuillEditorConfigurations(
+                          controller: _controller,
+                          readOnly: true,
+                          showCursor: false,
+                          autoFocus: false,
+                          embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                        ),
                       ),
-                    ),
-                  ),
-                ]),
+                    );
+                  },
+                ),
               ),
             ],
           ),

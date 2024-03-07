@@ -78,6 +78,9 @@ class _NewAddingPageState extends State<NewAddingPage> {
               ),
             ),
           ),
+          const SizedBox(
+            height: 80,
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -157,28 +160,23 @@ class _NewAddingPageState extends State<NewAddingPage> {
         ..insert('\n') // Insert a line break before the image
         ..insert({'image': imageFile.path}) // Use the file path as the key
         ..insert('\n'); // Insert a line break after the image
+
       // Compose the Delta to insert the image at the cursor position
       _controller.compose(
         delta,
+        _controller.selection,
+        ChangeSource.local,
+      );
+
+      _controller.updateSelection(
         TextSelection.collapsed(
-          offset: cursorPosition + 2,
-        ), // Adjust the cursor position
+          offset: _controller.selection.baseOffset + 3,
+        ),
         ChangeSource.local,
       );
 
       // Store the File object in the map
       _imagePaths[imageFile.path] = imageFile;
-
-      _controller.addListener(() {
-        if (_controller.document.toDelta().toList().length >
-            cursorPosition + 2) {
-          debugPrint('Image inserted');
-          _controller.updateSelection(
-              TextSelection.collapsed(offset: cursorPosition + 2),
-              ChangeSource.local);
-          _controller.removeListener(() {});
-        }
-      });
     }
   }
 }
