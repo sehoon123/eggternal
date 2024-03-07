@@ -21,20 +21,6 @@ class PostDetailsScreen extends StatefulWidget {
 }
 
 class _PostDetailsScreenState extends State<PostDetailsScreen> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   Provider.of<LocationProvider>(context, listen: false)
-  //       .startTrackingLocation();
-  // }
-
-  // @override
-  // void dispose() {
-  //   Provider.of<LocationProvider>(context, listen: false)
-  //       .stopTrackingLocation();
-  //   super.dispose();
-  // }
-
   bool _isReadyToOpen(DateTime dueDate) {
     final difference = dueDate.difference(DateTime.now());
     return difference.inDays < 0 ||
@@ -138,8 +124,6 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                         onPressed: distance * 1000 <= thresholdDistance &&
                                 isReadyToOpen
                             ? () {
-                                // Implement the logic for opening the post or any other interaction
-                                // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => OpenPostScreen(post: widget.post)));
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
