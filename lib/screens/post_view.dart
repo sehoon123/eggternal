@@ -20,13 +20,16 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   double _expandedHeight = 0.0;
   bool _imageLoaded = false;
   bool _isloading = false;
+  bool _showPhotoCard = true;
 
   @override
   void initState() {
     super.initState();
-    _loadContent();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadContent();
+      _loadImage(); // Load the imagd
+    });
     _scrollController.addListener(_onScroll);
-    _loadImage(); // Load the image
   }
 
   void _onScroll() {
@@ -49,46 +52,89 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   void _loadImage() {
- setState(() {
-    _isloading = true;
- });
-
- int loadedImages = 0;
- double firstImageHeight = 0.0; // To store the height of the first image
-
- for (String imageUrl in widget.post.imageUrls) {
-    Image image = Image.network(imageUrl);
-    image.image.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener((ImageInfo info, bool _) {
-        if (loadedImages == 0) {
-          // This is the first image, calculate its height
-          double aspectRatio = info.image.width / info.image.height;
-          double deviceWidth = MediaQuery.of(context).size.width;
-          firstImageHeight = deviceWidth / aspectRatio;
-        }
-
-        loadedImages++;
-        if (loadedImages == widget.post.imageUrls.length) {
-          // All images have been loaded
-          setState(() {
-            _expandedHeight = firstImageHeight; // Use the height of the first image
-            _imageLoaded = true;
-            _isloading = false;
-          });
-        }
-      }),
-    );
- }
-
- if (widget.post.imageUrls.isEmpty) {
-    // Handle case where there are no images
     setState(() {
-      _imageLoaded = true;
-      _isloading = false;
+      _isloading = true;
     });
- }
-}
 
+    int loadedImages = 0;
+    double firstImageHeight = 0.0; // To store the height of the first image
+
+    for (String imageUrl in widget.post.imageUrls) {
+      Image image = Image.network(imageUrl);
+      image.image.resolve(const ImageConfiguration()).addListener(
+        ImageStreamListener((ImageInfo info, bool _) {
+          if (loadedImages == 0) {
+            // This is the first image, calculate its height
+            double aspectRatio = info.image.width / info.image.height;
+            double deviceWidth = MediaQuery.of(context).size.width;
+            firstImageHeight = deviceWidth / aspectRatio;
+          }
+
+          loadedImages++;
+          if (loadedImages == widget.post.imageUrls.length) {
+            // All images have been loaded
+            setState(() {
+              _expandedHeight =
+                  firstImageHeight; // Use the height of the first image
+              _imageLoaded = true;
+              _isloading = false;
+              _showPhotoCard = true;
+            });
+          }
+        }),
+      );
+    }
+
+    if (widget.post.imageUrls.isEmpty) {
+      // Handle case where there are no images
+      setState(() {
+        _imageLoaded = true;
+        _isloading = false;
+      });
+    }
+  }
+
+  Widget _buildPhotoCard() {
+    return DraggableScrollableSheet(
+      initialChildSize: 1,
+      minChildSize: 1,
+      maxChildSize: 1,
+      builder: (BuildContext context, ScrollController scrollController) {
+        return GestureDetector(
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity! > 0) {
+              setState(() {
+                _showPhotoCard = false;
+              });
+            }
+          },
+          child: Stack(
+            children: [
+              Container(
+                color: Colors.black.withOpacity(0.5),
+              ),
+              Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: widget.post.imageUrls.isNotEmpty
+                      ? Image.network(
+                          widget.post.imageUrls.first,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +211,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               ),
             ],
           ),
+          if (_showPhotoCard) _buildPhotoCard(),
         ],
       ),
     );

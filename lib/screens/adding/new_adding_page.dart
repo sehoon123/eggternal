@@ -159,13 +159,26 @@ class _NewAddingPageState extends State<NewAddingPage> {
         ..insert('\n'); // Insert a line break after the image
       // Compose the Delta to insert the image at the cursor position
       _controller.compose(
-          delta,
-          TextSelection.collapsed(
-              offset: cursorPosition + 3), // Adjust the cursor position
-          ChangeSource.local);
+        delta,
+        TextSelection.collapsed(
+          offset: cursorPosition + 2,
+        ), // Adjust the cursor position
+        ChangeSource.local,
+      );
 
       // Store the File object in the map
       _imagePaths[imageFile.path] = imageFile;
+
+      _controller.addListener(() {
+        if (_controller.document.toDelta().toList().length >
+            cursorPosition + 2) {
+          debugPrint('Image inserted');
+          _controller.updateSelection(
+              TextSelection.collapsed(offset: cursorPosition + 2),
+              ChangeSource.local);
+          _controller.removeListener(() {});
+        }
+      });
     }
   }
 }
