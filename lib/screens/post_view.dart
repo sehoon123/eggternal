@@ -98,90 +98,83 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
-    // Initial height of the photo card
-    double photoCardHeight =
-        MediaQuery.of(context).size.height; // Full screen height
-
-    return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        // Your existing opacity calculation logic
+    return Dismissible(
+      key: UniqueKey(), // Each Dismissible needs a unique key
+      direction: DismissDirection.up, // Allow swiping up
+      onDismissed: (direction) {
+        // This callback is called when the card is dismissed
+        setState(() {
+          _showPhotoCard = false; // Hide the photo card
+          _photoCardBackgroundOpacity =
+              0.0; // Set background opacity to transparent
+        });
       },
-      child: Stack(
-        children: [
-          // Background with animated opacity
-          AnimatedOpacity(
-            opacity:
-                _photoCardBackgroundOpacity, // Control this value to animate opacity
-            duration: const Duration(milliseconds: 300),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              color: Colors.black.withOpacity(0.8), // Start with 0.8 opacity
-            ),
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Container(),
-          ),
-          // Dismissible photo card
-          Dismissible(
-            key: UniqueKey(), // Each Dismissible needs a unique key
-            direction: DismissDirection.up, // Allow swiping up
-            onDismissed: (direction) {
-              // This callback is called when the card is dismissed
-              setState(() {
-                _showPhotoCard = false; // Hide the photo card
-                _photoCardBackgroundOpacity =
-                    0.0; // Make the background fully transparent
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: photoCardHeight, // Use the animated height
-              color: Colors.transparent,
-              padding:
-                  const EdgeInsets.all(20), // Add padding around the PhotoCard
-              child: Center(
-                child: Container(
+      background: AnimatedOpacity(
+        // This is the background that appears when swiping
+        opacity: _photoCardBackgroundOpacity,
+        duration: const Duration(
+            milliseconds: 300), // Duration of the opacity animation
+        child: Container(
+          color: Colors.black, // Use the opacity variable
+        ),
+      ),
+      child: Container(
+        color: Colors.black.withOpacity(0.5), // This remains constant
+        child: Stack(
+          children: [
+            // Blurred background that fills the entire screen
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Image.network(
+                  widget.post.imageUrls.first,
+                  fit: BoxFit.cover,
                   width: MediaQuery.of(context).size.width,
-                  // height:
-                  //     MediaQuery.of(context).size.height, // Photo card height
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: widget.post.imageUrls.isNotEmpty
-                      ? Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                widget.post.imageUrls.first,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                color: Colors.transparent,
-                                child: Text(
-                                  widget.post.title,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : null,
+                  height: MediaQuery.of(context).size.height,
                 ),
               ),
             ),
-          ),
-        ],
+            // Image that maintains the aspect ratio
+            Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                // height: MediaQuery.of(context).size.height * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(
+                      20.0), // Apply rounded edges to the image
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Image.network(
+                    widget.post.imageUrls.first,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            // Title overlay on the image
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                color: Colors.black.withOpacity(
+                    0.5), // Semi-transparent background for the title
+                child: Text(
+                  widget.post.title, // Display the title of the post
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center, // Center the title text
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
