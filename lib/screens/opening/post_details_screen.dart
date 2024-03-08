@@ -1,5 +1,5 @@
 import 'package:eggciting/models/post.dart';
-import 'package:eggciting/screens/ar_test.dart';
+import 'package:eggciting/screens/opening/ar_test.dart';
 import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';

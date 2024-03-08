@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
-import 'package:eggciting/screens/nickname_screen.dart';
+import 'package:eggciting/screens/signin/nickname_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {

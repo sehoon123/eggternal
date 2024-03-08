@@ -6,7 +6,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:eggciting/models/post.dart';
-import 'package:eggciting/screens/map_screen.dart';
+import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
