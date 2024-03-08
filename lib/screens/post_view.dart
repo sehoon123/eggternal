@@ -97,17 +97,12 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
+    // Initial height of the photo card
+    double photoCardHeight = MediaQuery.of(context).size.height;
+
     return GestureDetector(
       onVerticalDragUpdate: (details) {
-        // Calculate the opacity based on the drag details
-        // This is a simple example; you might need to adjust the calculation
-        // based on your specific requirements
-        double opacity =
-            details.primaryDelta!.abs() / MediaQuery.of(context).size.height;
-        setState(() {
-          _photoCardBackgroundOpacity =
-              opacity.clamp(0.0, 1.0); // Ensure opacity is between 0.0 and 1.0
-        });
+        // Your existing opacity calculation logic
       },
       child: Dismissible(
         key: UniqueKey(), // Each Dismissible needs a unique key
@@ -118,22 +113,18 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
             _showPhotoCard = false; // Hide the photo card
             _photoCardBackgroundOpacity =
                 0.0; // Make the background transparent
+            photoCardHeight =
+                0.0; // Set the height to 0 to simulate vertical dismiss
           });
         },
-        background: AnimatedOpacity(
-          opacity: _photoCardBackgroundOpacity,
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          child: Container(
-            color: Colors.black,
-          ),
-        ),
-        child: Container(
-          color: Colors.black.withOpacity(0.5),
-          padding: const EdgeInsets.all(50), // Add padding around the PhotoCard
+          height: photoCardHeight, // Use the animated height
+          color: Colors.transparent,
+          padding: const EdgeInsets.all(20), // Add padding around the PhotoCard
           child: Center(
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.8,
+              width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20.0),
