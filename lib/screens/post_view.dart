@@ -97,58 +97,59 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
- return GestureDetector(
-    onVerticalDragUpdate: (details) {
-      // Calculate the opacity based on the drag details
-      // This is a simple example; you might need to adjust the calculation
-      // based on your specific requirements
-      double opacity = details.primaryDelta!.abs() / MediaQuery.of(context).size.height;
-      setState(() {
-        _photoCardBackgroundOpacity = opacity.clamp(0.0, 1.0); // Ensure opacity is between 0.0 and 1.0
-      });
-    },
-    child: Dismissible(
-      key: UniqueKey(), // Each Dismissible needs a unique key
-      direction: DismissDirection.up, // Allow swiping up
-      onDismissed: (direction) {
-        // This callback is called when the card is dismissed
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        // Calculate the opacity based on the drag details
+        // This is a simple example; you might need to adjust the calculation
+        // based on your specific requirements
+        double opacity =
+            details.primaryDelta!.abs() / MediaQuery.of(context).size.height;
         setState(() {
-          _showPhotoCard = false; // Hide the photo card
-          _photoCardBackgroundOpacity = 0.0; // Make the background transparent
+          _photoCardBackgroundOpacity =
+              opacity.clamp(0.0, 1.0); // Ensure opacity is between 0.0 and 1.0
         });
       },
-      background: AnimatedOpacity(
-        opacity: _photoCardBackgroundOpacity,
-        duration: const Duration(milliseconds: 300),
-        child: Container(
-          color: Colors.black,
-        ),
-      ),
-      child: Container(
-        color: Colors.black.withOpacity(0.5),
-        padding: const EdgeInsets.all(50), // Add padding around the PhotoCard
-        child: Center(
+      child: Dismissible(
+        key: UniqueKey(), // Each Dismissible needs a unique key
+        direction: DismissDirection.up, // Allow swiping up
+        onDismissed: (direction) {
+          // This callback is called when the card is dismissed
+          setState(() {
+            _showPhotoCard = false; // Hide the photo card
+            _photoCardBackgroundOpacity =
+                0.0; // Make the background transparent
+          });
+        },
+        background: AnimatedOpacity(
+          opacity: _photoCardBackgroundOpacity,
+          duration: const Duration(milliseconds: 300),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
+            color: Colors.black,
+          ),
+        ),
+        child: Container(
+          color: Colors.black.withOpacity(0.5),
+          padding: const EdgeInsets.all(50), // Add padding around the PhotoCard
+          child: Center(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.8,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: widget.post.imageUrls.isNotEmpty
+                  ? Image.network(
+                      widget.post.imageUrls.first,
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: widget.post.imageUrls.isNotEmpty
-                ? Image.network(
-                    widget.post.imageUrls.first,
-                    fit: BoxFit.cover,
-                 )
-                : null,
           ),
         ),
       ),
-    ),
- );
-}
-
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
