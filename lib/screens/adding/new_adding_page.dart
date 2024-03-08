@@ -12,6 +12,7 @@ import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart'; // Add this import
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart'; // Add this import for File
@@ -28,15 +29,11 @@ class NewAddingPage extends StatefulWidget {
 class _NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
   final Map<String, File> _imagePaths = {};
-  final ScrollController _scrollController = ScrollController();
   late final StreamSubscription _documentChangeSubscription;
 
   @override
   void initState() {
     super.initState();
-    _documentChangeSubscription = _controller.document.changes.listen((_) { 
-      _scrollToBottomAfterImageInsert();
-    });
   }
 
   @override
@@ -45,17 +42,47 @@ class _NewAddingPageState extends State<NewAddingPage> {
     super.dispose();
   }
 
-  void _scrollToBottomAfterImageInsert() {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-  });
-}
-
-
-
   Future<String> _getUserIdFromSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('userId') ?? '';
+  }
+
+  List<File> _getImagePathsOrURLs() {
+    return _imagePaths.values.toList();
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      final File imageFile = File(pickedImage.path); // Convert XFile to File
+      // Calculate the current cursor position
+      final int cursorPosition = _controller.selection.baseOffset;
+      // Create a Delta with an insert operation for the image
+      final Delta delta = Delta()
+        ..retain(cursorPosition)
+        ..insert('\n') // Insert a line break before the image
+        ..insert({'image': imageFile.path}) // Use the file path as the key
+        ..insert('\n'); // Insert a line break after the image
+
+      // Compose the Delta to insert the image at the cursor position
+      _controller.compose(
+        delta,
+        _controller.selection,
+        ChangeSource.local,
+      );
+
+      _controller.updateSelection(
+        TextSelection.collapsed(
+          offset: _controller.selection.baseOffset + 3,
+        ),
+        ChangeSource.local,
+      );
+
+      // Store the File object in the map
+      _imagePaths[imageFile.path] = imageFile;
+    }
   }
 
   @override
@@ -93,7 +120,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
           ),
           Expanded(
             child: Scrollable(
-                controller: _scrollController,
+                controller: ScrollController(),
                 viewportBuilder: (context, viewportOffset) {
                   return QuillEditor.basic(
                     configurations: QuillEditorConfigurations(
@@ -169,47 +196,5 @@ class _NewAddingPageState extends State<NewAddingPage> {
         child: const Icon(Icons.check),
       ),
     );
-  }
-
-  List<File> _getImagePathsOrURLs() {
-    return _imagePaths.values.toList();
-  }
-
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      final File imageFile = File(pickedImage.path); // Convert XFile to File
-      // Calculate the current cursor position
-      final int cursorPosition = _controller.selection.baseOffset;
-      // Create a Delta with an insert operation for the image
-      final Delta delta = Delta()
-        ..retain(cursorPosition)
-        ..insert('\n') // Insert a line break before the image
-        ..insert({'image': imageFile.path}) // Use the file path as the key
-        ..insert('\n'); // Insert a line break after the image
-
-      // Compose the Delta to insert the image at the cursor position
-      _controller.compose(
-        delta,
-        _controller.selection,
-        ChangeSource.local,
-      );
-
-      _controller.updateSelection(
-        TextSelection.collapsed(
-          offset: _controller.selection.baseOffset + 3,
-        ),
-        ChangeSource.local,
-      );
-
-      WidgetsBinding.instance.addPostFrameCallback((_) { 
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      });
-
-      // Store the File object in the map
-      _imagePaths[imageFile.path] = imageFile;
-    }
   }
 }
