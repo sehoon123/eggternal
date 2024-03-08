@@ -53,35 +53,38 @@ class _NewAddingPageState extends State<NewAddingPage> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      final File imageFile = File(pickedImage.path); // Convert XFile to File
-      // Calculate the current cursor position
-      final int cursorPosition = _controller.selection.baseOffset;
-      // Create a Delta with an insert operation for the image
-      final Delta delta = Delta()
-        ..retain(cursorPosition)
-        ..insert('\n') // Insert a line break before the image
-        ..insert({'image': imageFile.path}) // Use the file path as the key
-        ..insert('\n'); // Insert a line break after the image
+    final List<XFile> pickedImages = await picker.pickMultiImage();
+    if (pickedImages.isNotEmpty) {
+      FocusManager.instance.primaryFocus?.unfocus();
 
-      // Compose the Delta to insert the image at the cursor position
-      _controller.compose(
-        delta,
-        _controller.selection,
-        ChangeSource.local,
-      );
+      for (XFile pickedImage in pickedImages) {
+        final File imageFile = File(pickedImage.path); // Convert XFile to File
+        // Calculate the current cursor position
+        int cursorPosition = _controller.selection.baseOffset;
+        // Create a Delta with an insert operation for the image
+        final Delta delta = Delta()
+          ..retain(cursorPosition)
+          ..insert('\n') // Insert a line break before the image
+          ..insert({'image': imageFile.path}) // Use the file path as the key
+          ..insert('\n'); // Insert a line break after the image
 
-      _controller.updateSelection(
-        TextSelection.collapsed(
-          offset: _controller.selection.baseOffset + 3,
-        ),
-        ChangeSource.local,
-      );
+        // Compose the Delta to insert the image at the cursor position
+        _controller.compose(
+          delta,
+          _controller.selection,
+          ChangeSource.local,
+        );
 
-      // Store the File object in the map
-      _imagePaths[imageFile.path] = imageFile;
+        _controller.updateSelection(
+          TextSelection.collapsed(
+            offset: cursorPosition,
+          ),
+          ChangeSource.local,
+        );
+
+        // Store the File object in the map
+        _imagePaths[imageFile.path] = imageFile;
+      }
     }
   }
 
@@ -125,6 +128,8 @@ class _NewAddingPageState extends State<NewAddingPage> {
                   return QuillEditor.basic(
                     configurations: QuillEditorConfigurations(
                       controller: _controller,
+                      scrollBottomInset: 10,
+                      padding: const EdgeInsets.only(bottom: 50),
                       readOnly: false, // true for view only mode
                       sharedConfigurations: const QuillSharedConfigurations(
                         locale: Locale('en'),
@@ -134,9 +139,6 @@ class _NewAddingPageState extends State<NewAddingPage> {
                   );
                 }),
           ),
-          const SizedBox(
-            height: 100,
-          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
