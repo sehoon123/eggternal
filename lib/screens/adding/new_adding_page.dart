@@ -29,7 +29,6 @@ class NewAddingPage extends StatefulWidget {
 class _NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
   final Map<String, File> _imagePaths = {};
-  late final StreamSubscription _documentChangeSubscription;
 
   @override
   void initState() {
@@ -38,7 +37,6 @@ class _NewAddingPageState extends State<NewAddingPage> {
 
   @override
   void dispose() {
-    _documentChangeSubscription.cancel();
     super.dispose();
   }
 

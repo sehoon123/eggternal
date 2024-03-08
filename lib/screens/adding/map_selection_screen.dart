@@ -176,7 +176,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         },
         child: const Icon(Icons.check),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

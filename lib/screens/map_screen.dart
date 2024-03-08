@@ -8,7 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:eggciting/screens/post_details_screen.dart';
+import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
