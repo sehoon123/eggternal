@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as fq;
@@ -98,46 +99,69 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
 
   Widget _buildPhotoCard() {
     // Initial height of the photo card
-    double photoCardHeight = MediaQuery.of(context).size.height;
+    double photoCardHeight =
+        MediaQuery.of(context).size.height; // Full screen height
 
     return GestureDetector(
       onVerticalDragUpdate: (details) {
         // Your existing opacity calculation logic
       },
-      child: Dismissible(
-        key: UniqueKey(), // Each Dismissible needs a unique key
-        direction: DismissDirection.up, // Allow swiping up
-        onDismissed: (direction) {
-          // This callback is called when the card is dismissed
-          setState(() {
-            _showPhotoCard = false; // Hide the photo card
-            _photoCardBackgroundOpacity =
-                0.0; // Make the background transparent
-            photoCardHeight =
-                0.0; // Set the height to 0 to simulate vertical dismiss
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: photoCardHeight, // Use the animated height
-          color: Colors.transparent,
-          padding: const EdgeInsets.all(20), // Add padding around the PhotoCard
-          child: Center(
+      child: Stack(
+        children: [
+          // Background with animated opacity
+          AnimatedOpacity(
+            opacity:
+                _photoCardBackgroundOpacity, // Control this value to animate opacity
+            duration: const Duration(milliseconds: 300),
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: widget.post.imageUrls.isNotEmpty
-                  ? Image.network(
-                      widget.post.imageUrls.first,
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.black.withOpacity(0.8), // Start with 0.8 opacity
             ),
           ),
-        ),
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(),
+          ),
+          // Dismissible photo card
+          Dismissible(
+            key: UniqueKey(), // Each Dismissible needs a unique key
+            direction: DismissDirection.up, // Allow swiping up
+            onDismissed: (direction) {
+              // This callback is called when the card is dismissed
+              setState(() {
+                _showPhotoCard = false; // Hide the photo card
+                _photoCardBackgroundOpacity =
+                    0.0; // Make the background fully transparent
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: photoCardHeight, // Use the animated height
+              color: Colors.transparent,
+              padding:
+                  const EdgeInsets.all(20), // Add padding around the PhotoCard
+              child: Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width *
+                      0.9, // Photo card width
+                  height: MediaQuery.of(context).size.height *
+                      0.9, // Photo card height
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: widget.post.imageUrls.isNotEmpty
+                      ? Image.network(
+                          widget.post.imageUrls.first,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
