@@ -22,7 +22,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   bool _imageLoaded = false;
   bool _isloading = false;
   bool _showPhotoCard = true;
-  final double _photoCardTranslation = 0.0;
+  double _photoCardBackgroundOpacity = 0.5;
 
   @override
   void initState() {
@@ -97,18 +97,32 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
-    return Dismissible(
+ return GestureDetector(
+    onVerticalDragUpdate: (details) {
+      // Calculate the opacity based on the drag details
+      // This is a simple example; you might need to adjust the calculation
+      // based on your specific requirements
+      double opacity = details.primaryDelta!.abs() / MediaQuery.of(context).size.height;
+      setState(() {
+        _photoCardBackgroundOpacity = opacity.clamp(0.0, 1.0); // Ensure opacity is between 0.0 and 1.0
+      });
+    },
+    child: Dismissible(
       key: UniqueKey(), // Each Dismissible needs a unique key
       direction: DismissDirection.up, // Allow swiping up
       onDismissed: (direction) {
         // This callback is called when the card is dismissed
         setState(() {
           _showPhotoCard = false; // Hide the photo card
+          _photoCardBackgroundOpacity = 0.0; // Make the background transparent
         });
       },
-      background: Container(
-        // This is the background that appears when swiping
-        color: Colors.black.withOpacity(0.5),
+      background: AnimatedOpacity(
+        opacity: _photoCardBackgroundOpacity,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          color: Colors.black,
+        ),
       ),
       child: Container(
         color: Colors.black.withOpacity(0.5),
@@ -125,13 +139,16 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                 ? Image.network(
                     widget.post.imageUrls.first,
                     fit: BoxFit.cover,
-                  )
+                 )
                 : null,
           ),
         ),
       ),
-    );
-  }
+    ),
+ );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
