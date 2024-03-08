@@ -143,18 +143,38 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                   const EdgeInsets.all(20), // Add padding around the PhotoCard
               child: Center(
                 child: Container(
-                  width: MediaQuery.of(context).size.width *
-                      0.9, // Photo card width
-                  height: MediaQuery.of(context).size.height *
-                      0.9, // Photo card height
+                  width: MediaQuery.of(context).size.width,
+                  // height:
+                  //     MediaQuery.of(context).size.height, // Photo card height
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: widget.post.imageUrls.isNotEmpty
-                      ? Image.network(
-                          widget.post.imageUrls.first,
-                          fit: BoxFit.cover,
+                      ? Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                widget.post.imageUrls.first,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                color: Colors.transparent,
+                                child: Text(
+                                  widget.post.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         )
                       : null,
                 ),
