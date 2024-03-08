@@ -291,8 +291,11 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               SliverToBoxAdapter(
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                    return Container(
-                      color: Colors.white,
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 200,
+                        maxHeight: double.infinity,
+                      ),
                       child: fq.QuillEditor.basic(
                         configurations: fq.QuillEditorConfigurations(
                           controller: _controller,
