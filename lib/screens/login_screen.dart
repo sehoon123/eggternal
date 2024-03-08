@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +23,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<LocationProvider>(context, listen: false)
+        .startTrackingLocation();
+  }
 
   Future<void> _storeUserInfo(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

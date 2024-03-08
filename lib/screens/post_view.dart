@@ -22,6 +22,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   bool _imageLoaded = false;
   bool _isloading = false;
   bool _showPhotoCard = true;
+  final double _photoCardTranslation = 0.0;
 
   @override
   void initState() {
@@ -96,44 +97,39 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
-    return DraggableScrollableSheet(
-      initialChildSize: 1,
-      minChildSize: 1,
-      maxChildSize: 1,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return GestureDetector(
-          onVerticalDragEnd: (details) {
-            if (details.primaryVelocity! > 0) {
-              setState(() {
-                _showPhotoCard = false;
-              });
-            }
-          },
-          child: Stack(
-            children: [
-              Container(
-                color: Colors.black.withOpacity(0.5),
-              ),
-              Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: widget.post.imageUrls.isNotEmpty
-                      ? Image.network(
-                          widget.post.imageUrls.first,
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        );
+    return Dismissible(
+      key: UniqueKey(), // Each Dismissible needs a unique key
+      direction: DismissDirection.up, // Allow swiping up
+      onDismissed: (direction) {
+        // This callback is called when the card is dismissed
+        setState(() {
+          _showPhotoCard = false; // Hide the photo card
+        });
       },
+      background: Container(
+        // This is the background that appears when swiping
+        color: Colors.black.withOpacity(0.5),
+      ),
+      child: Container(
+        color: Colors.black.withOpacity(0.5),
+        padding: const EdgeInsets.all(50), // Add padding around the PhotoCard
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: widget.post.imageUrls.isNotEmpty
+                ? Image.network(
+                    widget.post.imageUrls.first,
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
+        ),
+      ),
     );
   }
 
