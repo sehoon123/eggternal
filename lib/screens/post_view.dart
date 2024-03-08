@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as fq;
 import 'package:eggciting/models/post.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:geocoding/geocoding.dart';
 
 class DisplayPostScreen extends StatefulWidget {
   final Post post;
@@ -46,12 +47,14 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
     final contentDelta = widget.post.contentDelta;
     final doc = fq.Document.fromJson(jsonDecode(contentDelta));
     debugPrint('Loaded content: $doc');
-    setState(() {
-      _controller = fq.QuillController(
-        document: doc,
-        selection: const TextSelection.collapsed(offset: 0),
-      );
-    });
+    setState(
+      () {
+        _controller = fq.QuillController(
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      },
+    );
   }
 
   void _loadImage() {
@@ -65,26 +68,30 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
     for (String imageUrl in widget.post.imageUrls) {
       Image image = Image.network(imageUrl);
       image.image.resolve(const ImageConfiguration()).addListener(
-        ImageStreamListener((ImageInfo info, bool _) {
-          if (loadedImages == 0) {
-            // This is the first image, calculate its height
-            double aspectRatio = info.image.width / info.image.height;
-            double deviceWidth = MediaQuery.of(context).size.width;
-            firstImageHeight = deviceWidth / aspectRatio;
-          }
+        ImageStreamListener(
+          (ImageInfo info, bool _) {
+            if (loadedImages == 0) {
+              // This is the first image, calculate its height
+              double aspectRatio = info.image.width / info.image.height;
+              double deviceWidth = MediaQuery.of(context).size.width;
+              firstImageHeight = deviceWidth / aspectRatio;
+            }
 
-          loadedImages++;
-          if (loadedImages == widget.post.imageUrls.length) {
-            // All images have been loaded
-            setState(() {
-              _expandedHeight =
-                  firstImageHeight; // Use the height of the first image
-              _imageLoaded = true;
-              _isloading = false;
-              _showPhotoCard = true;
-            });
-          }
-        }),
+            loadedImages++;
+            if (loadedImages == widget.post.imageUrls.length) {
+              // All images have been loaded
+              setState(
+                () {
+                  _expandedHeight =
+                      firstImageHeight; // Use the height of the first image
+                  _imageLoaded = true;
+                  _isloading = false;
+                  _showPhotoCard = true;
+                },
+              );
+            }
+          },
+        ),
       );
     }
 
@@ -109,68 +116,118 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               0.0; // Set background opacity to transparent
         });
       },
-      child: Stack(children: [
-        // Blurred background that fills the entire screen
-        if (widget.post.imageUrls.isNotEmpty) ...[
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Image.network(
-                widget.post.imageUrls.first,
-                fit: BoxFit.cover,
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              color: Colors.black.withOpacity(
-                  0.2), // Semi-transparent background for the title
-              child: Text(
-                widget.post.title, // Display the title of the post
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      child: Stack(
+        children: [
+          // Blurred background that fills the entire screen
+          if (widget.post.imageUrls.isNotEmpty) ...[
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Image.network(
+                  widget.post.imageUrls.first,
+                  fit: BoxFit.cover,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
                 ),
-                textAlign: TextAlign.center, // Center the title text
               ),
             ),
-          ),
-        ] else
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                color: Colors.black45,
-              ), // Semi-transparent background for the title
+            Positioned(
+              bottom: 150,
+              left: 0,
+              right: 0,
+              child: FutureBuilder<List<Placemark>>(
+                  future: placemarkFromCoordinates(
+                    widget.post.location.latitude,
+                    widget.post.location.longitude,
+                  ),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<Placemark>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    final placemark = snapshot.data!.first;
+                    return Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            widget.post.title, // Display the title of the post
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.start, // Center the title text
+                          ),
+                          const SizedBox(height: 10), // Add space (10 pixels)
+                          Text(
+                            '${placemark.street}, ${placemark.locality}, ${placemark.country}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              color: Colors.black.withOpacity(
-                  0.2), // Semi-transparent background for the title
-              child: Text(
-                widget.post.title, // Display the title of the post
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          ] else ...[
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  color: Colors.black45,
+                ), // Semi-transparent background for the title
+              ),
+            ),
+            Positioned(
+              bottom: 150,
+              left: 0,
+              right: 0,
+              child: FutureBuilder<List<Placemark>>(
+                future: placemarkFromCoordinates(
+                  widget.post.location.latitude,
+                  widget.post.location.longitude,
                 ),
-                textAlign: TextAlign.center, // Center the title text
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Placemark>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  final placemark = snapshot.data!.first;
+                  return Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.post.title, // Display the title of the post
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start, // Center the title text
+                        ),
+                        const SizedBox(height: 10), // Add space (10 pixels)
+                        Text(
+                          '${placemark.street}, ${placemark.locality}, ${placemark.country}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
-          ),
-      ]),
+          ]
+        ],
+      ),
     );
   }
 
