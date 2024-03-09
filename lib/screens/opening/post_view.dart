@@ -157,27 +157,30 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               right: 0,
               child: Container(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text(
-                      widget.post.title, // Display the title of the post
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                child: Opacity(
+                  opacity: _titleOpacity,
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.post.title, // Display the title of the post
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start, // Center the title text
                       ),
-                      textAlign: TextAlign.start, // Center the title text
-                    ),
-                    const SizedBox(height: 10), // Add space (10 pixels)
-                    Text(
-                      _formattedLocation ?? 'Location not found',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
+                      const SizedBox(height: 10), // Add space (10 pixels)
+                      Text(
+                        _formattedLocation ?? 'Location not found',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start,
                       ),
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -196,27 +199,30 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               right: 0,
               child: Container(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text(
-                      widget.post.title, // Display the title of the post
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                child: Opacity(
+                  opacity: _titleOpacity,
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.post.title, // Display the title of the post
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start, // Center the title text
                       ),
-                      textAlign: TextAlign.start, // Center the title text
-                    ),
-                    const SizedBox(height: 10), // Add space (10 pixels)
-                    Text(
-                      _formattedLocation ?? 'Location not found',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
+                      const SizedBox(height: 10), // Add space (10 pixels)
+                      Text(
+                        _formattedLocation ?? 'Location not found',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start,
                       ),
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -261,30 +267,33 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                         right: 0,
                         child: Container(
                           padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                widget.post
-                                    .title, // Display the title of the post
-                                style: const TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          child: Opacity(
+                            opacity: _titleOpacity,
+                            child: Column(
+                              children: [
+                                Text(
+                                  widget.post
+                                      .title, // Display the title of the post
+                                  style: const TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign:
+                                      TextAlign.start, // Center the title text
                                 ),
-                                textAlign:
-                                    TextAlign.start, // Center the title text
-                              ),
-                              const SizedBox(
-                                  height: 10), // Add space (10 pixels)
-                              Text(
-                                _formattedLocation ?? 'Location not found',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                                const SizedBox(
+                                    height: 10), // Add space (10 pixels)
+                                Text(
+                                  _formattedLocation ?? 'Location not found',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.start,
                                 ),
-                                textAlign: TextAlign.start,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
