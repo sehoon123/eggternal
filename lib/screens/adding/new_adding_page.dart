@@ -88,6 +88,8 @@ class _NewAddingPageState extends State<NewAddingPage> {
 
   @override
   Widget build(BuildContext context) {
+    double? lastPointerY;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('New Adding Page'),
@@ -120,22 +122,34 @@ class _NewAddingPageState extends State<NewAddingPage> {
             ),
           ),
           Expanded(
-            child: Scrollable(
-                controller: ScrollController(),
-                viewportBuilder: (context, viewportOffset) {
-                  return QuillEditor.basic(
-                    configurations: QuillEditorConfigurations(
-                      controller: _controller,
-                      scrollBottomInset: 10,
-                      padding: const EdgeInsets.only(bottom: 50),
-                      readOnly: false, // true for view only mode
-                      sharedConfigurations: const QuillSharedConfigurations(
-                        locale: Locale('en'),
+            child: Listener(
+              onPointerMove: (event) {
+                if (lastPointerY != null) {
+                  if (event.position.dy > lastPointerY!) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                }
+                lastPointerY = event.position.dy;
+              },
+              child: Scrollable(
+                  controller: ScrollController(),
+                  viewportBuilder: (context, viewportOffset) {
+                    return QuillEditor.basic(
+                      configurations: QuillEditorConfigurations(
+                        placeholder: 'First line will be the title',
+                        controller: _controller,
+                        scrollBottomInset: 10,
+                        showCursor: true,
+                        padding: const EdgeInsets.only(bottom: 50),
+                        readOnly: false, // true for view only mode
+                        sharedConfigurations: const QuillSharedConfigurations(
+                          locale: Locale('en'),
+                        ),
+                        embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                       ),
-                      embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+            ),
           ),
         ],
       ),

@@ -165,6 +165,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if ( _selectedPosition != null) {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -173,6 +174,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
               ),
             ),
           );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please select a location'),
+              ),
+            );
+          }
         },
         child: const Icon(Icons.check),
       ),
