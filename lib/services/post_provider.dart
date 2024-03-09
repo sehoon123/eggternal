@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggciting/models/post.dart'; // Ensure this path is correct
+import 'package:eggciting/models/post.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart'; // Ensure this path is correct
 
 class PostsProvider with ChangeNotifier {
   User? _currentUser;
@@ -60,6 +61,8 @@ class PostsProvider with ChangeNotifier {
         // Convert each DocumentSnapshot to a Map (JSON data) and then to a Post object
         _posts.addAll(querySnapshot.docs.map((doc) {
           Map<String, dynamic> jsonData = doc.data() as Map<String, dynamic>;
+
+          // GeoFirePoint location = jsonData['location'];
           // debugPrint('Post data: $jsonData');
           return Post.fromJson(jsonData);
         }).toList());

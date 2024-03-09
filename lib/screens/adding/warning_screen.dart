@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class WarningScreen extends StatefulWidget {
   final Post post;
@@ -44,6 +46,9 @@ class _WarningScreenState extends State<WarningScreen> {
   }
 
   Future<void> _uploadPost() async {
+    var uuid = const Uuid();
+    String key = uuid.v4();
+
     // Upload images to Firebase Storage and get their download URLs
     Map<String, String> imagePathToUrlMap = {};
     for (String imagePath in widget.post.imageUrls) {
@@ -69,7 +74,8 @@ class _WarningScreenState extends State<WarningScreen> {
     String updatedContentDelta = jsonEncode(contentDeltaList);
 
     // Add the post to Firestore with the updated contentDelta
-    await FirebaseFirestore.instance.collection('posts').add({
+    await FirebaseFirestore.instance.collection('posts').doc(key).set({
+      'key': key,
       'title': widget.post.title,
       'contentDelta': updatedContentDelta, // Use the updated contentDelta
       'dueDate': widget.post.dueDate,
@@ -82,6 +88,26 @@ class _WarningScreenState extends State<WarningScreen> {
       'sharedUser': widget.post.sharedUser,
       // Add any other necessary fields
     });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // await removeAllLocationPrefs(); // Remove all location prefs
+    await prefs.setString('location_$key',
+        '${widget.post.location.latitude},${widget.post.location.longitude}');
+  }
+
+  Future<void> removeAllLocationPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Get all keys
+    Set<String> keys = prefs.getKeys();
+    // Iterate over the keys
+    for (String key in keys) {
+      // Check if the key starts with 'location_'
+      if (key.startsWith('location_')) {
+        // Remove the key
+        await prefs.remove(key);
+      }
+    }
   }
 
   @override

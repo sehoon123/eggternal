@@ -57,8 +57,8 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
                                   itemCount: 31,
                                   itemBuilder: (context, index) {
                                     return ListTile(
-                                      title:
-                                          Text('${DateTime.now().year + index}'),
+                                      title: Text(
+                                          '${DateTime.now().year + index}'),
                                       onTap: () {
                                         setState(() {
                                           _focusedDay = DateTime(
@@ -95,8 +95,8 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
                       ),
                       child: Text(
                         '${date.day}',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16.0),
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 16.0),
                       ),
                     );
                   },
@@ -108,6 +108,7 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
                   ? () {
                       // Create a new Post object with the updated dueDate
                       final updatedPost = Post(
+                        key: widget.post.key,
                         title: widget.post.title,
                         contentDelta: widget.post.contentDelta,
                         dueDate: _selectedDate!, // Use the selected date
@@ -117,12 +118,13 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
                         imageUrls: widget.post.imageUrls,
                         sharedUser: widget.post.sharedUser,
                       );
-        
+
                       // Navigate to the next screen, passing the updated Post object along
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WarningScreen(post: updatedPost),
+                          builder: (context) =>
+                              WarningScreen(post: updatedPost),
                         ),
                       );
                     }

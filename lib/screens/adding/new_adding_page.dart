@@ -186,6 +186,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
 
           // Create a Post object with the collected data
           final Post post = Post(
+            key: '', // You might want to generate a key for the post
             title: title, // You might want to collect this from the user
             contentDelta: contentDelta,
             dueDate: DateTime.now(), // Adjust as needed

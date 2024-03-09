@@ -4,16 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 
 class Post {
- final String title;
- final String contentDelta; // Store the rich text content as a JSON string
- final DateTime dueDate;
- final DateTime createdAt;
- final String userId;
- final GeoFirePoint location;
- final List<String> imageUrls;
- final List<String> sharedUser;
+  final String key;
+  final String title;
+  final String contentDelta; // Store the rich text content as a JSON string
+  final DateTime dueDate;
+  final DateTime createdAt;
+  final String userId;
+  final GeoFirePoint location;
+  final List<String> imageUrls;
+  final List<String> sharedUser;
 
- Post({
+  Post({
+    required this.key,
     required this.title,
     required this.contentDelta, // Use contentDelta instead of content
     required this.dueDate,
@@ -22,17 +24,23 @@ class Post {
     required this.location,
     required this.imageUrls,
     required this.sharedUser,
- });
+  });
 
-factory Post.fromJson(Map<String, dynamic> json) {
+  factory Post.fromJson(Map<String, dynamic> json) {
+    String key = json['key'] ?? 'No Key';
     String title = json['title'] ?? 'No Title';
-    String contentDelta = json['contentDelta'] ?? '{}'; // Default to an empty Delta
+    String contentDelta =
+        json['contentDelta'] ?? '{}'; // Default to an empty Delta
     // Correctly handle Timestamp objects for dueDate and createdAt
     DateTime dueDate = json['dueDate'] != null
-        ? (json['dueDate'] as Timestamp).toDate().toLocal() // Convert Timestamp to DateTime and then to local time
+        ? (json['dueDate'] as Timestamp)
+            .toDate()
+            .toLocal() // Convert Timestamp to DateTime and then to local time
         : DateTime.now();
     DateTime createdAt = json['createdAt'] != null
-        ? (json['createdAt'] as Timestamp).toDate().toLocal() // Convert Timestamp to DateTime and then to local time
+        ? (json['createdAt'] as Timestamp)
+            .toDate()
+            .toLocal() // Convert Timestamp to DateTime and then to local time
         : DateTime.now();
     String userId = json['userId'] ?? 'No User ID';
     GeoFirePoint location = json['location'] != null
@@ -44,6 +52,7 @@ factory Post.fromJson(Map<String, dynamic> json) {
         json['sharedUser'] != null ? List<String>.from(json['sharedUser']) : [];
 
     return Post(
+      key: key,
       title: title,
       contentDelta: contentDelta,
       dueDate: dueDate,
@@ -53,11 +62,12 @@ factory Post.fromJson(Map<String, dynamic> json) {
       imageUrls: imageUrls,
       sharedUser: sharedUser,
     );
- }
+  }
 
- // Method to convert a Post object to a Map (JSON data)
- Map<String, dynamic> toJson() {
+  // Method to convert a Post object to a Map (JSON data)
+  Map<String, dynamic> toJson() {
     return {
+      'key': key,
       'title': title,
       'contentDelta': contentDelta, // Use contentDelta
       'dueDate': dueDate.toIso8601String(),
@@ -70,5 +80,5 @@ factory Post.fromJson(Map<String, dynamic> json) {
       'imageUrls': imageUrls,
       'sharedUser': sharedUser,
     };
- }
+  }
 }

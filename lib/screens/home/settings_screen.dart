@@ -132,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               radius: 140,
               backgroundColor: Colors.grey,
               backgroundImage: _profileImageUrl != null &&
-                      Uri.parse(_profileImageUrl!).host.isNotEmpty
+                      Uri.parse(_profileImageUrl!).host.isNotEmpty 
                   ? NetworkImage(_profileImageUrl!)
                   : const AssetImage('assets/images/default_profile_image.png')
                       as ImageProvider,
