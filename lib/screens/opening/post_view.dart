@@ -25,6 +25,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   bool _isloading = false;
   bool _showPhotoCard = true;
   double _photoCardBackgroundOpacity = 0.5;
+  String? _formattedLocation;
 
   @override
   void initState() {
@@ -32,8 +33,27 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadContent();
       _loadImage(); // Load the imagd
+      _loadLocation();
     });
     _scrollController.addListener(_onScroll);
+  }
+
+  void _loadLocation() async {
+    final placemarks = await placemarkFromCoordinates(
+      widget.post.location.latitude,
+      widget.post.location.longitude,
+    );
+    if (placemarks.isNotEmpty) {
+      final placemark = placemarks.first;
+      setState(() {
+        _formattedLocation =
+            '${placemark.street}, ${placemark.locality}, ${placemark.country}';
+      });
+    } else {
+      setState(() {
+        _formattedLocation = 'Location not found';
+      });
+    }
   }
 
   void _onScroll() {
@@ -135,43 +155,31 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               bottom: 150,
               left: 0,
               right: 0,
-              child: FutureBuilder<List<Placemark>>(
-                  future: placemarkFromCoordinates(
-                    widget.post.location.latitude,
-                    widget.post.location.longitude,
-                  ),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<Placemark>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    final placemark = snapshot.data!.first;
-                    return Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.post.title, // Display the title of the post
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.start, // Center the title text
-                          ),
-                          const SizedBox(height: 10), // Add space (10 pixels)
-                          Text(
-                            '${placemark.street}, ${placemark.locality}, ${placemark.country}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                        ],
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      widget.post.title, // Display the title of the post
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                    );
-                  }),
+                      textAlign: TextAlign.start, // Center the title text
+                    ),
+                    const SizedBox(height: 10), // Add space (10 pixels)
+                    Text(
+                      _formattedLocation ?? 'Location not found',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ] else ...[
             Positioned.fill(
@@ -186,43 +194,30 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
               bottom: 150,
               left: 0,
               right: 0,
-              child: FutureBuilder<List<Placemark>>(
-                future: placemarkFromCoordinates(
-                  widget.post.location.latitude,
-                  widget.post.location.longitude,
-                ),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<Placemark>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-                  final placemark = snapshot.data!.first;
-                  return Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.post.title, // Display the title of the post
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start, // Center the title text
-                        ),
-                        const SizedBox(height: 10), // Add space (10 pixels)
-                        Text(
-                          '${placemark.street}, ${placemark.locality}, ${placemark.country}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start,
-                        ),
-                      ],
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      widget.post.title, // Display the title of the post
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.start, // Center the title text
                     ),
-                  );
-                },
+                    const SizedBox(height: 10), // Add space (10 pixels)
+                    Text(
+                      _formattedLocation ?? 'Location not found',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
               ),
             ),
           ]
@@ -261,24 +256,33 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                               : Container() // No need for the circular indicator here
                           : Container(),
                       Positioned(
-                        bottom: 70.0,
-                        left: 20.0,
-                        child: Opacity(
-                          opacity: _titleOpacity,
+                        bottom: 150,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.post.title,
+                                widget.post
+                                    .title, // Display the title of the post
                                 style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign:
+                                    TextAlign.start, // Center the title text
                               ),
+                              const SizedBox(
+                                  height: 10), // Add space (10 pixels)
                               Text(
-                                widget.post.location.toString(),
+                                _formattedLocation ?? 'Location not found',
                                 style: const TextStyle(
-                                    fontSize: 16, color: Colors.white),
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.start,
                               ),
                             ],
                           ),
