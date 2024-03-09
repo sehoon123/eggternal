@@ -59,14 +59,19 @@ class PostsProvider with ChangeNotifier {
       if (querySnapshot.docs.isNotEmpty) {
         _lastDocument = querySnapshot.docs.last;
         // Convert each DocumentSnapshot to a Map (JSON data) and then to a Post object
-        _posts.addAll(querySnapshot.docs.map((doc) {
+        List<Post> fetchedPosts = querySnapshot.docs.map((doc) {
           Map<String, dynamic> jsonData = doc.data() as Map<String, dynamic>;
 
           // GeoFirePoint location = jsonData['location'];
           // debugPrint('Post data: $jsonData');
           return Post.fromJson(jsonData);
-        }).toList());
-      } else {
+        }).toList();
+
+        fetchedPosts.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+
+        // Add the sorted posts to the existing list
+        _posts.addAll(fetchedPosts);
+      }else {
         _hasMorePosts = false;
       }
 
