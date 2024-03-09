@@ -236,40 +236,51 @@ class _ListScreenState extends State<ListScreen> {
                                 child: FutureBuilder<String>(
                                   future: _getUsername(details['username']),
                                   builder: (context, snapshot) {
-                                    return ListTile(
-                                      leading: CircleAvatar(
-                                        child: Text(
-                                            snapshot.data!.substring(0, 1)),
-                                      ),
-                                      title: Text(details['title']),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text('User: ${snapshot.data}'),
-                                          Text(
-                                              'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                          Text('Time Left: $timeLeft'),
-                                        ],
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.share),
-                                        onPressed: () {
-                                          Share.share(
-                                              'Check out this post: ${details['title']}');
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      return ListTile(
+                                        leading: CircleAvatar(
+                                          child: Text(
+                                              snapshot.data!.substring(0, 1)),
+                                        ),
+                                        title: Text(details['title']),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text('User: ${snapshot.data}'),
+                                            Text(
+                                                'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                            Text('Time Left: $timeLeft'),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.share),
+                                          onPressed: () {
+                                            Share.share(
+                                                'Check out this post: ${details['title']}');
+                                          },
+                                        ),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PostDetailsScreen(post: post),
+                                            ),
+                                          );
                                         },
-                                      ),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PostDetailsScreen(post: post),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }
+                                      );
+                                    } else {
+                                      return ListTile(
+                                        leading:
+                                            const CircularProgressIndicator(),
+                                        title: Text(details['title']),
+                                        subtitle:
+                                            const Text('Loading username...'),
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ],
