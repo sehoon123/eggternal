@@ -305,8 +305,8 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                     return ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: 1500,
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height,
                         maxHeight: double.infinity,
                       ),
                       child: fq.QuillEditor.basic(
