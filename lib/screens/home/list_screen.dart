@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,7 +29,7 @@ class _ListScreenState extends State<ListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostsProvider>(context, listen: false).fetchPosts();
     });
-    // debugPrintSharedPreferences();
+    debugPrintSharedPreferences();
     // Removed _scrollController.addListener(_onScroll); as it's not needed for non-lazy loading
   }
 
@@ -93,13 +95,41 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<Map<String, dynamic>?> _storeAndRetrievePostDetails(
+    String postKey,
+    GeoFirePoint postLocation,
+    String username,
+    String title,
+    DateTime dueDate,
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedDetails = prefs.getString('postDetails_$postKey');
+
+    if (storedDetails != null) {
+      // Assuming the stored location is a string representation of GeoFirePoint
+      // You might need to adjust this based on how you're storing the location
+      Map<String, dynamic> details = jsonDecode(storedDetails);
+      return details;
+    } else {
+      Map<String, dynamic> details = {
+        'location': '${postLocation.latitude},${postLocation.longitude}',
+        'username': username,
+        'title': title,
+        'dueDate': dueDate.toIso8601String(),
+      };
+      await prefs.setString('postDetails_$postKey', jsonEncode(details));
+      return details;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Posts'),
-        ),
-        body: Consumer<PostsProvider>(builder: (context, postsProvider, child) {
+      appBar: AppBar(
+        title: const Text('Posts'),
+      ),
+      body: Consumer<PostsProvider>(
+        builder: (context, postsProvider, child) {
           if (postsProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -157,28 +187,39 @@ class _ListScreenState extends State<ListScreen> {
                     final post = postsProvider.posts[index];
                     final timeLeft = _calculateTimeLeft(post.dueDate);
 
-                    return FutureBuilder<String>(
-                      future: _getUsername(post.userId),
+                    return FutureBuilder<Map<String, dynamic>?>(
+                      future: _storeAndRetrievePostDetails(
+                        post.key,
+                        post.location,
+                        post.userId,
+                        post.title,
+                        post.dueDate,
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState != ConnectionState.done) {
                           return ListTile(
                             leading: const CircularProgressIndicator(),
                             title: Text(post.title),
-                            subtitle: const Text('Loading user nickname...'),
+                            subtitle: const Text('Loading post details...'),
                           );
                         } else if (snapshot.hasError) {
                           return ListTile(
                             leading: const Icon(Icons.error),
                             title: Text(post.title),
-                            subtitle: const Text('Error loading user nickname'),
+                            subtitle: const Text('Error loading post details'),
                           );
                         } else {
+                          final details = snapshot.data;
+                          final postLocation = GeoFirePoint(
+                            double.parse(details!['location'].split(',')[0]),
+                            double.parse(details['location'].split(',')[1]),
+                          );
                           final userLocation = Provider.of<LocationProvider>(
                                   context,
                                   listen: false)
                               .userLocation;
                           final distance = userLocation != null
-                              ? _calculateDistance(post.location)
+                              ? _calculateDistance(postLocation)
                               : -1;
 
                           return Column(
@@ -188,40 +229,47 @@ class _ListScreenState extends State<ListScreen> {
                                   color: timeLeft == 'Ready to Open'
                                       ? Colors.green[100]
                                       : Colors.white,
-                                  border: Border.all(color: Colors.grey[400]!),
+                                  border: Border.all(
+                                    color: Colors.grey[400]!,
+                                  ),
                                 ),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                      child:
-                                          Text(snapshot.data!.substring(0, 1))),
-                                  title: Text(post.title),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('User: ${snapshot.data}'),
-                                      Text(
-                                          'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                      Text('Time Left: $timeLeft'),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.share),
-                                    onPressed: () {
-                                      Share.share(
-                                        'Check out this post: ${post.title}',
-                                      );
-                                    },
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PostDetailsScreen(post: post),
+                                child: FutureBuilder<String>(
+                                  future: _getUsername(details['username']),
+                                  builder: (context, snapshot) {
+                                    return ListTile(
+                                      leading: CircleAvatar(
+                                        child: Text(
+                                            snapshot.data!.substring(0, 1)),
                                       ),
+                                      title: Text(details['title']),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('User: ${snapshot.data}'),
+                                          Text(
+                                              'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                          Text('Time Left: $timeLeft'),
+                                        ],
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.share),
+                                        onPressed: () {
+                                          Share.share(
+                                              'Check out this post: ${details['title']}');
+                                        },
+                                      ),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                PostDetailsScreen(post: post),
+                                          ),
+                                        );
+                                      },
                                     );
-                                  },
+                                  }
                                 ),
                               ),
                             ],
@@ -234,6 +282,8 @@ class _ListScreenState extends State<ListScreen> {
               )
             ],
           );
-        }));
+        },
+      ),
+    );
   }
 }

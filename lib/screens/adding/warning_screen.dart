@@ -91,9 +91,9 @@ class _WarningScreenState extends State<WarningScreen> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // await removeAllLocationPrefs(); // Remove all location prefs
-    await prefs.setString('location_$key',
-        '${widget.post.location.latitude},${widget.post.location.longitude}');
+    await removeAllLocationPrefs(); // Remove all location prefs
+    // await prefs.setString('location_$key',
+    //     '${widget.post.location.latitude},${widget.post.location.longitude}');
   }
 
   Future<void> removeAllLocationPrefs() async {
