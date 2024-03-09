@@ -262,7 +262,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                               : Container() // No need for the circular indicator here
                           : Container(),
                       Positioned(
-                        bottom: 150,
+                        bottom: 80,
                         left: 0,
                         right: 0,
                         child: Container(
@@ -306,7 +306,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                   builder: (BuildContext context, BoxConstraints constraints) {
                     return ConstrainedBox(
                       constraints: const BoxConstraints(
-                        minHeight: 200,
+                        minHeight: 1500,
                         maxHeight: double.infinity,
                       ),
                       child: fq.QuillEditor.basic(
@@ -314,6 +314,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                           controller: _controller,
                           readOnly: true,
                           showCursor: false,
+                          scrollable: true,
                           autoFocus: false,
                           embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                         ),
