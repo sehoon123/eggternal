@@ -77,6 +77,9 @@ dependencies:
   flutter_google_maps_webservices: ^1.1.1
   flutter_quill: ^9.3.1
   flutter_quill_extensions: ^9.3.1
+  location: ^5.0.3
+  workmanager: ^0.5.2
+  flutter_background_geolocation: ^4.14.0
 
 dev_dependencies:
   flutter_test:

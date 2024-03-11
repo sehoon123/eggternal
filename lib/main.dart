@@ -3,6 +3,7 @@ import 'package:eggciting/screens/opening/ar_test.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
+import 'package:eggciting/services/notification_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,12 +18,37 @@ import 'package:eggciting/screens/signin/nickname_screen.dart';
 import 'package:eggciting/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    LocationProvider locationProvider = LocationProvider();
+    locationProvider.startTrackingLocation();
 
+    NotificationService notificationService = NotificationService();
+    await notificationService
+        .monitorLocationAndTriggerNotification(locationProvider.userLocation);
+
+    return Future.value(true);
+  });
+}
+
+void main() async {
   await dotenv.load();
+
+  callbackDispatcher();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+  Workmanager().registerOneOffTask(
+    "1",
+    "simpleTask",
+    initialDelay: const Duration(minutes: 1),
+  );
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -68,9 +94,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final NotificationService _notificationService = NotificationService();
+
   @override
   void initState() {
     super.initState();
+    _notificationService.initNotification();
+    // _notificationService.monitorLocationAndTriggerNotification();
     Provider.of<LocationProvider>(context, listen: false)
         .startTrackingLocation();
   }
@@ -100,7 +130,7 @@ class _MyAppState extends State<MyApp> {
         '/postSuccess': (context) => const PostSuccessScreen(
               imageAssetPaths: ['assets/images/logo.png'],
             ),
-        '/payment': (context) => PaymentScreen(),
+        '/payment': (context) => const PaymentScreen(),
       },
     );
   }
