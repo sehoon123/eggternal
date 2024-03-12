@@ -17,7 +17,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   LatLng? _selectedPosition;
-  late LocationProvider _locationProvider;
+  // late LocationProvider _locationProvider;
   final TextEditingController _searchController = TextEditingController();
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);

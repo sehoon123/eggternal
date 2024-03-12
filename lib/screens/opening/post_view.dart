@@ -300,6 +300,14 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                     ],
                   ),
                 ),
+                actions: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.done_outlined),
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    },
+                  ),
+                ],
               ),
               SliverToBoxAdapter(
                 child: LayoutBuilder(

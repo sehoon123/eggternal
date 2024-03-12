@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserNickname();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
+    // Provider.of<LocationProvider>(context, listen: false)
+    //     .startTrackingLocation();
   }
 
   void _onItemTapped(int index) {
@@ -76,15 +76,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          const MapScreen(),
-          const ListScreen(),
+        children: const [
+          MapScreen(),
+          ListScreen(),
           // const NewAddingPage(),
           // const AddPageScreen(),
-          const MapSelectionScreen(),
+          MapSelectionScreen(),
           // AddScreen(firestore: widget.firestore),
           PaymentScreen(),
-          const SettingsScreen(),
+          SettingsScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

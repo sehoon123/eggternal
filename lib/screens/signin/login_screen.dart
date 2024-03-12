@@ -27,8 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
+    // Provider.of<LocationProvider>(context, listen: false)
+    //     .startTrackingLocation();
   }
 
   Future<void> _storeUserInfo(User user) async {
@@ -149,10 +149,11 @@ class _LoginPageState extends State<LoginPage> {
     bool agreement = userData['agreement'] ?? false;
 
     // Request permissions using the new Permission.request method
-    await Permission.camera.request();
-    await Permission.microphone.request();
-    await Permission.location.request();
-    await Permission.photos.request();
+    // await Permission.camera.request();
+    // await Permission.notification.request();
+    // await Permission.microphone.request();
+    // await Permission.location.request();
+    // await Permission.photos.request();
 
     debugPrint('Permissions granted');
 

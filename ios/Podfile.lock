@@ -22,8 +22,6 @@ PODS:
     - Firebase/RemoteConfig (< 11.0, >= 8.0)
     - GoogleDataTransport (~> 9.2)
     - nanopb (< 2.30910.0, >= 2.30908.0)
-  - background_fetch (1.2.4):
-    - Flutter
   - BlueCryptor (1.0.32)
   - BlueECC (1.2.5)
   - BlueRSA (1.0.200)
@@ -37,9 +35,6 @@ PODS:
     - firebase_core
     - Flutter
     - nanopb (< 2.30910.0, >= 2.30908.0)
-  - CocoaLumberjack (3.7.4):
-    - CocoaLumberjack/Core (= 3.7.4)
-  - CocoaLumberjack/Core (3.7.4)
   - device_info_plus (0.0.1):
     - Flutter
   - Firebase/Auth (10.20.0):
@@ -127,9 +122,6 @@ PODS:
     - FirebaseCoreExtension (~> 10.0)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - Flutter (1.0.0)
-  - flutter_background_geolocation (4.14.0):
-    - CocoaLumberjack (~> 3.7.2)
-    - Flutter
   - flutter_image_compress_common (1.0.0):
     - Flutter
     - Mantle
@@ -293,7 +285,6 @@ PODS:
 
 DEPENDENCIES:
   - ar_flutter_plugin_flutterflow (from `.symlinks/plugins/ar_flutter_plugin_flutterflow/ios`)
-  - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
@@ -301,7 +292,6 @@ DEPENDENCIES:
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `10.20.0`)
   - Flutter (from `Flutter`)
-  - flutter_background_geolocation (from `.symlinks/plugins/flutter_background_geolocation/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
@@ -340,7 +330,6 @@ SPEC REPOS:
     - BSGridCollectionViewLayout
     - BSImagePicker
     - BSImageView
-    - CocoaLumberjack
     - Firebase
     - FirebaseABTesting
     - FirebaseAppCheckInterop
@@ -385,8 +374,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   ar_flutter_plugin_flutterflow:
     :path: ".symlinks/plugins/ar_flutter_plugin_flutterflow/ios"
-  background_fetch:
-    :path: ".symlinks/plugins/background_fetch/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   device_info_plus:
@@ -402,8 +389,6 @@ EXTERNAL SOURCES:
     :tag: 10.20.0
   Flutter:
     :path: Flutter
-  flutter_background_geolocation:
-    :path: ".symlinks/plugins/flutter_background_geolocation/ios"
   flutter_image_compress_common:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_inappwebview:
@@ -468,7 +453,6 @@ SPEC CHECKSUMS:
   AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
   ar_flutter_plugin_flutterflow: b2d9dcf909e143f49aa3c1303032583435301c50
   ARCore: 0ae024c989d177c9f907b54e9efc28940045f8df
-  background_fetch: 11c8ee1b9fe31a5ffaf0078d4ee0cfa5bb293694
   BlueCryptor: b0aee3d9b8f367b49b30de11cda90e1735571c24
   BlueECC: 0d18e93347d3ec6d41416de21c1ffa4d4cd3c2cc
   BlueRSA: dfeef51db96bcc4edec654956c1581adbda4e6a3
@@ -476,7 +460,6 @@ SPEC CHECKSUMS:
   BSImagePicker: 07404254f2fcdaf5a2eb403c0f8c337267ce8738
   BSImageView: a149459433a2687157d034c78e059d30ac7f2544
   cloud_firestore: ecf08badc10198974885617f14819201d9a42575
-  CocoaLumberjack: 543c79c114dadc3b1aba95641d8738b06b05b646
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   Firebase: 10c8cb12fb7ad2ae0c09ffc86cd9c1ab392a0031
   firebase_auth: 29a10d4129d53aa690c10dbd838ed1a059ef0c9b
@@ -501,7 +484,6 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 2fbf73618288b7a36b2014b957745dcdd781389e
   FirebaseStorage: 8505bae8ac6662474b5b50e07759fb2765c15746
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_background_geolocation: 574aa1e1f4c24948d49f6a2c8371b27f8d1f5bbe
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
   flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
