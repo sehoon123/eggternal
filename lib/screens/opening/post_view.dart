@@ -249,6 +249,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
             controller: _scrollController,
             slivers: [
               SliverAppBar(
+                pinned: true,
                 expandedHeight: _expandedHeight,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(
@@ -301,11 +302,17 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                   ),
                 ),
                 actions: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.done_outlined),
+                  TextButton(
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/home');
                     },
+                    child: const Text(
+                      'Done',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ],
               ),

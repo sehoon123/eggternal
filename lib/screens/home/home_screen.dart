@@ -54,6 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
     String? userId = FirebaseAuth.instance.currentUser!.uid;
     String? nickname = prefs.getString('nickname_$userId');
 
+    debugPrint('userId: $userId');
+    await prefs.setString('userId', userId);
+    debugPrint('nickname: $nickname');
+
     if (nickname == null) {
       // If the nickname is not in shared_preferences, fetch it from Firestore
       final doc = await FirebaseFirestore.instance

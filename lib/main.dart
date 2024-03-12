@@ -19,6 +19,7 @@ import 'package:eggciting/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
@@ -48,10 +49,10 @@ Future<void> requestPermissions() async {
     await openAppSettings();
   }
 
-    await Permission.camera.request();
-    await Permission.notification.request();
-    await Permission.microphone.request();
-    await Permission.photos.request();
+  await Permission.camera.request();
+  await Permission.notification.request();
+  await Permission.microphone.request();
+  await Permission.photos.request();
 }
 
 void main() async {

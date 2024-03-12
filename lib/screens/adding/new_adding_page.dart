@@ -42,6 +42,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
 
   Future<String> _getUserIdFromSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    debugPrint('userId from newadding: ${prefs.getString('userId')}');
     return prefs.getString('userId') ?? '';
   }
 
