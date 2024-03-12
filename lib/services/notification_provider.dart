@@ -98,7 +98,7 @@ class NotificationService {
       );
     }
     Timer.periodic(
-        const Duration(seconds: 10), (Timer t) => showNotification());
+        const Duration(seconds: 30), (Timer t) => showNotification());
   }
 
   bool isNearTargetLocation(

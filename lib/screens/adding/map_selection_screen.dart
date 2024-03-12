@@ -26,13 +26,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    _locationProvider.startTrackingLocation();
+    // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
+    // _locationProvider.startTrackingLocation();
   }
 
   @override
   void dispose() {
-    _locationProvider.stopTrackingLocation();
+    // _locationProvider.stopTrackingLocation();
     super.dispose();
   }
 
@@ -71,7 +71,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userLocation = _locationProvider.userLocation;
+    // final userLocation = _locationProvider.userLocation;
+    final userLocation = Provider.of<LocationProvider>(context).userLocation;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location'),

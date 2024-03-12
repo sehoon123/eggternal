@@ -23,6 +23,7 @@ import 'firebase_options.dart';
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    debugPrint("inside callbackDispatcher()");
     LocationProvider locationProvider = LocationProvider();
     locationProvider.startTrackingLocation();
 
