@@ -24,22 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
-// const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
-
-// @pragma('vm:entry-point')
-// void callbackDispatcher() {
-//   Workmanager().executeTask((task, inputData) async {
-//     switch (task) {
-//       case simpleTaskKey:
-//         debugPrint("inside callbackDispatcher()");
-
-//         NotificationService notificationService = NotificationService();
-//         await notificationService.monitorLocationAndTriggerNotification();
-//     }
-//     return Future.value(true);
-//   });
-// }
-
 // request permissions
 Future<void> requestPermissions() async {
   if (await Permission.location.isDenied) {
@@ -62,17 +46,6 @@ void main() async {
   await dotenv.load();
 
   await requestPermissions();
-
-  // WidgetsFlutterBinding.ensureInitialized();
-  // Workmanager().initialize(
-  //   callbackDispatcher,
-  //   isInDebugMode: true,
-  // );
-  // Workmanager().registerOneOffTask(
-  //   simpleTaskKey,
-  //   simpleTaskKey,
-  //   initialDelay: const Duration(minutes: 1),
-  // );
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
