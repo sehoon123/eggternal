@@ -34,7 +34,7 @@ class PaymentScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 var notificationService = NotificationService();
-                notificationService.monitorLocationAndTriggerNotification(userLocation);
+                notificationService.monitorLocationAndTriggerNotification();
               },
               child: const Text('Go to YouTube'),
             ),

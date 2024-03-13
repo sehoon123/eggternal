@@ -59,16 +59,15 @@ class NotificationService {
             (NotificationResponse notificationResponse) async {});
   }
 
-  Future<void> monitorLocationAndTriggerNotification(
-      LatLng? userLocation) async {
+  Future<void> monitorLocationAndTriggerNotification() async {
     // Request location permissions
+
+    Location location = Location();
     await location.requestPermission();
 
-    LatLng? currentLocation = userLocation;
+    debugPrint('Current Location in monitor : $location');
 
-    debugPrint('Current Location in monitor : $currentLocation');
-
-    if (userLocation != null) {
+    if (location != null) {
       getStoredLocations().then(
         (List<TimecapsuleLocation> storedLocations) {
           for (var storedLocation in storedLocations) {
@@ -77,7 +76,7 @@ class NotificationService {
             double targetLongitude = double.parse(coordinates[1]);
 
             if (isNearTargetLocation(
-                  currentLocation,
+                  location as LatLng?,
                   targetLatitude,
                   targetLongitude,
                 ) &&
@@ -104,17 +103,17 @@ class NotificationService {
   bool isNearTargetLocation(
       LatLng? currentLocation, double targetLatitude, double targetLongitude) {
     // Define the threshold for "near" (e.g., 1 kilometer)
-    const double nearThreshold = 1.0; // You can adjust this value as needed
+    const double nearThreshold = 300; // You can adjust this value as needed
 
     // Calculate the distance using GeoFirePoint.distanceBetween
     double distance = GeoFirePoint.distanceBetween(
       to: Coordinates(targetLatitude, targetLongitude),
       from: Coordinates(
-          currentLocation?.latitude ?? 0.0, currentLocation?.longitude?? 0.0),
+          currentLocation?.latitude ?? 0.0, currentLocation?.longitude ?? 0.0),
     );
 
     // Check if the distance is less than or equal to the threshold
-    return distance <= nearThreshold;
+    return distance * 1000 <= nearThreshold;
   }
 
   Future<void> showNotification() async {

@@ -23,16 +23,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
+const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
+
+@pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    debugPrint("inside callbackDispatcher()");
-    LocationProvider locationProvider = LocationProvider();
-    locationProvider.startTrackingLocation();
+    switch (task) {
+      case simpleTaskKey:
+        debugPrint("inside callbackDispatcher()");
 
-    NotificationService notificationService = NotificationService();
-    await notificationService
-        .monitorLocationAndTriggerNotification(locationProvider.userLocation);
-
+        NotificationService notificationService = NotificationService();
+        await notificationService.monitorLocationAndTriggerNotification();
+    }
     return Future.value(true);
   });
 }
@@ -60,16 +62,14 @@ void main() async {
 
   await requestPermissions();
 
-  callbackDispatcher();
-
   WidgetsFlutterBinding.ensureInitialized();
   Workmanager().initialize(
     callbackDispatcher,
     isInDebugMode: true,
   );
   Workmanager().registerOneOffTask(
-    "1",
-    "simpleTask",
+    simpleTaskKey,
+    simpleTaskKey,
     initialDelay: const Duration(minutes: 1),
   );
 
