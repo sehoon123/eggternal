@@ -8,6 +8,7 @@ import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:eggciting/screens/signin/agreement_screen.dart';
 import 'package:eggciting/screens/home/home_screen.dart';
@@ -23,21 +24,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
-const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
+// const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
 
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    switch (task) {
-      case simpleTaskKey:
-        debugPrint("inside callbackDispatcher()");
+// @pragma('vm:entry-point')
+// void callbackDispatcher() {
+//   Workmanager().executeTask((task, inputData) async {
+//     switch (task) {
+//       case simpleTaskKey:
+//         debugPrint("inside callbackDispatcher()");
 
-        NotificationService notificationService = NotificationService();
-        await notificationService.monitorLocationAndTriggerNotification();
-    }
-    return Future.value(true);
-  });
-}
+//         NotificationService notificationService = NotificationService();
+//         await notificationService.monitorLocationAndTriggerNotification();
+//     }
+//     return Future.value(true);
+//   });
+// }
 
 // request permissions
 Future<void> requestPermissions() async {
@@ -62,16 +63,16 @@ void main() async {
 
   await requestPermissions();
 
-  WidgetsFlutterBinding.ensureInitialized();
-  Workmanager().initialize(
-    callbackDispatcher,
-    isInDebugMode: true,
-  );
-  Workmanager().registerOneOffTask(
-    simpleTaskKey,
-    simpleTaskKey,
-    initialDelay: const Duration(minutes: 1),
-  );
+  // WidgetsFlutterBinding.ensureInitialized();
+  // Workmanager().initialize(
+  //   callbackDispatcher,
+  //   isInDebugMode: true,
+  // );
+  // Workmanager().registerOneOffTask(
+  //   simpleTaskKey,
+  //   simpleTaskKey,
+  //   initialDelay: const Duration(minutes: 1),
+  // );
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
