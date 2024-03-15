@@ -1,5 +1,5 @@
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/adding/new_adding_page.dart';
-import 'package:eggciting/services/location_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -72,7 +72,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     // final userLocation = _locationProvider.userLocation;
-    final userLocation = Provider.of<LocationProvider>(context).userLocation;
+    final userLocation = GlobalLocationData().currentLocation;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location'),
@@ -166,15 +166,15 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if ( _selectedPosition != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NewAddingPage(
-                selectedLocation: _selectedPosition!,
+          if (_selectedPosition != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewAddingPage(
+                  selectedLocation: _selectedPosition!,
+                ),
               ),
-            ),
-          );
+            );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
-import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +33,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    final userLocation =
-        Provider.of<LocationProvider>(context, listen: false).userLocation;
+    final userLocation = GlobalLocationData().currentLocation;
     if (userLocation != null) {
       _mapController!.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: userLocation, zoom: 16)));
@@ -83,9 +82,7 @@ class _MapScreenState extends State<MapScreen> {
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
-                final userLocation =
-                    Provider.of<LocationProvider>(context, listen: false)
-                        .userLocation;
+                final userLocation = GlobalLocationData().currentLocation;
                 return GoogleMap(
                   myLocationButtonEnabled: true,
                   myLocationEnabled: true,

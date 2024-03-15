@@ -1,4 +1,3 @@
-import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/notification_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +9,6 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userLocation = Provider.of<LocationProvider>(context).userLocation;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment'),

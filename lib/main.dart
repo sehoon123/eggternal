@@ -1,12 +1,12 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
-import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -72,10 +72,6 @@ void main() async {
           create: (context) =>
               PostsProvider(), // Create instance of PostsProvider
         ),
-        ChangeNotifierProvider(
-          create: (context) =>
-              LocationProvider(), // Create instance of LocationProvider
-        ),
       ],
       child: MyApp(firestore: firestore),
     ),
@@ -100,13 +96,18 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // _notificationService.monitorLocationAndTriggerNotification();
-    Provider.of<LocationProvider>(context, listen: false)
-        .startTrackingLocation();
 
     subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) {
         debugPrint('Flutter Received: $event');
+        final parts = event.toString().split(',');
+        if (parts.length == 2) {
+          final lat = double.tryParse(parts[0]);
+          final lng = double.tryParse(parts[1]);
+          if (lat != null && lng != null) {
+            GlobalLocationData().currentLocation = LatLng(lat, lng);
+          }
+        }
       },
       onError: (Object obj, StackTrace stackTrace) {
         debugPrint('Error: $obj');

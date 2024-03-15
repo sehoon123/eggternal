@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:eggciting/services/location_provider.dart';
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -69,8 +69,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   double _calculateDistance(GeoFirePoint postLocation) {
-    final userLocation =
-        Provider.of<LocationProvider>(context, listen: false).userLocation;
+    final userLocation = GlobalLocationData().currentLocation;
     if (userLocation != null) {
       return postLocation.distance(
         lat: userLocation.latitude,
@@ -214,10 +213,8 @@ class _ListScreenState extends State<ListScreen> {
                             double.parse(details!['location'].split(',')[0]),
                             double.parse(details['location'].split(',')[1]),
                           );
-                          final userLocation = Provider.of<LocationProvider>(
-                                  context,
-                                  listen: false)
-                              .userLocation;
+                          final userLocation =
+                              GlobalLocationData().currentLocation;
                           final distance = userLocation != null
                               ? _calculateDistance(postLocation)
                               : -1;

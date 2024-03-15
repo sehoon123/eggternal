@@ -8,7 +8,6 @@ import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:eggciting/screens/home/settings_screen.dart';
-import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
