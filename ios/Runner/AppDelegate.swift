@@ -13,7 +13,7 @@ import flutter_local_notifications
     manager.desiredAccuracy = kCLLocationAccuracyBest
     manager.delegate = self
     manager.requestWhenInUseAuthorization()
-    manager.allowBackgroundLocationUpdates = true
+    manager.allowsBackgroundLocationUpdates = true
     manager.pausesLocationUpdatesAutomatically = false
     return manager
   }()
