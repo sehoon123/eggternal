@@ -18,7 +18,7 @@ import flutter_local_notifications
     return manager
   }()
 
-  private let networkEventchanner = "com.dts.eggciting/network"
+  private let networkEventchanner = "com.dts.eggciting/location"
 
   override func application(
     _ application: UIApplication,
