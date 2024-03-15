@@ -1,14 +1,16 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggciting/screens/opening/ar_test.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
 import 'package:eggciting/services/location_provider.dart';
-import 'package:eggciting/services/notification_provider.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:eggciting/screens/signin/agreement_screen.dart';
 import 'package:eggciting/screens/home/home_screen.dart';
@@ -20,8 +22,6 @@ import 'package:eggciting/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 
 // request permissions
@@ -91,15 +91,40 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final NotificationService _notificationService = NotificationService();
+  static const locationChannel = MethodChannel('locationPlatform');
+
+  final _eventChannel = const EventChannel('com.dts.eggciting/location');
+
+  StreamSubscription? subscription;
 
   @override
   void initState() {
     super.initState();
-    _notificationService.initNotification();
     // _notificationService.monitorLocationAndTriggerNotification();
     Provider.of<LocationProvider>(context, listen: false)
         .startTrackingLocation();
+
+    subscription = _eventChannel.receiveBroadcastStream().listen(
+      (dynamic event) {
+        debugPrint('Flutter Received: $event');
+      },
+      onError: (Object obj, StackTrace stackTrace) {
+        debugPrint('Error: $obj');
+        debugPrint('Stack: $stackTrace');
+      },
+    );
+
+    try {
+      locationChannel.invokeMethod('getLocation');
+    } on PlatformException catch (e) {
+      debugPrint('Error: ${e.message}');
+    }
+  }
+
+  @override
+  void dispose() {
+    subscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -121,7 +146,6 @@ class _MyAppState extends State<MyApp> {
         '/home': (context) => HomeScreen(firestore: widget.firestore),
         '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
         '/nickname': (context) => NicknameScreen(firestore: widget.firestore),
-        // '/add': (context) => AddScreen(firestore: widget.firestore),
         '/mapSelection': (context) => const MapSelectionScreen(),
         '/list': (context) => const ListScreen(),
         '/postSuccess': (context) => const PostSuccessScreen(

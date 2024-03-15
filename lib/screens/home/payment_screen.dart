@@ -1,6 +1,7 @@
 import 'package:eggciting/services/location_provider.dart';
 import 'package:eggciting/services/notification_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,14 +30,6 @@ class PaymentScreen extends StatelessWidget {
                 }
               },
               child: const Text('Go to Google'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                var notificationService = NotificationService();
-                notificationService.monitorLocationAndTriggerNotification();
-              },
-              child: const Text('Go to YouTube'),
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
