@@ -140,7 +140,7 @@ class MainActivity: FlutterFragmentActivity(), LocationCallback {
     override fun onLocationUpdated(latitude: Double, longitude: Double) {
         runOnUiThread {
             Log.i("attachevent", "${attachEvent}",)
-            Toast.makeText(this, "Location: ${latitude}, ${longitude}", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(this, "Location: ${latitude}, ${longitude}", Toast.LENGTH_SHORT).show()
 
             attachEvent?.success("${latitude}, ${longitude}")
         }
