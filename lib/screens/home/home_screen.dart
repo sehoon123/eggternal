@@ -11,6 +11,7 @@ import 'package:eggciting/screens/home/settings_screen.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,9 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserNickname();
-    // Provider.of<LocationProvider>(context, listen: false)
-    //     .startTrackingLocation();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -77,18 +78,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: const [
-          MapScreen(),
-          ListScreen(),
-          // const NewAddingPage(),
-          // const AddPageScreen(),
-          MapSelectionScreen(),
-          // AddScreen(firestore: widget.firestore),
-          PaymentScreen(),
-          SettingsScreen(),
-        ],
+      body: SafeArea(
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: const [
+            MapScreen(),
+            ListScreen(),
+            // const NewAddingPage(),
+            // const AddPageScreen(),
+            MapSelectionScreen(),
+            // AddScreen(firestore: widget.firestore),
+            PaymentScreen(),
+            SettingsScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

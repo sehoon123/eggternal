@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -23,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadUserProfile();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   Future<void> _loadUserProfile() async {
@@ -132,7 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               radius: 140,
               backgroundColor: Colors.grey,
               backgroundImage: _profileImageUrl != null &&
-                      Uri.parse(_profileImageUrl!).host.isNotEmpty 
+                      Uri.parse(_profileImageUrl!).host.isNotEmpty
                   ? NetworkImage(_profileImageUrl!)
                   : const AssetImage('assets/images/default_profile_image.png')
                       as ImageProvider,

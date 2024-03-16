@@ -1,6 +1,7 @@
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/adding/new_adding_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
@@ -26,6 +27,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
     // _locationProvider.startTrackingLocation();
   }

@@ -4,6 +4,7 @@ import 'package:eggciting/models/post.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
@@ -24,6 +25,12 @@ class _MapScreenState extends State<MapScreen> {
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
   List<Prediction> _predictions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
   @override
   void dispose() {

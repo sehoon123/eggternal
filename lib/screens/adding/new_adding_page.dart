@@ -5,6 +5,7 @@ import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:eggciting/screens/adding/select_due_date_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_quill_extensions/embeds/image/editor/image_embed.dart';
@@ -13,6 +14,7 @@ import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart'; // Add this import
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart'; // Add this import for File
@@ -33,6 +35,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   @override
@@ -51,6 +54,7 @@ class _NewAddingPageState extends State<NewAddingPage> {
   }
 
   Future<void> _pickImage() async {
+    await Permission.photos.request();
     final ImagePicker picker = ImagePicker();
     final List<XFile> pickedImages = await picker.pickMultiImage();
     if (pickedImages.isNotEmpty) {

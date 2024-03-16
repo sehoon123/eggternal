@@ -38,10 +38,10 @@ Future<void> requestPermissions() async {
     await openAppSettings();
   }
 
-  await Permission.camera.request();
+  // await Permission.camera.request();
   await Permission.notification.request();
-  await Permission.microphone.request();
-  await Permission.photos.request();
+  // await Permission.microphone.request();
+  // await Permission.photos.request();
 }
 
 void main() async {
@@ -157,6 +157,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _locationStream();
     _initialization();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     try {
       locationChannel.invokeMethod('getLocation');
