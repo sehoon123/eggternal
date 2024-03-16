@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
+import 'package:eggciting/services/notification_service.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
@@ -57,9 +59,6 @@ void main() async {
     // debugPrint('LineSDK Prepared');
   });
 
-  // String apiKey = dotenv.env['kakaoNativeAppKey']!;
-  // debugPrint('API Key: $apiKey');
-
   KakaoSdk.init(
     nativeAppKey: dotenv.env['kakaoNativeAppKey']!,
     javaScriptAppKey: dotenv.env['kakaoJavaScriptAppKey']!,
@@ -88,15 +87,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static const locationChannel = MethodChannel('locationPlatform');
-
   final _eventChannel = const EventChannel('com.dts.eggciting/location');
+
+  final FlutterLocalNotificationsPlugin _local =
+      FlutterLocalNotificationsPlugin();
 
   StreamSubscription? subscription;
 
-  @override
-  void initState() {
-    super.initState();
-
+  void _locationStream() {
+    NotificationService notificationService = NotificationService();
     subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) {
         debugPrint('Flutter Received: $event');
@@ -106,6 +105,7 @@ class _MyAppState extends State<MyApp> {
           final lng = double.tryParse(parts[1]);
           if (lat != null && lng != null) {
             GlobalLocationData().currentLocation = LatLng(lat, lng);
+            notificationService.monitorLocationAndTriggerNotification();
           }
         }
       },
@@ -114,6 +114,49 @@ class _MyAppState extends State<MyApp> {
         debugPrint('Stack: $stackTrace');
       },
     );
+  }
+
+  // Future<void> showNotification() async {
+  //   const AndroidNotificationDetails androidNotificationDetails =
+  //       AndroidNotificationDetails(
+  //     'channel id',
+  //     'channel name',
+  //     channelDescription: 'channel description',
+  //     importance: Importance.max,
+  //     priority: Priority.high,
+  //   );
+
+  //   const NotificationDetails notificationDetails = NotificationDetails(
+  //     android: androidNotificationDetails,
+  //     iOS: DarwinNotificationDetails(badgeNumber: 1),
+  //   );
+
+  //   await _local.show(
+  //     0,
+  //     'Eggciting',
+  //     'You have a new notification!',
+  //     notificationDetails,
+  //   );
+  // }
+
+  void _initialization() async {
+    AndroidInitializationSettings android =
+        const AndroidInitializationSettings("@mipmap/ic_launcher");
+    DarwinInitializationSettings ios = const DarwinInitializationSettings(
+      requestSoundPermission: false,
+      requestBadgePermission: false,
+      requestAlertPermission: false,
+    );
+    InitializationSettings settings =
+        InitializationSettings(android: android, iOS: ios);
+    await _local.initialize(settings);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _locationStream();
+    _initialization();
 
     try {
       locationChannel.invokeMethod('getLocation');

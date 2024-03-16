@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
@@ -61,43 +62,38 @@ class NotificationService {
 
   Future<void> monitorLocationAndTriggerNotification() async {
     // Request location permissions
-
-    Location location = Location();
-    await location.requestPermission();
+    final location = GlobalLocationData().currentLocation;
 
     debugPrint('Current Location in monitor : $location');
 
-    if (location != null) {
-      getStoredLocations().then(
-        (List<TimecapsuleLocation> storedLocations) {
-          for (var storedLocation in storedLocations) {
-            List<String> coordinates = storedLocation.location.split(',');
-            double targetLatitude = double.parse(coordinates[0]);
-            double targetLongitude = double.parse(coordinates[1]);
+    getStoredLocations().then(
+      (List<TimecapsuleLocation> storedLocations) {
+        for (var storedLocation in storedLocations) {
+          List<String> coordinates = storedLocation.location.split(',');
+          double targetLatitude = double.parse(coordinates[0]);
+          double targetLongitude = double.parse(coordinates[1]);
 
-            if (isNearTargetLocation(
-                  location as LatLng?,
-                  targetLatitude,
-                  targetLongitude,
-                ) &&
-                (!notifiedLocations.containsKey(storedLocation.id) ||
-                    DateTime.now()
-                            .difference(notifiedLocations[storedLocation.id]!)
-                            .inHours >
-                        2) &&
-                DateTime.now()
-                    .isAfter(DateTime.parse(storedLocation.dueDate))) {
-              showNotification();
-              debugPrint(
-                  'date After ${DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))}');
-              notifiedLocations[storedLocation.id] = DateTime.now();
-            }
+          if (isNearTargetLocation(
+                location,
+                targetLatitude,
+                targetLongitude,
+              ) &&
+              (!notifiedLocations.containsKey(storedLocation.id) ||
+                  DateTime.now()
+                          .difference(notifiedLocations[storedLocation.id]!)
+                          .inHours >
+                      2) &&
+              DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))) {
+            showNotification();
+            // debugPrint(
+            //     'date After ${DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))}');
+            notifiedLocations[storedLocation.id] = DateTime.now();
           }
-        },
-      );
-    }
-    Timer.periodic(
-        const Duration(seconds: 30), (Timer t) => showNotification());
+        }
+      },
+    );
+    // Timer.periodic(
+    //     const Duration(seconds: 10), (Timer t) => showNotification());
   }
 
   bool isNearTargetLocation(
