@@ -68,6 +68,7 @@ class NotificationService {
 
     getStoredLocations().then(
       (List<TimecapsuleLocation> storedLocations) {
+        List<TimecapsuleLocation> nearbyLocations = [];
         for (var storedLocation in storedLocations) {
           List<String> coordinates = storedLocation.location.split(',');
           double targetLatitude = double.parse(coordinates[0]);
@@ -84,16 +85,18 @@ class NotificationService {
                           .inHours >
                       2) &&
               DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))) {
-            showNotification();
+            nearbyLocations.add(storedLocation);
             // debugPrint(
             //     'date After ${DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))}');
             notifiedLocations[storedLocation.id] = DateTime.now();
           }
         }
+        if (nearbyLocations.isNotEmpty) {
+          debugPrint('Nearby Locations: $nearbyLocations');
+          showNotification();
+        }
       },
     );
-    // Timer.periodic(
-    //     const Duration(seconds: 10), (Timer t) => showNotification());
   }
 
   bool isNearTargetLocation(

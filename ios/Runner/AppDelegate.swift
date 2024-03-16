@@ -39,38 +39,8 @@ import UserNotifications
 
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let locationChannel = FlutterMethodChannel(name: "locationPlatform", binaryMessenger: controller.binaryMessenger)
-    let sharedPrefsChannel = FlutterMethodChannel(name: CHANNEL_SHARED_PREFS, binaryMessenger: controller.binaryMessenger)
 
     FlutterEventChannel(name: networkEventchanner, binaryMessenger: controller.binaryMessenger).setStreamHandler(self)
-
-    sharedPrefsChannel.setMethodCallHandler({
-      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-      if call.method == "setSharedPrefs" {
-        guard let args = call.arguments as? [String: Any],
-              let key = args["key"] as? String,
-              let value = args["value"] as? String else {
-          result(FlutterError(code: "BAD_ARGS", message: "Invalid arguments", details: nil))
-          return
-        }
-        UserDefaults.standard.set(value, forKey: key)
-        print("SharedPrefs: \(key) = \(value)")
-
-        let content = UNMutableNotificationContent()
-        content.title = "SharedPrefs"
-        content.body = "\(key) = \(value)"
-        content.sound = UNNotificationSound.default
-
-        let request = UNNotificationRequest(identifier: "sharedPrefs", content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-          if let error = error {
-            print("Error: \(error)")
-          }
-        }
-        result(true)
-      } else {
-        result(FlutterMethodNotImplemented)
-      }
-    })
 
 
     locationChannel.setMethodCallHandler({
