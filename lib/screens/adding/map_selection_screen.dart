@@ -86,7 +86,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     _controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 16),
+            target: LatLng(position.latitude, position.longitude), zoom: 20),
       ),
     );
   }
@@ -95,12 +95,12 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   Widget build(BuildContext context) {
     // final userLocation = _locationProvider.userLocation;
     final userLocation = GlobalLocationData().currentLocation;
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Select Location'),
-        ),
-        body: Stack(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Location'),
+      ),
+      body: SafeArea(
+        child: Stack(
           children: [
             GoogleMap(
               myLocationEnabled: true,

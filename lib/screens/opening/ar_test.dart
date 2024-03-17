@@ -56,24 +56,24 @@ class _ARViewPageState extends State<ARViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('AR Test'),
-        ),
-        body: Stack(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('AR Test'),
+      ),
+      body: SafeArea(
+        child: Stack(
           children: [
             ARView(
               onARViewCreated: onARViewCreated,
             ),
           ],
         ),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: onLocalObjectAtOriginButtonPressed,
-        //   tooltip: 'Add Local Object',
-        //   child: const Icon(Icons.add),
-        // ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: onLocalObjectAtOriginButtonPressed,
+      //   tooltip: 'Add Local Object',
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 

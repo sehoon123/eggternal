@@ -49,21 +49,21 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     // Check if the post is ready to open based on time
     bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Post Details'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                // Implement the logic for sharing the post
-                Share.share('Check out this post: ${widget.post.title}');
-              },
-              icon: const Icon(Icons.share),
-            ),
-          ],
-        ),
-        body: Padding(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Post Details'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // Implement the logic for sharing the post
+              Share.share('Check out this post: ${widget.post.title}');
+            },
+            icon: const Icon(Icons.share),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

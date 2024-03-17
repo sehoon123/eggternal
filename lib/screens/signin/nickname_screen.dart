@@ -55,12 +55,12 @@ class _NicknameScreenState extends State<NicknameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Set Nickname'),
-        ),
-        body: Padding(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Set Nickname'),
+      ),
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,

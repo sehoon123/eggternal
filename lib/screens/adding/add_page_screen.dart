@@ -14,12 +14,12 @@ class _AddPageScreenState extends State<AddPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Add Page'),
-        ),
-        body: Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Page'),
+      ),
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -31,12 +31,12 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Select Due Date'),
-        ),
-        body: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Due Date'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

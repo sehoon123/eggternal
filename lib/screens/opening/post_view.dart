@@ -125,111 +125,109 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
-    return SafeArea(
-      child: Dismissible(
-        key: UniqueKey(), // Each Dismissible needs a unique key
-        direction: DismissDirection.up, // Allow swiping up
-        onDismissed: (direction) {
-          // This callback is called when the card is dismissed
-          setState(() {
-            _showPhotoCard = false; // Hide the photo card
-            _photoCardBackgroundOpacity =
-                0.0; // Set background opacity to transparent
-          });
-        },
-        child: Stack(
-          children: [
-            // Blurred background that fills the entire screen
-            if (widget.post.imageUrls.isNotEmpty) ...[
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Image.network(
-                    widget.post.imageUrls.first,
-                    fit: BoxFit.cover,
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
+    return Dismissible(
+      key: UniqueKey(), // Each Dismissible needs a unique key
+      direction: DismissDirection.up, // Allow swiping up
+      onDismissed: (direction) {
+        // This callback is called when the card is dismissed
+        setState(() {
+          _showPhotoCard = false; // Hide the photo card
+          _photoCardBackgroundOpacity =
+              0.0; // Set background opacity to transparent
+        });
+      },
+      child: Stack(
+        children: [
+          // Blurred background that fills the entire screen
+          if (widget.post.imageUrls.isNotEmpty) ...[
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Image.network(
+                  widget.post.imageUrls.first,
+                  fit: BoxFit.cover,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 150,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Opacity(
+                  opacity: _titleOpacity,
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.post.title, // Display the title of the post
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start, // Center the title text
+                      ),
+                      const SizedBox(height: 10), // Add space (10 pixels)
+                      Text(
+                        _formattedLocation ?? 'Location not found',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 150,
-                left: 0,
-                right: 0,
+            ),
+          ] else ...[
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                 child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Opacity(
-                    opacity: _titleOpacity,
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.post.title, // Display the title of the post
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start, // Center the title text
+                  color: Colors.black45,
+                ), // Semi-transparent background for the title
+              ),
+            ),
+            Positioned(
+              bottom: 150,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Opacity(
+                  opacity: _titleOpacity,
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.post.title, // Display the title of the post
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 10), // Add space (10 pixels)
-                        Text(
-                          _formattedLocation ?? 'Location not found',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start,
+                        textAlign: TextAlign.start, // Center the title text
+                      ),
+                      const SizedBox(height: 10), // Add space (10 pixels)
+                      Text(
+                        _formattedLocation ?? 'Location not found',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ] else ...[
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(
-                    color: Colors.black45,
-                  ), // Semi-transparent background for the title
-                ),
-              ),
-              Positioned(
-                bottom: 150,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Opacity(
-                    opacity: _titleOpacity,
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.post.title, // Display the title of the post
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start, // Center the title text
-                        ),
-                        const SizedBox(height: 10), // Add space (10 pixels)
-                        Text(
-                          _formattedLocation ?? 'Location not found',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.start,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ]
-          ],
-        ),
+            ),
+          ]
+        ],
       ),
     );
   }
@@ -244,106 +242,109 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
       );
     }
     return Scaffold(
-      body: Stack(
-        // Use a Stack for layering
-        children: [
-          CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                expandedHeight: _expandedHeight,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    children: [
-                      widget.post.imageUrls.isNotEmpty
-                          ? _imageLoaded // Check the flag
-                              ? Image.network(
-                                  widget.post.imageUrls.first,
-                                  fit: BoxFit.fitWidth,
-                                )
-                              : Container() // No need for the circular indicator here
-                          : Container(),
-                      Positioned(
-                        bottom: 80,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Opacity(
-                            opacity: _titleOpacity,
-                            child: Column(
-                              children: [
-                                Text(
-                                  widget.post
-                                      .title, // Display the title of the post
-                                  style: const TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          // Use a Stack for layering
+          children: [
+            CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  expandedHeight: _expandedHeight,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      children: [
+                        widget.post.imageUrls.isNotEmpty
+                            ? _imageLoaded // Check the flag
+                                ? Image.network(
+                                    widget.post.imageUrls.first,
+                                    fit: BoxFit.fitWidth,
+                                  )
+                                : Container() // No need for the circular indicator here
+                            : Container(),
+                        Positioned(
+                          bottom: 80,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Opacity(
+                              opacity: _titleOpacity,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    widget.post
+                                        .title, // Display the title of the post
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign
+                                        .start, // Center the title text
                                   ),
-                                  textAlign:
-                                      TextAlign.start, // Center the title text
-                                ),
-                                const SizedBox(
-                                    height: 10), // Add space (10 pixels)
-                                Text(
-                                  _formattedLocation ?? 'Location not found',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
+                                  const SizedBox(
+                                      height: 10), // Add space (10 pixels)
+                                  Text(
+                                    _formattedLocation ?? 'Location not found',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.start,
                                   ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
-                    child: const Text(
-                      'Done',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                      ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              SliverToBoxAdapter(
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height,
-                        maxHeight: double.infinity,
-                      ),
-                      child: fq.QuillEditor.basic(
-                        configurations: fq.QuillEditorConfigurations(
-                          controller: _controller,
-                          readOnly: true,
-                          showCursor: false,
-                          scrollable: true,
-                          autoFocus: false,
-                          embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          if (_showPhotoCard) _buildPhotoCard(),
-        ],
+                SliverToBoxAdapter(
+                  child: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height,
+                          maxHeight: double.infinity,
+                        ),
+                        child: fq.QuillEditor.basic(
+                          configurations: fq.QuillEditorConfigurations(
+                            controller: _controller,
+                            readOnly: true,
+                            showCursor: false,
+                            scrollable: true,
+                            autoFocus: false,
+                            embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            if (_showPhotoCard) _buildPhotoCard(),
+          ],
+        ),
       ),
     );
   }

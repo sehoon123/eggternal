@@ -9,12 +9,12 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Payment'),
-        ),
-        body: Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Payment'),
+      ),
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -24,12 +24,12 @@ class AgreementScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('이용 약관 동의'),
-        ),
-        body: Padding(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('이용 약관 동의'),
+      ),
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[

@@ -97,12 +97,12 @@ class _NewAddingPageState extends State<NewAddingPage> {
   Widget build(BuildContext context) {
     double? lastPointerY;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('New Adding Page'),
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('New Adding Page'),
+      ),
+      body: SafeArea(
+        child: Column(
           children: [
             QuillToolbar.simple(
               configurations: QuillSimpleToolbarConfigurations(
@@ -161,64 +161,63 @@ class _NewAddingPageState extends State<NewAddingPage> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            // Collect the rich text content and convert it to a JSON string
-            final String contentDelta =
-                jsonEncode(_controller.document.toDelta().toList());
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Collect the rich text content and convert it to a JSON string
+          final String contentDelta =
+              jsonEncode(_controller.document.toDelta().toList());
 
-            // Collect the images
-            // Assuming you have a method to get the image paths or URLs
-            final List<File> images = _getImagePathsOrURLs();
+          // Collect the images
+          // Assuming you have a method to get the image paths or URLs
+          final List<File> images = _getImagePathsOrURLs();
 
-            final List<String> imagePaths =
-                images.map((file) => file.path).toList();
+          final List<String> imagePaths =
+              images.map((file) => file.path).toList();
 
-            // Extract the first line of text from the contentDelta
-            final List<dynamic> contentDeltaList = jsonDecode(contentDelta);
-            String title =
-                'No Title'; // Default title in case the content is empty
-            for (var item in contentDeltaList) {
-              if (item is Map && item.containsKey('insert')) {
-                String insertText = item['insert'];
-                if (insertText.contains('\n')) {
-                  title =
-                      insertText.split('\n')[0]; // Get the first line of text
-                  break;
-                } else {
-                  title =
-                      insertText; // If there's no line break, use the entire text as the title
-                  break;
-                }
+          // Extract the first line of text from the contentDelta
+          final List<dynamic> contentDeltaList = jsonDecode(contentDelta);
+          String title =
+              'No Title'; // Default title in case the content is empty
+          for (var item in contentDeltaList) {
+            if (item is Map && item.containsKey('insert')) {
+              String insertText = item['insert'];
+              if (insertText.contains('\n')) {
+                title = insertText.split('\n')[0]; // Get the first line of text
+                break;
+              } else {
+                title =
+                    insertText; // If there's no line break, use the entire text as the title
+                break;
               }
             }
+          }
 
-            // Create a Post object with the collected data
-            final Post post = Post(
-              key: '', // You might want to generate a key for the post
-              title: title, // You might want to collect this from the user
-              contentDelta: contentDelta,
-              dueDate: DateTime.now(), // Adjust as needed
-              createdAt: DateTime.now(), // Adjust as needed
-              userId: await _getUserIdFromSharedPrefs(), // Adjust as needed
-              location: GeoFirePoint(
-                widget.selectedLocation!.latitude,
-                widget.selectedLocation!.longitude,
-              ),
-              imageUrls: imagePaths,
-              sharedUser: [], // Adjust as needed
-            );
+          // Create a Post object with the collected data
+          final Post post = Post(
+            key: '', // You might want to generate a key for the post
+            title: title, // You might want to collect this from the user
+            contentDelta: contentDelta,
+            dueDate: DateTime.now(), // Adjust as needed
+            createdAt: DateTime.now(), // Adjust as needed
+            userId: await _getUserIdFromSharedPrefs(), // Adjust as needed
+            location: GeoFirePoint(
+              widget.selectedLocation!.latitude,
+              widget.selectedLocation!.longitude,
+            ),
+            imageUrls: imagePaths,
+            sharedUser: [], // Adjust as needed
+          );
 
-            // Navigate to the MapSelectionScreen, passing the Post object along
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SelectDueDateScreen(post: post),
-              ),
-            );
-          },
-          child: const Icon(Icons.check),
-        ),
+          // Navigate to the MapSelectionScreen, passing the Post object along
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SelectDueDateScreen(post: post),
+            ),
+          );
+        },
+        child: const Icon(Icons.check),
       ),
     );
   }

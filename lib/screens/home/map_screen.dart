@@ -94,12 +94,12 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Map View'),
-        ),
-        body: Stack(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Map View'),
+      ),
+      body: SafeArea(
+        child: Stack(
           children: [
             StreamBuilder<List<Post>>(
               stream: Provider.of<PostsProvider>(context).postsStream,

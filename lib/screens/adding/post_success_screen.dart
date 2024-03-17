@@ -7,12 +7,12 @@ class PostSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Post Success'),
-        ),
-        body: Stack(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Post Success'),
+      ),
+      body: SafeArea(
+        child: Stack(
           children: [
             // Centered image
             Center(

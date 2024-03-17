@@ -165,14 +165,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      appBar: AppBar(
+        title: const Text('Login'),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        appBar: AppBar(
-          title: const Text('Login'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
-        body: Center(
+      ),
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
