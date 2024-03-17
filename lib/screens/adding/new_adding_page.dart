@@ -63,7 +63,9 @@ class _NewAddingPageState extends State<NewAddingPage> {
       for (XFile pickedImage in pickedImages) {
         final File imageFile = File(pickedImage.path); // Convert XFile to File
         // Calculate the current cursor position
-        int cursorPosition = _controller.selection.baseOffset;
+        int cursorPosition = _controller.selection.baseOffset == -1
+            ? 0
+            : _controller.selection.baseOffset;
         // Create a Delta with an insert operation for the image
         final Delta delta = Delta()
           ..retain(cursorPosition)
@@ -74,13 +76,13 @@ class _NewAddingPageState extends State<NewAddingPage> {
         // Compose the Delta to insert the image at the cursor position
         _controller.compose(
           delta,
-          _controller.selection,
+          TextSelection.collapsed(offset: cursorPosition + 3),
           ChangeSource.local,
         );
 
         _controller.updateSelection(
           TextSelection.collapsed(
-            offset: cursorPosition,
+            offset: cursorPosition + 3,
           ),
           ChangeSource.local,
         );
