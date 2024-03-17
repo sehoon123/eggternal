@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,25 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Future<void> _moveToCurrentUserLocation() async {
+    bool serviceEnabled;
+
+    // Check if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    // When we reach here, permissions are granted and we can continue accessing the position of the device.
+    Position position = await Geolocator.getCurrentPosition();
+    _mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: LatLng(position.latitude, position.longitude), zoom: 16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -92,7 +112,7 @@ class _MapScreenState extends State<MapScreen> {
                 } else if (snapshot.hasData) {
                   final userLocation = GlobalLocationData().currentLocation;
                   return GoogleMap(
-                    myLocationButtonEnabled: true,
+                    myLocationButtonEnabled: false,
                     myLocationEnabled: true,
                     onMapCreated: _onMapCreated,
                     initialCameraPosition: CameraPosition(
@@ -170,6 +190,14 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                     ),
                 ],
+              ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: FloatingActionButton(
+                onPressed: _moveToCurrentUserLocation,
+                child: const Icon(Icons.my_location),
               ),
             ),
           ],

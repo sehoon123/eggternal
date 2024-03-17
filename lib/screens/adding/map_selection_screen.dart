@@ -2,6 +2,7 @@ import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/adding/new_adding_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
@@ -71,6 +72,25 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     });
   }
 
+  Future<void> _moveToCurrentUserLocation() async {
+    bool serviceEnabled;
+
+    // Check if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    // When we reach here, permissions are granted and we can continue accessing the position of the device.
+    Position position = await Geolocator.getCurrentPosition();
+    _controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: LatLng(position.latitude, position.longitude), zoom: 16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // final userLocation = _locationProvider.userLocation;
@@ -84,6 +104,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           children: [
             GoogleMap(
               myLocationEnabled: true,
+              myLocationButtonEnabled: false,
               onMapCreated: (controller) {
                 _controller = controller;
                 if (userLocation != null) {
@@ -166,30 +187,43 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
                 ],
               ),
             ),
+            // Bottom left floating action button
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: FloatingActionButton(
+                onPressed: _moveToCurrentUserLocation,
+                child: const Icon(Icons.my_location),
+              ),
+            ),
+            // Bottom right floating action button
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: FloatingActionButton(
+                onPressed: () {
+                  if (_selectedPosition != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NewAddingPage(
+                          selectedLocation: _selectedPosition!,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select a location'),
+                      ),
+                    );
+                  }
+                },
+                child: const Icon(Icons.check),
+              ),
+            ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (_selectedPosition != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NewAddingPage(
-                    selectedLocation: _selectedPosition!,
-                  ),
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please select a location'),
-                ),
-              );
-            }
-          },
-          child: const Icon(Icons.check),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
     );
   }
