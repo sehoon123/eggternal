@@ -126,175 +126,181 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Posts'),
-      ),
-      body: SafeArea(
-        child: Consumer<PostsProvider>(
-          builder: (context, postsProvider, child) {
-            if (postsProvider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: ToggleButtons(
-                    isSelected: [
-                      postsProvider.isMyPostsSelected,
-                      !postsProvider.isMyPostsSelected
-                    ],
-                    onPressed: (index) {
-                      Provider.of<PostsProvider>(context, listen: false)
-                          .togglePostsView();
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    selectedColor: Theme.of(context).primaryColor,
-                    renderBorder: true,
-                    constraints: const BoxConstraints(
-                      minWidth: 100,
-                      minHeight: 36,
-                    ),
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('My Posts'),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Posts'),
+        ),
+        body: SafeArea(
+          child: Consumer<PostsProvider>(
+            builder: (context, postsProvider, child) {
+              if (postsProvider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: ToggleButtons(
+                      isSelected: [
+                        postsProvider.isMyPostsSelected,
+                        !postsProvider.isMyPostsSelected
+                      ],
+                      onPressed: (index) {
+                        Provider.of<PostsProvider>(context, listen: false)
+                            .togglePostsView();
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      selectedColor: Theme.of(context).primaryColor,
+                      renderBorder: true,
+                      constraints: const BoxConstraints(
+                        minWidth: 100,
+                        minHeight: 36,
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('Shared Posts'),
-                      )
-                    ],
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('My Posts'),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Shared Posts'),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: postsProvider.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Text(
-                          postsProvider.isMyPostsSelected
-                              ? '${postsProvider.postCount} posts'
-                              : '${postsProvider.sharedPostCount} shared posts',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: postsProvider.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : Text(
+                            postsProvider.isMyPostsSelected
+                                ? '${postsProvider.postCount} posts'
+                                : '${postsProvider.sharedPostCount} shared posts',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: postsProvider.posts.length,
-                    itemBuilder: (context, index) {
-                      final post = postsProvider.posts[index];
-                      final timeLeft = _calculateTimeLeft(post.dueDate);
-        
-                      return FutureBuilder<Map<String, dynamic>?>(
-                        future: _storeAndRetrievePostDetails(
-                          post.key,
-                          post.location,
-                          post.userId,
-                          post.title,
-                          post.dueDate,
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState != ConnectionState.done) {
-                            return ListTile(
-                              leading: const CircularProgressIndicator(),
-                              title: Text(post.title),
-                              subtitle: const Text('Loading post details...'),
-                            );
-                          } else if (snapshot.hasError) {
-                            return ListTile(
-                              leading: const Icon(Icons.error),
-                              title: Text(post.title),
-                              subtitle: const Text('Error loading post details'),
-                            );
-                          } else {
-                            final details = snapshot.data;
-                            final postLocation = GeoFirePoint(
-                              double.parse(details!['location'].split(',')[0]),
-                              double.parse(details['location'].split(',')[1]),
-                            );
-                            final userLocation =
-                                GlobalLocationData().currentLocation;
-                            final distance = userLocation != null
-                                ? _calculateDistance(postLocation)
-                                : -1;
-        
-                            return Column(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: timeLeft == 'Ready to Open'
-                                        ? Colors.green[100]
-                                        : Colors.white,
-                                    border: Border.all(
-                                      color: Colors.grey[400]!,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: postsProvider.posts.length,
+                      itemBuilder: (context, index) {
+                        final post = postsProvider.posts[index];
+                        final timeLeft = _calculateTimeLeft(post.dueDate);
+
+                        return FutureBuilder<Map<String, dynamic>?>(
+                          future: _storeAndRetrievePostDetails(
+                            post.key,
+                            post.location,
+                            post.userId,
+                            post.title,
+                            post.dueDate,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState !=
+                                ConnectionState.done) {
+                              return ListTile(
+                                leading: const CircularProgressIndicator(),
+                                title: Text(post.title),
+                                subtitle: const Text('Loading post details...'),
+                              );
+                            } else if (snapshot.hasError) {
+                              return ListTile(
+                                leading: const Icon(Icons.error),
+                                title: Text(post.title),
+                                subtitle:
+                                    const Text('Error loading post details'),
+                              );
+                            } else {
+                              final details = snapshot.data;
+                              final postLocation = GeoFirePoint(
+                                double.parse(
+                                    details!['location'].split(',')[0]),
+                                double.parse(details['location'].split(',')[1]),
+                              );
+                              final userLocation =
+                                  GlobalLocationData().currentLocation;
+                              final distance = userLocation != null
+                                  ? _calculateDistance(postLocation)
+                                  : -1;
+
+                              return Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: timeLeft == 'Ready to Open'
+                                          ? Colors.green[100]
+                                          : Colors.white,
+                                      border: Border.all(
+                                        color: Colors.grey[400]!,
+                                      ),
+                                    ),
+                                    child: FutureBuilder<String>(
+                                      future: _getUsername(details['username']),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.done) {
+                                          return ListTile(
+                                            leading: CircleAvatar(
+                                              child: Text(snapshot.data!
+                                                  .substring(0, 1)),
+                                            ),
+                                            title: Text(details['title']),
+                                            subtitle: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('User: ${snapshot.data}'),
+                                                Text(
+                                                    'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                                Text('Time Left: $timeLeft'),
+                                              ],
+                                            ),
+                                            trailing: IconButton(
+                                              icon: const Icon(Icons.share),
+                                              onPressed: () {
+                                                Share.share(
+                                                    'Check out this post: ${details['title']}');
+                                              },
+                                            ),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PostDetailsScreen(
+                                                          post: post),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        } else {
+                                          return ListTile(
+                                            leading:
+                                                const CircularProgressIndicator(),
+                                            title: Text(details['title']),
+                                            subtitle: const Text(
+                                                'Loading username...'),
+                                          );
+                                        }
+                                      },
                                     ),
                                   ),
-                                  child: FutureBuilder<String>(
-                                    future: _getUsername(details['username']),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.done) {
-                                        return ListTile(
-                                          leading: CircleAvatar(
-                                            child: Text(
-                                                snapshot.data!.substring(0, 1)),
-                                          ),
-                                          title: Text(details['title']),
-                                          subtitle: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text('User: ${snapshot.data}'),
-                                              Text(
-                                                  'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
-                                              Text('Time Left: $timeLeft'),
-                                            ],
-                                          ),
-                                          trailing: IconButton(
-                                            icon: const Icon(Icons.share),
-                                            onPressed: () {
-                                              Share.share(
-                                                  'Check out this post: ${details['title']}');
-                                            },
-                                          ),
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PostDetailsScreen(post: post),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      } else {
-                                        return ListTile(
-                                          leading:
-                                              const CircularProgressIndicator(),
-                                          title: Text(details['title']),
-                                          subtitle:
-                                              const Text('Loading username...'),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-                )
-              ],
-            );
-          },
+                                ],
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  )
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

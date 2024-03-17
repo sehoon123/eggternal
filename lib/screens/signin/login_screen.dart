@@ -165,74 +165,76 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      appBar: AppBar(
-        title: const Text('Login'),
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            InkWell(
-              child: Image.asset(
-                'assets/images/google_login.png',
-                width: 300,
+        appBar: AppBar(
+          title: const Text('Login'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              InkWell(
+                child: Image.asset(
+                  'assets/images/google_login.png',
+                  width: 300,
+                ),
+                onTap: () async {
+                  try {
+                    final userCredential = await signInWithGoogle();
+                    _handleSuccessfulSignIn(userCredential);
+                    // Navigator.pushReplacementNamed(context, '/agreement');
+                  } catch (e) {
+                    debugPrint('Error in signInWithGoogle: $e');
+                  }
+                },
               ),
-              onTap: () async {
-                try {
-                  final userCredential = await signInWithGoogle();
+              const SizedBox(height: 20), // Add space
+              InkWell(
+                child: Image.asset(
+                  'assets/images/apple_login.png',
+                  width: 300,
+                ),
+                onTap: () async {
+                  final userCredential = await signInWithApple();
                   _handleSuccessfulSignIn(userCredential);
-                  // Navigator.pushReplacementNamed(context, '/agreement');
-                } catch (e) {
-                  debugPrint('Error in signInWithGoogle: $e');
-                }
-              },
-            ),
-            const SizedBox(height: 20), // Add space
-            InkWell(
-              child: Image.asset(
-                'assets/images/apple_login.png',
-                width: 300,
+                },
               ),
-              onTap: () async {
-                final userCredential = await signInWithApple();
-                _handleSuccessfulSignIn(userCredential);
-              },
-            ),
-            const SizedBox(height: 20), // Add space
-            InkWell(
-              child: Image.asset(
-                'assets/images/line_login.png',
-                width: 300,
+              const SizedBox(height: 20), // Add space
+              InkWell(
+                child: Image.asset(
+                  'assets/images/line_login.png',
+                  width: 300,
+                ),
+                onTap: () async {
+                  try {
+                    final userCredential = await signInWithLine();
+                    _handleSuccessfulSignIn(userCredential);
+                  } catch (e) {
+                    debugPrint('Error in signInWithLine: $e');
+                  }
+                },
               ),
-              onTap: () async {
-                try {
-                  final userCredential = await signInWithLine();
-                  _handleSuccessfulSignIn(userCredential);
-                } catch (e) {
-                  debugPrint('Error in signInWithLine: $e');
-                }
-              },
-            ),
-            const SizedBox(height: 20), // Add space
-            InkWell(
-              child: Image.asset(
-                'assets/images/kakao_login.png',
-                width: 300,
+              const SizedBox(height: 20), // Add space
+              InkWell(
+                child: Image.asset(
+                  'assets/images/kakao_login.png',
+                  width: 300,
+                ),
+                onTap: () async {
+                  try {
+                    debugPrint('Sign in with kakao');
+                    final userCredential = await signInWithKakao();
+                    _handleSuccessfulSignIn(userCredential);
+                  } catch (e) {
+                    debugPrint('Error in signInWithKakao: $e');
+                  }
+                },
               ),
-              onTap: () async {
-                try {
-                  debugPrint('Sign in with kakao');
-                  final userCredential = await signInWithKakao();
-                  _handleSuccessfulSignIn(userCredential);
-                } catch (e) {
-                  debugPrint('Error in signInWithKakao: $e');
-                }
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -122,49 +122,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 140,
-              backgroundColor: Colors.grey,
-              backgroundImage: _profileImageUrl != null &&
-                      Uri.parse(_profileImageUrl!).host.isNotEmpty
-                  ? NetworkImage(_profileImageUrl!)
-                  : const AssetImage('assets/images/default_profile_image.png')
-                      as ImageProvider,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: const Text('Change Profile Image'),
-            ),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Profile Name'),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 16.0), // Add gap between TextField and the button
-              child: ElevatedButton(
-                onPressed: _updateProfile,
-                child: const Text('Update Profile'),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 140,
+                backgroundColor: Colors.grey,
+                backgroundImage: _profileImageUrl != null &&
+                        Uri.parse(_profileImageUrl!).host.isNotEmpty
+                    ? NetworkImage(_profileImageUrl!)
+                    : const AssetImage(
+                            'assets/images/default_profile_image.png')
+                        as ImageProvider,
               ),
-            ),
-            const Spacer(), // This will push the logout button to the bottom
-            ElevatedButton(
-                onPressed: _logout,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.white),
-                )),
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Change Profile Image'),
+              ),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Profile Name'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 16.0), // Add gap between TextField and the button
+                child: ElevatedButton(
+                  onPressed: _updateProfile,
+                  child: const Text('Update Profile'),
+                ),
+              ),
+              const Spacer(), // This will push the logout button to the bottom
+              ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ],
+          ),
         ),
       ),
     );

@@ -119,62 +119,64 @@ class _WarningScreenState extends State<WarningScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Warning'),
-      ),
-      body: Stack(
-        children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('You can\'t modify this post after posting.'),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _uploadPostFuture = _uploadPost();
-                    });
-                  },
-                  child: const Text('Post'),
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Warning'),
+        ),
+        body: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('You can\'t modify this post after posting.'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _uploadPostFuture = _uploadPost();
+                      });
+                    },
+                    child: const Text('Post'),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_uploadPostFuture != null)
-            FutureBuilder(
-              future: _uploadPostFuture,
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    color: Colors.black.withOpacity(0.6),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                } else {
-                  // Navigate to the PostSuccessScreen
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PostSuccessScreen(
-                            imageAssetPaths: [
-                              'assets/images/logo.png'
-                            ]), // Replace with actual image paths
+            if (_uploadPostFuture != null)
+              FutureBuilder(
+                future: _uploadPostFuture,
+                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      color: Colors.black.withOpacity(0.6),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
                       ),
                     );
-                  });
-                  return Container(); // Return an empty container when not uploading
-                }
-              },
-            ),
-        ],
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  } else {
+                    // Navigate to the PostSuccessScreen
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PostSuccessScreen(
+                              imageAssetPaths: [
+                                'assets/images/logo.png'
+                              ]), // Replace with actual image paths
+                        ),
+                      );
+                    });
+                    return Container(); // Return an empty container when not uploading
+                  }
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

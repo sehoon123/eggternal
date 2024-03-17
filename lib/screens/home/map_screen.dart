@@ -74,102 +74,106 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Map View'),
-      ),
-      body: Stack(
-        children: [
-          StreamBuilder<List<Post>>(
-            stream: Provider.of<PostsProvider>(context).postsStream,
-            builder: (context, snapshot) {
-              // debugPrint('snapshot: $snapshot');
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.hasData) {
-                final userLocation = GlobalLocationData().currentLocation;
-                return GoogleMap(
-                  myLocationButtonEnabled: true,
-                  myLocationEnabled: true,
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: userLocation ?? const LatLng(0, 0),
-                    zoom: 12,
-                  ),
-                  onTap: (LatLng position) {
-                    FocusScope.of(context).unfocus();
-                  },
-                  markers: snapshot.data!.map((post) {
-                    return Marker(
-                      markerId: MarkerId(post
-                          .userId), // Assuming the Post class has an 'id' field
-                      position: LatLng(
-                          post.location.latitude, post.location.longitude),
-                      infoWindow: InfoWindow(title: post.title),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostDetailsScreen(post: post),
-                          ),
-                        );
-                      },
-                    );
-                  }).toSet(),
-                );
-              } else {
-                return const Center(child: Text('No data available'));
-              }
-            },
-          ),
-          Positioned(
-            top: 10,
-            right: 15,
-            left: 15,
-            child: Column(
-              children: [
-                TextField(
-                  controller: _searchController,
-                  textInputAction: TextInputAction.search,
-                  onChanged: _searchPlace,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a place...',
-                    fillColor: Colors.white,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Map View'),
+        ),
+        body: Stack(
+          children: [
+            StreamBuilder<List<Post>>(
+              stream: Provider.of<PostsProvider>(context).postsStream,
+              builder: (context, snapshot) {
+                // debugPrint('snapshot: $snapshot');
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  final userLocation = GlobalLocationData().currentLocation;
+                  return GoogleMap(
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition: CameraPosition(
+                      target: userLocation ?? const LatLng(0, 0),
+                      zoom: 12,
                     ),
-                    suffixIcon: const Icon(Icons.search),
-                  ),
-                ),
-                if (_predictions.isNotEmpty)
-                  Container(
-                    color: Colors.white,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _predictions.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_predictions[index].description ??
-                              'No description'),
-                          onTap: () {
-                            _moveToSearchedPlace(_predictions[index].placeId!);
-                            _searchController.clear();
-                            setState(() {
-                              _predictions = [];
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-              ],
+                    onTap: (LatLng position) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    markers: snapshot.data!.map((post) {
+                      return Marker(
+                        markerId: MarkerId(post
+                            .userId), // Assuming the Post class has an 'id' field
+                        position: LatLng(
+                            post.location.latitude, post.location.longitude),
+                        infoWindow: InfoWindow(title: post.title),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PostDetailsScreen(post: post),
+                            ),
+                          );
+                        },
+                      );
+                    }).toSet(),
+                  );
+                } else {
+                  return const Center(child: Text('No data available'));
+                }
+              },
             ),
-          ),
-        ],
+            Positioned(
+              top: 10,
+              right: 15,
+              left: 15,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onChanged: _searchPlace,
+                    decoration: InputDecoration(
+                      hintText: 'Search for a place...',
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      suffixIcon: const Icon(Icons.search),
+                    ),
+                  ),
+                  if (_predictions.isNotEmpty)
+                    Container(
+                      color: Colors.white,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _predictions.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(_predictions[index].description ??
+                                'No description'),
+                            onTap: () {
+                              _moveToSearchedPlace(
+                                  _predictions[index].placeId!);
+                              _searchController.clear();
+                              setState(() {
+                                _predictions = [];
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

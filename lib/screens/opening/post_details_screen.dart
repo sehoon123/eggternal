@@ -49,121 +49,126 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     // Check if the post is ready to open based on time
     bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Post Details'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              // Implement the logic for sharing the post
-              Share.share('Check out this post: ${widget.post.title}');
-            },
-            icon: const Icon(Icons.share),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.post.title,
-              style: const TextStyle(fontSize: 30.0),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Post Details'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                // Implement the logic for sharing the post
+                Share.share('Check out this post: ${widget.post.title}');
+              },
+              icon: const Icon(Icons.share),
             ),
-            const SizedBox(height: 16.0),
-            // Display user's location if available
-            if (userLocation == null) ...[
-              const Text('Loading user location...'),
-              const LinearProgressIndicator(),
-            ] else ...[
-              // Display distance information
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                  'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
-              // Add additional information about the location as needed
+                widget.post.title,
+                style: const TextStyle(fontSize: 30.0),
+              ),
               const SizedBox(height: 16.0),
-              // Replace the image view section with a map showing the post's location
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: GoogleMap(
-                    myLocationButtonEnabled: true,
-                    myLocationEnabled: true,
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(widget.post.location.latitude,
-                          widget.post.location.longitude),
-                      zoom: 14.0,
-                    ),
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('postMarker'),
-                        position: LatLng(widget.post.location.latitude,
+              // Display user's location if available
+              if (userLocation == null) ...[
+                const Text('Loading user location...'),
+                const LinearProgressIndicator(),
+              ] else ...[
+                // Display distance information
+                Text(
+                    'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
+                // Add additional information about the location as needed
+                const SizedBox(height: 16.0),
+                // Replace the image view section with a map showing the post's location
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: GoogleMap(
+                      myLocationButtonEnabled: true,
+                      myLocationEnabled: true,
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(widget.post.location.latitude,
                             widget.post.location.longitude),
-                        infoWindow: const InfoWindow(
-                          title: 'Post Location',
-                          snippet: 'This is where the post is located.',
+                        zoom: 14.0,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: const MarkerId('postMarker'),
+                          position: LatLng(widget.post.location.latitude,
+                              widget.post.location.longitude),
+                          infoWindow: const InfoWindow(
+                            title: 'Post Location',
+                            snippet: 'This is where the post is located.',
+                          ),
+                        ),
+                      },
+                    ),
+                  ),
+                ),
+                // Check if the user is within the allowed distance
+                const SizedBox(
+                  height: 16,
+                ),
+                SizedBox(
+                  width:
+                      double.infinity, // Makes the button fit the device width
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 0), // Adjust the padding as needed
+                    child: ElevatedButton(
+                      onPressed: distance * 1000 <= thresholdDistance &&
+                              isReadyToOpen
+                          ? () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ARViewPage(post: widget.post)));
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (context) => DisplayPostScreen(
+                              //             post: widget.post)));
+                            }
+                          : null, // Disables the button if distance is greater than thresholdDistance
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.disabled)) {
+                              return Colors.grey; // Color for disabled state
+                            }
+                            return Theme.of(context)
+                                .primaryColor; // Default color
+                          },
+                        ),
+                        foregroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.disabled)) {
+                              return Colors
+                                  .black; // Ensures text color is visible on grey background
+                            }
+                            return Colors.white; // Default text color
+                          },
+                        ),
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.symmetric(
+                              vertical:
+                                  15), // Adjust padding, making the button taller
                         ),
                       ),
-                    },
-                  ),
-                ),
-              ),
-              // Check if the user is within the allowed distance
-              const SizedBox(
-                height: 16,
-              ),
-              SizedBox(
-                width: double.infinity, // Makes the button fit the device width
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 0), // Adjust the padding as needed
-                  child: ElevatedButton(
-                    onPressed: distance * 1000 <= thresholdDistance &&
-                            isReadyToOpen
-                        ? () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ARViewPage(post: widget.post)));
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => DisplayPostScreen(
-                            //             post: widget.post)));
-                          }
-                        : null, // Disables the button if distance is greater than thresholdDistance
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return Colors.grey; // Color for disabled state
-                          }
-                          return Theme.of(context)
-                              .primaryColor; // Default color
-                        },
-                      ),
-                      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return Colors
-                                .black; // Ensures text color is visible on grey background
-                          }
-                          return Colors.white; // Default text color
-                        },
-                      ),
-                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                        const EdgeInsets.symmetric(
-                            vertical:
-                                15), // Adjust padding, making the button taller
-                      ),
+                      child: const Text('Open Post'),
                     ),
-                    child: const Text('Open Post'),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

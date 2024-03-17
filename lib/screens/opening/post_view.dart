@@ -125,109 +125,111 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   }
 
   Widget _buildPhotoCard() {
-    return Dismissible(
-      key: UniqueKey(), // Each Dismissible needs a unique key
-      direction: DismissDirection.up, // Allow swiping up
-      onDismissed: (direction) {
-        // This callback is called when the card is dismissed
-        setState(() {
-          _showPhotoCard = false; // Hide the photo card
-          _photoCardBackgroundOpacity =
-              0.0; // Set background opacity to transparent
-        });
-      },
-      child: Stack(
-        children: [
-          // Blurred background that fills the entire screen
-          if (widget.post.imageUrls.isNotEmpty) ...[
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Image.network(
-                  widget.post.imageUrls.first,
-                  fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 150,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Opacity(
-                  opacity: _titleOpacity,
-                  child: Column(
-                    children: [
-                      Text(
-                        widget.post.title, // Display the title of the post
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.start, // Center the title text
-                      ),
-                      const SizedBox(height: 10), // Add space (10 pixels)
-                      Text(
-                        _formattedLocation ?? 'Location not found',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ],
+    return SafeArea(
+      child: Dismissible(
+        key: UniqueKey(), // Each Dismissible needs a unique key
+        direction: DismissDirection.up, // Allow swiping up
+        onDismissed: (direction) {
+          // This callback is called when the card is dismissed
+          setState(() {
+            _showPhotoCard = false; // Hide the photo card
+            _photoCardBackgroundOpacity =
+                0.0; // Set background opacity to transparent
+          });
+        },
+        child: Stack(
+          children: [
+            // Blurred background that fills the entire screen
+            if (widget.post.imageUrls.isNotEmpty) ...[
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Image.network(
+                    widget.post.imageUrls.first,
+                    fit: BoxFit.cover,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
                   ),
                 ),
               ),
-            ),
-          ] else ...[
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              Positioned(
+                bottom: 150,
+                left: 0,
+                right: 0,
                 child: Container(
-                  color: Colors.black45,
-                ), // Semi-transparent background for the title
-              ),
-            ),
-            Positioned(
-              bottom: 150,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Opacity(
-                  opacity: _titleOpacity,
-                  child: Column(
-                    children: [
-                      Text(
-                        widget.post.title, // Display the title of the post
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Opacity(
+                    opacity: _titleOpacity,
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.post.title, // Display the title of the post
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start, // Center the title text
                         ),
-                        textAlign: TextAlign.start, // Center the title text
-                      ),
-                      const SizedBox(height: 10), // Add space (10 pixels)
-                      Text(
-                        _formattedLocation ?? 'Location not found',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
+                        const SizedBox(height: 10), // Add space (10 pixels)
+                        Text(
+                          _formattedLocation ?? 'Location not found',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start,
                         ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ]
-        ],
+            ] else ...[
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: Colors.black45,
+                  ), // Semi-transparent background for the title
+                ),
+              ),
+              Positioned(
+                bottom: 150,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Opacity(
+                    opacity: _titleOpacity,
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.post.title, // Display the title of the post
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start, // Center the title text
+                        ),
+                        const SizedBox(height: 10), // Add space (10 pixels)
+                        Text(
+                          _formattedLocation ?? 'Location not found',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ]
+          ],
+        ),
       ),
     );
   }

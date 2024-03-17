@@ -75,119 +75,122 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   Widget build(BuildContext context) {
     // final userLocation = _locationProvider.userLocation;
     final userLocation = GlobalLocationData().currentLocation;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Location'),
-      ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            myLocationEnabled: true,
-            onMapCreated: (controller) {
-              _controller = controller;
-              if (userLocation != null) {
-                _controller.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Select Location'),
+        ),
+        body: Stack(
+          children: [
+            GoogleMap(
+              myLocationEnabled: true,
+              onMapCreated: (controller) {
+                _controller = controller;
+                if (userLocation != null) {
+                  _controller.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: userLocation,
+                        zoom: 20,
+                      ),
+                    ),
+                  );
+                }
+              },
+              onTap: (position) {
+                setState(() {
+                  _selectedPosition = position;
+                  _markers.clear();
+                  _markers.add(Marker(
+                    markerId: const MarkerId('selectedLocation'),
+                    position: position,
+                  ));
+                });
+                FocusScope.of(context).unfocus();
+              },
+              markers: _markers,
+              initialCameraPosition: userLocation != null
+                  ? CameraPosition(
                       target: userLocation,
                       zoom: 20,
+                    )
+                  : const CameraPosition(
+                      target: LatLng(0, 0),
+                      zoom: 20,
                     ),
-                  ),
-                );
-              }
-            },
-            onTap: (position) {
-              setState(() {
-                _selectedPosition = position;
-                _markers.clear();
-                _markers.add(Marker(
-                  markerId: const MarkerId('selectedLocation'),
-                  position: position,
-                ));
-              });
-              FocusScope.of(context).unfocus();
-            },
-            markers: _markers,
-            initialCameraPosition: userLocation != null
-                ? CameraPosition(
-                    target: userLocation,
-                    zoom: 20,
-                  )
-                : const CameraPosition(
-                    target: LatLng(0, 0),
-                    zoom: 20,
-                  ),
-          ),
-          Positioned(
-            top: 10,
-            right: 15,
-            left: 15,
-            child: Column(
-              children: [
-                TextField(
-                  controller: _searchController,
-                  textInputAction: TextInputAction.search,
-                  onChanged: _searchPlace,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a place...',
-                    fillColor: Colors.white,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                    suffixIcon: const Icon(Icons.search),
-                  ),
-                ),
-                if (_predictions.isNotEmpty)
-                  Container(
-                    color: Colors.white,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _predictions.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_predictions[index].description ??
-                              'No description'),
-                          onTap: () {
-                            _searchController.text =
-                                _predictions[index].description ?? '';
-                            _moveToSearchedPlace(_predictions[index].placeId!);
-                            setState(() {
-                              _predictions = [];
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-              ],
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_selectedPosition != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NewAddingPage(
-                  selectedLocation: _selectedPosition!,
+            Positioned(
+              top: 10,
+              right: 15,
+              left: 15,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onChanged: _searchPlace,
+                    decoration: InputDecoration(
+                      hintText: 'Search for a place...',
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      suffixIcon: const Icon(Icons.search),
+                    ),
+                  ),
+                  if (_predictions.isNotEmpty)
+                    Container(
+                      color: Colors.white,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _predictions.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(_predictions[index].description ??
+                                'No description'),
+                            onTap: () {
+                              _searchController.text =
+                                  _predictions[index].description ?? '';
+                              _moveToSearchedPlace(
+                                  _predictions[index].placeId!);
+                              setState(() {
+                                _predictions = [];
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            if (_selectedPosition != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewAddingPage(
+                    selectedLocation: _selectedPosition!,
+                  ),
                 ),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Please select a location'),
-              ),
-            );
-          }
-        },
-        child: const Icon(Icons.check),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please select a location'),
+                ),
+              );
+            }
+          },
+          child: const Icon(Icons.check),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

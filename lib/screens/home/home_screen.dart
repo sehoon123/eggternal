@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -77,58 +76,60 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: const [
-            MapScreen(),
-            ListScreen(),
-            // const NewAddingPage(),
-            // const AddPageScreen(),
-            MapSelectionScreen(),
-            // AddScreen(firestore: widget.firestore),
-            PaymentScreen(),
-            SettingsScreen(),
+    return SafeArea(
+      child: Scaffold(
+        body: SafeArea(
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: const [
+              MapScreen(),
+              ListScreen(),
+              // const NewAddingPage(),
+              // const AddPageScreen(),
+              MapSelectionScreen(),
+              // AddScreen(firestore: widget.firestore),
+              PaymentScreen(),
+              SettingsScreen(),
+            ],
+          ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          unselectedItemColor: Colors.grey,
+          unselectedIconTheme: const IconThemeData(
+            color: Colors.grey,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            color: Colors.grey,
+          ),
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list_outlined),
+              label: 'List',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_box_outlined),
+              label: 'Add',
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Colors.deepPurple,
+              icon: Icon(Icons.create),
+              label: 'Create',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
           ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+          onTap: _onItemTapped,
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-        unselectedItemColor: Colors.grey,
-        unselectedIconTheme: const IconThemeData(
-          color: Colors.grey,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_outlined),
-            label: 'List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box_outlined),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
-            icon: Icon(Icons.create),
-            label: 'Create',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
       ),
     );
   }

@@ -14,38 +14,40 @@ class _AddPageScreenState extends State<AddPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Page'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (selectedLocation != null)
-              Center(
-                child: Text(
-                  'Selected Location: ${selectedLocation!.latitude}, ${selectedLocation!.longitude}',
-                  textAlign: TextAlign.center,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Add Page'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (selectedLocation != null)
+                Center(
+                  child: Text(
+                    'Selected Location: ${selectedLocation!.latitude}, ${selectedLocation!.longitude}',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () async {
+                  // Navigate to the MapSelectionScreen and wait for the result
+                  final LatLng? result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MapSelectionScreen()),
+                  );
+                  // Update the state with the selected location
+                  setState(() {
+                    selectedLocation = result;
+                  });
+                },
+                child: const Text('Select Location on Map'),
               ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                // Navigate to the MapSelectionScreen and wait for the result
-                final LatLng? result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const MapSelectionScreen()),
-                );
-                // Update the state with the selected location
-                setState(() {
-                  selectedLocation = result;
-                });
-              },
-              child: const Text('Select Location on Map'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -56,22 +56,24 @@ class _ARViewPageState extends State<ARViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('AR Test'),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('AR Test'),
+        ),
+        body: Stack(
+          children: [
+            ARView(
+              onARViewCreated: onARViewCreated,
+            ),
+          ],
+        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: onLocalObjectAtOriginButtonPressed,
+        //   tooltip: 'Add Local Object',
+        //   child: const Icon(Icons.add),
+        // ),
       ),
-      body: Stack(
-        children: [
-          ARView(
-            onARViewCreated: onARViewCreated,
-          ),
-        ],
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: onLocalObjectAtOriginButtonPressed,
-      //   tooltip: 'Add Local Object',
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 
@@ -85,10 +87,13 @@ class _ARViewPageState extends State<ARViewPage> {
 
     this.arSessionManager!.onInitialize(
           showFeaturePoints: false,
-          showPlanes: true,
+          showAnimatedGuide: false,
+          showPlanes: false,
           customPlaneTexturePath: "triangle.png",
           showWorldOrigin: false,
           handleTaps: true,
+          handlePans: true,
+          handleRotation: true,
         );
     this.arObjectManager!.onInitialize();
 
