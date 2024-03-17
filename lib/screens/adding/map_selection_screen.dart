@@ -105,6 +105,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
             GoogleMap(
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
               onMapCreated: (controller) {
                 _controller = controller;
                 if (userLocation != null) {

@@ -95,9 +95,6 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Map View'),
-      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -113,6 +110,7 @@ class _MapScreenState extends State<MapScreen> {
                   final userLocation = GlobalLocationData().currentLocation;
                   return GoogleMap(
                     myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
                     myLocationEnabled: true,
                     onMapCreated: _onMapCreated,
                     initialCameraPosition: CameraPosition(

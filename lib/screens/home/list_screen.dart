@@ -127,9 +127,6 @@ class _ListScreenState extends State<ListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Posts'),
-      ),
       body: SafeArea(
         child: Consumer<PostsProvider>(
           builder: (context, postsProvider, child) {
