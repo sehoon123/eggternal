@@ -34,6 +34,7 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Due Date'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(

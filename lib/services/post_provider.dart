@@ -1,3 +1,4 @@
+import 'package:eggciting/models/global_location_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,6 +36,8 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> fetchPosts({bool isInitialFetch = false}) async {
+    final currentLocation = GlobalLocationData().currentLocation;
+
     if (isInitialFetch) {
       _posts.clear();
       _lastDocument = null;
@@ -67,11 +70,27 @@ class PostsProvider with ChangeNotifier {
           return Post.fromJson(jsonData);
         }).toList();
 
-        fetchedPosts.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+        fetchedPosts.sort((a, b) {
+          if (a.dueDate.isAfter(b.dueDate)) {
+            return 1;
+          } else {
+            double distanceA = a.location.distance(
+              lat: currentLocation!.latitude,
+              lng: currentLocation.longitude,
+            );
+            double distanceB = b.location.distance(
+              lat: currentLocation.latitude,
+              lng: currentLocation.longitude,
+            );
+            debugPrint('Distance A: $distanceA, ${a.title}');
+            debugPrint('Distance B: $distanceB, ${b.title}');
+            return distanceA.compareTo(distanceB);
+          }
+        });
 
         // Add the sorted posts to the existing list
         _posts.addAll(fetchedPosts);
-      }else {
+      } else {
         _hasMorePosts = false;
       }
 

@@ -10,6 +10,7 @@ class PostSuccessScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Post Success'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Stack(

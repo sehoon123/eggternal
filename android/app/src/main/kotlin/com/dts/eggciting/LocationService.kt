@@ -70,9 +70,18 @@ class LocationService(): Service() {
     }
 
     private fun start() {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, pendingIntentFlags)
+
         val notification = NotificationCompat.Builder(this, "location")
             .setContentTitle("Tracking Eggs")
             .setContentText("Finding eggs near you...")
+            .setContentIntent(pendingIntent)
             .setSmallIcon(R.drawable.launch_background)
             .setOngoing(true)
         

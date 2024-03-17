@@ -122,6 +122,7 @@ class _WarningScreenState extends State<WarningScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Warning'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Stack(
@@ -130,7 +131,10 @@ class _WarningScreenState extends State<WarningScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('You can\'t modify this post after posting.'),
+                  const Text(
+                    'You can\'t modify this post after posting.',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {

@@ -16,6 +16,7 @@ import UserNotifications
     manager.requestWhenInUseAuthorization()
     manager.allowsBackgroundLocationUpdates = true
     manager.pausesLocationUpdatesAutomatically = false
+    manager.distanceFilter = 50
     return manager
   }()
 

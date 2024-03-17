@@ -17,6 +17,7 @@ class _AddPageScreenState extends State<AddPageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Page'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Center(

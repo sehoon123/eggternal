@@ -98,6 +98,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Stack(
@@ -193,6 +194,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
               bottom: 10,
               right: 10,
               child: FloatingActionButton(
+                heroTag: "fab1",
                 onPressed: _moveToCurrentUserLocation,
                 child: const Icon(Icons.my_location),
               ),
@@ -202,6 +204,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
               bottom: 10,
               left: 10,
               child: FloatingActionButton(
+                heroTag: "fab2",
                 onPressed: () {
                   if (_selectedPosition != null) {
                     Navigator.push(

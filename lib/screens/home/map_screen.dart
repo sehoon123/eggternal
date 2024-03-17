@@ -123,7 +123,7 @@ class _MapScreenState extends State<MapScreen> {
                     markers: snapshot.data!.map((post) {
                       return Marker(
                         markerId: MarkerId(post
-                            .userId), // Assuming the Post class has an 'id' field
+                            .key), // Assuming the Post class has an 'id' field
                         position: LatLng(
                             post.location.latitude, post.location.longitude),
                         infoWindow: InfoWindow(title: post.title),
