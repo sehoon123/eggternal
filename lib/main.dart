@@ -46,6 +46,8 @@ Future<void> requestPermissions() async {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  FlutterBranchSdk.validateSDKIntegration();
   await dotenv.load();
 
   await requestPermissions();
