@@ -7,6 +7,7 @@ import 'package:eggciting/services/notification_service.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -115,29 +116,6 @@ class _MyAppState extends State<MyApp> {
       },
     );
   }
-
-  // Future<void> showNotification() async {
-  //   const AndroidNotificationDetails androidNotificationDetails =
-  //       AndroidNotificationDetails(
-  //     'channel id',
-  //     'channel name',
-  //     channelDescription: 'channel description',
-  //     importance: Importance.max,
-  //     priority: Priority.high,
-  //   );
-
-  //   const NotificationDetails notificationDetails = NotificationDetails(
-  //     android: androidNotificationDetails,
-  //     iOS: DarwinNotificationDetails(badgeNumber: 1),
-  //   );
-
-  //   await _local.show(
-  //     0,
-  //     'Eggciting',
-  //     'You have a new notification!',
-  //     notificationDetails,
-  //   );
-  // }
 
   void _initialization() async {
     AndroidInitializationSettings android =

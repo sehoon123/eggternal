@@ -41,11 +41,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    final userLocation = GlobalLocationData().currentLocation;
-    if (userLocation != null) {
-      _mapController!.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: userLocation, zoom: 16)));
-    }
+    _moveToCurrentUserLocation();
   }
 
   void _searchPlace(String query) async {
