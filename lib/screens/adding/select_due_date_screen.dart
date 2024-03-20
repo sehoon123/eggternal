@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/adding/warning_screen.dart';
@@ -27,15 +28,30 @@ class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    Timer(const Duration(milliseconds: 500), () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Select Due Date'),
+            content: const Text('Please select a due date for your post.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Due Date'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

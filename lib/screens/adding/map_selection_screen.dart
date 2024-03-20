@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/screens/adding/new_adding_page.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,25 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
     // _locationProvider.startTrackingLocation();
+    Timer(const Duration(milliseconds: 500), () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Location'),
+          content: const Text('Please select a location on the map.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  });
   }
 
   @override
@@ -96,10 +117,6 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     // final userLocation = _locationProvider.userLocation;
     final userLocation = GlobalLocationData().currentLocation;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Location'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Stack(
           children: [

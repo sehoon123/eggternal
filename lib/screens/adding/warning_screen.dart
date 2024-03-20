@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -120,31 +121,27 @@ class _WarningScreenState extends State<WarningScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Warning'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Stack(
           children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'You can\'t modify this post after posting.',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _uploadPostFuture = _uploadPost();
-                      });
-                    },
-                    child: const Text('Post'),
-                  ),
-                ],
+            const Center(
+              child: Text(
+                'You can\'t modify this post after posting.',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Positioned(
+              bottom: 16.0,
+              left: 16.0,
+              right: 16.0,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _uploadPostFuture = _uploadPost();
+                  });
+                },
+                child: const Text('Post'),
               ),
             ),
             if (_uploadPostFuture != null)

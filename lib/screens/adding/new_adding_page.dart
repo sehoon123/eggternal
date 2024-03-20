@@ -98,9 +98,6 @@ class _NewAddingPageState extends State<NewAddingPage> {
     double? lastPointerY;
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('New Adding Page'),
-      // ),
       body: SafeArea(
         child: Column(
           children: [

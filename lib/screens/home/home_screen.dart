@@ -25,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -41,6 +42,27 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == 1) {
       refreshListScreenData();
     }
+
+    _navigatorKey.currentState!.pushReplacement(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          switch (index) {
+            case 0:
+              return const MapScreen();
+            case 1:
+              return const ListScreen();
+            case 2:
+              return const MapSelectionScreen();
+            case 3:
+              return const PaymentScreen();
+            case 4:
+              return const SettingsScreen();
+            default:
+              return const MapScreen();
+          }
+        },
+      ),
+    );
   }
 
   void refreshListScreenData() {
@@ -78,18 +100,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: const [
-            MapScreen(),
-            ListScreen(),
-            // const NewAddingPage(),
-            // const AddPageScreen(),
-            MapSelectionScreen(),
-            // AddScreen(firestore: widget.firestore),
-            PaymentScreen(),
-            SettingsScreen(),
-          ],
+        child: Navigator(
+          key: _navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute(
+              builder: (BuildContext context) {
+                switch (_selectedIndex) {
+                  case 0:
+                    return const MapScreen();
+                  case 1:
+                    return const ListScreen();
+                  case 2:
+                    return const MapSelectionScreen();
+                  case 3:
+                    return const PaymentScreen();
+                  case 4:
+                    return const SettingsScreen();
+                  default:
+                    return const MapScreen();
+                }
+              },
+            );
+          },
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

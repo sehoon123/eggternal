@@ -15,10 +15,6 @@ class _AddPageScreenState extends State<AddPageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Page'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Center(
           child: Column(
