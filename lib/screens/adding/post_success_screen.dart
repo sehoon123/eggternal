@@ -1,3 +1,4 @@
+import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:flutter/material.dart';
 
 class PostSuccessScreen extends StatelessWidget {
@@ -34,8 +35,12 @@ class PostSuccessScreen extends StatelessWidget {
               right: 16.0,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil('/home', (route) => false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MapScreen(),
+                    ),
+                  );
                 },
                 child: const Text('Continue'),
               ),
