@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/models/global_location_data.dart';
+import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
+import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:eggciting/services/notification_service.dart';
 import 'package:eggciting/services/post_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:location/location.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
@@ -143,6 +144,56 @@ class _MyAppState extends State<MyApp> {
     _locationStream();
     _initialization();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    // Listen for deep link events
+    FlutterBranchSdk.listSession().listen((linkData) async {
+      // Extract the post ID from the link data
+      String? postId = linkData['postId'];
+      if (postId != null) {
+        // Fetch the current user's ID
+        String? currentUserId = FirebaseAuth.instance.currentUser!.uid;
+        debugPrint('Current User ID in main.dart: $currentUserId');
+        // Fetch the post from Firestore
+        DocumentSnapshot postSnapshot =
+            await widget.firestore.collection('posts').doc(postId).get();
+
+        if (postSnapshot.exists) {
+          // Convert the post document to a Post object
+          Post post =
+              Post.fromJson(postSnapshot.data() as Map<String, dynamic>);
+
+          // Check if the current user is already in the sharedUser list
+          if (!post.sharedUser.contains(currentUserId)) {
+            // Add the current user to the sharedUser list
+            post.sharedUser.add(currentUserId);
+
+            // Save the updated post back to Firestore
+            await widget.firestore
+                .collection('posts')
+                .doc(postId)
+                .update({'sharedUser': post.sharedUser});
+          }
+
+          // Navigate to the post details screen with the post ID
+          FutureBuilder(
+            future: Future.delayed(Duration.zero),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PostDetailsScreen(post: post),
+                  ),
+                );
+              }
+              return Container();
+            },
+          );
+        }
+      }
+    }, onError: (error) {
+      debugPrint('Error: $error');
+    });
 
     try {
       locationChannel.invokeMethod('getLocation');

@@ -1,26 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class AgreementScreen extends StatelessWidget {
   const AgreementScreen({super.key, required this.firestore});
   final FirebaseFirestore firestore;
-
-  void _showDisagreePopup(BuildContext context) {
-    Alert(
-      context: context,
-      title: "Notice", // Update title as needed
-      desc: "Must agree to terms to use this app.", // Update message
-      buttons: [
-        DialogButton(
-          onPressed: () => Navigator.pop(context), // Close the popup
-          color: Colors.green,
-          child: const Text("OK"), // Example button color
-        ),
-      ],
-    ).show();
-  }
 
   @override
   Widget build(BuildContext context) {

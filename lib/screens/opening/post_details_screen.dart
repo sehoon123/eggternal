@@ -1,12 +1,11 @@
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/opening/ar_test.dart';
-import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share/share.dart';
-import 'package:provider/provider.dart';
 
 class PostDetailsScreen extends StatefulWidget {
   final Post post;
@@ -17,14 +16,50 @@ class PostDetailsScreen extends StatefulWidget {
   });
 
   @override
-  _PostDetailsScreenState createState() => _PostDetailsScreenState();
+  PostDetailsScreenState createState() => PostDetailsScreenState();
 }
 
-class _PostDetailsScreenState extends State<PostDetailsScreen> {
+class PostDetailsScreenState extends State<PostDetailsScreen> {
   bool _isReadyToOpen(DateTime dueDate) {
     final difference = dueDate.difference(DateTime.now());
     return difference.inDays < 0 ||
         (difference.inDays == 0 && difference.inHours <= 0);
+  }
+
+  Future<String> createDynamicLink(String postId) async {
+    // Create BranchLinkProperties with the desired properties
+    BranchLinkProperties linkProperties = BranchLinkProperties(
+      channel: 'facebook', // The channel through which the link was shared
+      feature: 'sharing', // The feature that the link is associated with
+      alias: 'post-$postId', // A unique alias for the link
+      stage: 'new user', // The stage of the user's lifecycle
+      matchDuration:
+          43200, // The duration in seconds for which the link should be matched
+      tags: ['post', 'share'], // Tags associated with the link
+      campaign:
+          'post sharing campaign', // The campaign associated with the link
+    );
+
+    // Add any additional control parameters if needed
+    linkProperties.addControlParam(postId, 'postId');
+
+    // Create a BranchUniversalObject for the post
+    BranchUniversalObject buo = BranchUniversalObject(
+      canonicalIdentifier: 'content/$postId',
+      title: 'Check out this post!',
+      contentDescription: 'This is a great post you should check out.',
+      imageUrl: 'https://example.com/post-image.jpg',
+      contentMetadata: BranchContentMetaData()
+        ..addCustomMetadata('postId', postId),
+    );
+
+    // Create the dynamic link
+    BranchResponse link = await FlutterBranchSdk.getShortUrl(
+      buo: buo,
+      linkProperties: linkProperties,
+    );
+
+    return link.result;
   }
 
   @override
@@ -54,8 +89,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
         title: const Text('Post Details'),
         actions: [
           IconButton(
-            onPressed: () {
-              Share.share('Check out this post: ${widget.post.title}');
+            onPressed: () async {
+              String dynamicLink = await createDynamicLink(widget.post.key);
+              Share.share('Check out this post: $dynamicLink');
             },
             icon: const Icon(Icons.share),
           ),

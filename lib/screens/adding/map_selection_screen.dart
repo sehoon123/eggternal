@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -14,10 +13,10 @@ class MapSelectionScreen extends StatefulWidget {
   const MapSelectionScreen({super.key});
 
   @override
-  _MapSelectionScreenState createState() => _MapSelectionScreenState();
+  MapSelectionScreenState createState() => MapSelectionScreenState();
 }
 
-class _MapSelectionScreenState extends State<MapSelectionScreen> {
+class MapSelectionScreenState extends State<MapSelectionScreen> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   LatLng? _selectedPosition;

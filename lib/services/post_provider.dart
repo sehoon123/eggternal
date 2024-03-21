@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/models/post.dart';
-import 'package:geoflutterfire2/geoflutterfire2.dart'; // Ensure this path is correct
 
 class PostsProvider with ChangeNotifier {
   User? _currentUser;

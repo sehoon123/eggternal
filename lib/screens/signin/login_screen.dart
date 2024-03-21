@@ -9,8 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
-import 'package:eggciting/screens/signin/nickname_screen.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.firestore});
@@ -125,10 +123,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleSuccessfulSignIn(UserCredential userCredential) async {
     final user = userCredential.user;
-
-    // debugPrint("User info in _handleSuccessfulSignIn: ${user?.uid}");
-
     await _storeUserInfo(user!);
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     // Check if the user already exists in Firestore
     final userDoc = widget.firestore.collection('users').doc(user.uid);
@@ -147,20 +143,16 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
     bool agreement = userData['agreement'] ?? false;
 
-    // Request permissions using the new Permission.request method
-    // await Permission.camera.request();
-    // await Permission.notification.request();
-    // await Permission.microphone.request();
-    // await Permission.location.request();
-    // await Permission.photos.request();
-
-    debugPrint('Permissions granted');
-
-    Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
+    if (mounted) {
+      Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
+    }
 
     // Navigate to the appropriate screen
-    Navigator.pushReplacementNamed(context, agreement ? '/home' : '/agreement');
-    // Navigator.pushReplacementNamed(context, '/agreement');
+    if (navigatorKey.currentState != null) {
+      navigatorKey.currentState!.pushReplacementNamed(
+        agreement ? '/home' : '/agreement',
+      );
+    }
   }
 
   @override

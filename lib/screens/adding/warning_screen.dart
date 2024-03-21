@@ -7,8 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -91,7 +89,6 @@ class _WarningScreenState extends State<WarningScreen> {
       // Add any other necessary fields
     });
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     await removeAllLocationPrefs(); // Remove all location prefs
     // await prefs.setString('location_$key',

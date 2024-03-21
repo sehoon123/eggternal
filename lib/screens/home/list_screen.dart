@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +40,42 @@ class _ListScreenState extends State<ListScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<String> createDynamicLink(String postId) async {
+    // Create BranchLinkProperties with the desired properties
+    BranchLinkProperties linkProperties = BranchLinkProperties(
+      channel: 'facebook', // The channel through which the link was shared
+      feature: 'sharing', // The feature that the link is associated with
+      alias: 'post-$postId', // A unique alias for the link
+      stage: 'new user', // The stage of the user's lifecycle
+      matchDuration:
+          43200, // The duration in seconds for which the link should be matched
+      tags: ['post', 'share'], // Tags associated with the link
+      campaign:
+          'post sharing campaign', // The campaign associated with the link
+    );
+
+    // Add any additional control parameters if needed
+    linkProperties.addControlParam(postId, 'postId');
+
+    // Create a BranchUniversalObject for the post
+    BranchUniversalObject buo = BranchUniversalObject(
+      canonicalIdentifier: 'content/$postId',
+      title: 'Check out this post!',
+      contentDescription: 'This is a great post you should check out.',
+      imageUrl: 'https://example.com/post-image.jpg',
+      contentMetadata: BranchContentMetaData()
+        ..addCustomMetadata('postId', postId),
+    );
+
+    // Create the dynamic link
+    BranchResponse link = await FlutterBranchSdk.getShortUrl(
+      buo: buo,
+      linkProperties: linkProperties,
+    );
+
+    return link.result;
   }
 
   void debugPrintSharedPreferences() async {
@@ -186,7 +222,7 @@ class _ListScreenState extends State<ListScreen> {
                     itemBuilder: (context, index) {
                       final post = postsProvider.posts[index];
                       final timeLeft = _calculateTimeLeft(post.dueDate);
-    
+
                       return FutureBuilder<Map<String, dynamic>?>(
                         future: _storeAndRetrievePostDetails(
                           post.key,
@@ -213,8 +249,7 @@ class _ListScreenState extends State<ListScreen> {
                           } else {
                             final details = snapshot.data;
                             final postLocation = GeoFirePoint(
-                              double.parse(
-                                  details!['location'].split(',')[0]),
+                              double.parse(details!['location'].split(',')[0]),
                               double.parse(details['location'].split(',')[1]),
                             );
                             final userLocation =
@@ -222,7 +257,7 @@ class _ListScreenState extends State<ListScreen> {
                             final distance = userLocation != null
                                 ? _calculateDistance(postLocation)
                                 : -1;
-    
+
                             return Column(
                               children: [
                                 Container(
@@ -241,8 +276,8 @@ class _ListScreenState extends State<ListScreen> {
                                           ConnectionState.done) {
                                         return ListTile(
                                           leading: CircleAvatar(
-                                            child: Text(snapshot.data!
-                                                .substring(0, 1)),
+                                            child: Text(
+                                                snapshot.data!.substring(0, 1)),
                                           ),
                                           title: Text(details['title']),
                                           subtitle: Column(
@@ -257,9 +292,12 @@ class _ListScreenState extends State<ListScreen> {
                                           ),
                                           trailing: IconButton(
                                             icon: const Icon(Icons.share),
-                                            onPressed: () {
+                                            onPressed: () async {
+                                              String dynamicLink =
+                                                  await createDynamicLink(
+                                                      post.key);
                                               Share.share(
-                                                  'Check out this post: ${details['title']}');
+                                                  'Check out this post: $dynamicLink');
                                             },
                                           ),
                                           onTap: () {
@@ -278,8 +316,8 @@ class _ListScreenState extends State<ListScreen> {
                                           leading:
                                               const CircularProgressIndicator(),
                                           title: Text(details['title']),
-                                          subtitle: const Text(
-                                              'Loading username...'),
+                                          subtitle:
+                                              const Text('Loading username...'),
                                         );
                                       }
                                     },

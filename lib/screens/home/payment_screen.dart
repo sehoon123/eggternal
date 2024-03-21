@@ -1,8 +1,5 @@
-import 'package:eggciting/services/notification_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PaymentScreen extends StatelessWidget {

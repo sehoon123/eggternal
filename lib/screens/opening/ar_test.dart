@@ -6,10 +6,8 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
-import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:eggciting/models/post.dart';
-import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
@@ -22,10 +20,10 @@ class ARViewPage extends StatefulWidget {
   const ARViewPage({super.key, required this.post});
 
   @override
-  _ARViewPageState createState() => _ARViewPageState();
+  ARViewPageState createState() => ARViewPageState();
 }
 
-class _ARViewPageState extends State<ARViewPage> {
+class ARViewPageState extends State<ARViewPage> {
   ARSessionManager? arSessionManager;
   ARObjectManager? arObjectManager;
   ARNode? localObjectNode;
@@ -146,7 +144,6 @@ class _ARViewPageState extends State<ARViewPage> {
       // This is a placeholder for such a method, which you might need to implement
       // based on the AR framework you're using.
       var cameraPosition = await getCurrentCameraPosition();
-      var cameraOrientation = await getCurrentCameraOrientation();
 
       // Generate random offsets for the x, y, and z coordinates
       var randomX = (Random().nextDouble() * 3.0) - 1.5;

@@ -31,11 +31,13 @@ class _NicknameScreenState extends State<NicknameScreen> {
 
         if (nicknameSnapshot.docs.isNotEmpty) {
           // The nickname already exists, show an error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text(
-                    'This nickname is already taken. Please choose another one.')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text(
+                      'This nickname is already taken. Please choose another one.')),
+            );
+          }
         } else {
           // The nickname does not exist, update the user document
           await FirebaseFirestore.instance
@@ -44,7 +46,9 @@ class _NicknameScreenState extends State<NicknameScreen> {
               .update({'nickname': _nicknameController.text});
 
           // Navigate to the next screen (e.g., home screen)
-          Navigator.pushReplacementNamed(context, '/home');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
         }
       } catch (e) {
         // Handle update error - maybe show the user an error message

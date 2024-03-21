@@ -11,10 +11,10 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  SettingsScreenState createState() => SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _nameController = TextEditingController();
   User? user = FirebaseAuth.instance.currentUser;
   String? _profileImageUrl;
@@ -96,9 +96,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (nicknameQuery.docs.isNotEmpty &&
         nicknameQuery.docs.first.id != user!.uid) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Nickname is already taken. Please choose another one.')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text('Nickname is already taken. Please choose another one.')));
+      }
       return;
     }
 
@@ -110,14 +112,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('nickname_${user!.uid}', _nameController.text.trim());
 
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')));
+    }
   }
 
   void _logout() async {
     await FirebaseAuth.instance.signOut();
     // Redirect to login screen or handle logout appropriately
-    Navigator.pushReplacementNamed(context, '/login');
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

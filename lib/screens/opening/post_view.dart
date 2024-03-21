@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as fq;
 import 'package:eggciting/models/post.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -24,6 +23,7 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
   bool _imageLoaded = false;
   bool _isloading = false;
   bool _showPhotoCard = true;
+  // ignore: unused_field
   double _photoCardBackgroundOpacity = 0.5;
   String? _formattedLocation;
 

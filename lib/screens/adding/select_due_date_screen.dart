@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/adding/warning_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // Import LatLng
 import 'package:table_calendar/table_calendar.dart'; // Import TableCalendar
 
 class SelectDueDateScreen extends StatefulWidget {
@@ -16,10 +14,10 @@ class SelectDueDateScreen extends StatefulWidget {
   });
 
   @override
-  _SelectDueDateScreenState createState() => _SelectDueDateScreenState();
+  SelectDueDateScreenState createState() => SelectDueDateScreenState();
 }
 
-class _SelectDueDateScreenState extends State<SelectDueDateScreen> {
+class SelectDueDateScreenState extends State<SelectDueDateScreen> {
   DateTime? _selectedDate;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;

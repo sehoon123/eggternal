@@ -1,12 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eggciting/screens/adding/add_page_screen.dart';
 import 'package:eggciting/screens/adding/map_selection_screen.dart';
-import 'package:eggciting/screens/adding/new_adding_page.dart';
-import 'package:eggciting/screens/opening/ar_test.dart';
 import 'package:eggciting/screens/home/list_screen.dart';
 import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
-import 'package:eggciting/screens/opening/post_view.dart';
 import 'package:eggciting/screens/home/settings_screen.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';

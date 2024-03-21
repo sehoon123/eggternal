@@ -2,18 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:eggciting/models/post.dart';
-import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:eggciting/screens/adding/select_due_date_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
-import 'package:flutter_quill_extensions/embeds/image/editor/image_embed.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart'; // Add this import
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
@@ -25,12 +22,13 @@ class NewAddingPage extends StatefulWidget {
   const NewAddingPage({super.key, this.selectedLocation});
 
   @override
-  _NewAddingPageState createState() => _NewAddingPageState();
+  NewAddingPageState createState() => NewAddingPageState();
 }
 
-class _NewAddingPageState extends State<NewAddingPage> {
+class NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
   final Map<String, File> _imagePaths = {};
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -207,12 +205,13 @@ class _NewAddingPageState extends State<NewAddingPage> {
           );
 
           // Navigate to the MapSelectionScreen, passing the Post object along
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SelectDueDateScreen(post: post),
-            ),
-          );
+          if (navigatorKey.currentState != null) {
+            navigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (context) => SelectDueDateScreen(post: post),
+              ),
+            );
+          }
         },
         child: const Icon(Icons.check),
       ),

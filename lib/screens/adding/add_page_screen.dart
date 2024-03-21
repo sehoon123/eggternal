@@ -6,10 +6,10 @@ class AddPageScreen extends StatefulWidget {
   const AddPageScreen({super.key});
 
   @override
-  _AddPageScreenState createState() => _AddPageScreenState();
+  AddPageScreenState createState() => AddPageScreenState();
 }
 
-class _AddPageScreenState extends State<AddPageScreen> {
+class AddPageScreenState extends State<AddPageScreen> {
   LatLng? selectedLocation;
 
   @override
