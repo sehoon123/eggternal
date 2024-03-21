@@ -55,7 +55,6 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              // Implement the logic for sharing the post
               Share.share('Check out this post: ${widget.post.title}');
             },
             icon: const Icon(Icons.share),
