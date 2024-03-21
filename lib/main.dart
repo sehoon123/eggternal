@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/models/global_location_data.dart';
+import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:eggciting/screens/home/payment_screen.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
 import 'package:eggciting/services/notification_service.dart';
@@ -169,6 +170,7 @@ class _MyAppState extends State<MyApp> {
         '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
         '/nickname': (context) => NicknameScreen(firestore: widget.firestore),
         '/mapSelection': (context) => const MapSelectionScreen(),
+        '/mapScreen': (context) => const MapScreen(),
         '/list': (context) => const ListScreen(),
         '/postSuccess': (context) => const PostSuccessScreen(
               imageAssetPaths: ['assets/images/logo.png'],

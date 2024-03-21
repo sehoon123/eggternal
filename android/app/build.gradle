@@ -17,6 +17,8 @@ def kakaoScheme = localProperties.getProperty('kakaoScheme')
 def androidGeoApiKey = localProperties.getProperty('androidGeoApiKey')
 def lineChannelId = localProperties.getProperty('lineChannelId')
 def applicationName = localProperties.getProperty('applicationName')
+def branchKey = localProperties.getProperty('branchKey')
+def branchSecret = localProperties.getProperty('branchSecret')
 
 println("kakaoScheme = $kakaoScheme")
 println("androidGeoApiKey = $androidGeoApiKey")
@@ -68,7 +70,9 @@ android {
             kakaoScheme: kakaoScheme,
             androidGeoApiKey: androidGeoApiKey,
             lineChannelId: lineChannelId,
-            applicationName: applicationName
+            applicationName: applicationName,
+            branchKey: branchKey,
+            branchSecret: branchSecret
         ]
 
     }
