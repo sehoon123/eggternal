@@ -145,8 +145,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             backgroundColor: Colors.deepPurple,
-            icon: Icon(Icons.create),
-            label: 'Create',
+            icon: Icon(Icons.credit_card_outlined),
+            label: 'Pay',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

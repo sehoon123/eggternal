@@ -11,8 +11,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, required this.firestore});
-  final FirebaseFirestore firestore;
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -126,7 +125,8 @@ class _LoginPageState extends State<LoginPage> {
     await _storeUserInfo(user!);
 
     // Check if the user already exists in Firestore
-    final userDoc = widget.firestore.collection('users').doc(user.uid);
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
     final userSnapshot = await userDoc.get();
 
     if (!userSnapshot.exists) {

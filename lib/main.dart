@@ -223,7 +223,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
-        '/login': (context) => LoginPage(firestore: widget.firestore),
+        '/login': (context) => const LoginPage(),
         '/home': (context) => HomeScreen(firestore: widget.firestore),
         '/agreement': (context) => AgreementScreen(firestore: widget.firestore),
         '/nickname': (context) => NicknameScreen(firestore: widget.firestore),

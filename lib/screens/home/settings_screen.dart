@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:eggciting/screens/signin/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -29,28 +30,30 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? nickname = prefs.getString('nickname_${user!.uid}');
-    String? profileImageUrl = prefs.getString('profileImageUrl_${user!.uid}');
+    if (user != null) {
+      String? nickname = prefs.getString('nickname_${user!.uid}');
+      String? profileImageUrl = prefs.getString('profileImageUrl_${user!.uid}');
 
-    if (nickname != null && profileImageUrl != null) {
-      setState(() {
-        _nameController.text = nickname;
-        _profileImageUrl = profileImageUrl;
-      });
-    } else {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
-      if (doc.exists) {
+      if (nickname != null && profileImageUrl != null) {
         setState(() {
-          _nameController.text = doc.data()?['nickname'] ?? '';
-          _profileImageUrl = doc.data()?['profileImageUrl'] ?? '';
+          _nameController.text = nickname;
+          _profileImageUrl = profileImageUrl;
         });
-        // Store the fetched values in shared_preferences
-        await prefs.setString('nickname_${user!.uid}', _nameController.text);
-        await prefs.setString(
-            'profileImageUrl_${user!.uid}', _profileImageUrl!);
+      } else {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+        if (doc.exists) {
+          setState(() {
+            _nameController.text = doc.data()?['nickname'] ?? '';
+            _profileImageUrl = doc.data()?['profileImageUrl'] ?? '';
+          });
+          // Store the fetched values in shared_preferences
+          await prefs.setString('nickname_${user!.uid}', _nameController.text);
+          await prefs.setString(
+              'profileImageUrl_${user!.uid}', _profileImageUrl!);
+        }
       }
     }
   }
@@ -120,62 +123,77 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   void _logout() async {
     await FirebaseAuth.instance.signOut();
-    // Redirect to login screen or handle logout appropriately
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+    // Clear shared preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    // Navigate to the login screen
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Settings'),
-      // ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 140,
-                backgroundColor: Colors.grey,
-                backgroundImage: _profileImageUrl != null &&
-                        Uri.parse(_profileImageUrl!).host.isNotEmpty
-                    ? NetworkImage(_profileImageUrl!)
-                    : const AssetImage(
-                            'assets/images/default_profile_image.png')
-                        as ImageProvider,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Change Profile Image'),
-              ),
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Profile Name'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 16.0), // Add gap between TextField and the button
-                child: ElevatedButton(
-                  onPressed: _updateProfile,
-                  child: const Text('Update Profile'),
+    if (FirebaseAuth.instance.currentUser == null) {
+      // User is not logged in, navigate to the login screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      });
+      return Container(); // Return an empty container while navigating
+    } else {
+      // User is logged in, show the settings screen
+      return Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 140,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: _profileImageUrl != null &&
+                          Uri.parse(_profileImageUrl!).host.isNotEmpty
+                      ? NetworkImage(_profileImageUrl!)
+                      : const AssetImage(
+                              'assets/images/default_profile_image.png')
+                          as ImageProvider,
                 ),
-              ),
-              const Spacer(), // This will push the logout button to the bottom
-              ElevatedButton(
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('Change Profile Image'),
+                ),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Profile Name'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 16.0), // Add gap between TextField and the button
+                  child: ElevatedButton(
+                    onPressed: _updateProfile,
+                    child: const Text('Update Profile'),
+                  ),
+                ),
+                const Spacer(), // This will push the logout button to the bottom
+                ElevatedButton(
                   onPressed: _logout,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text(
                     'Logout',
                     style: TextStyle(color: Colors.white),
-                  )),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
