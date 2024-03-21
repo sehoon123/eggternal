@@ -28,7 +28,6 @@ class NewAddingPage extends StatefulWidget {
 class NewAddingPageState extends State<NewAddingPage> {
   final QuillController _controller = QuillController.basic();
   final Map<String, File> _imagePaths = {};
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -205,8 +204,10 @@ class NewAddingPageState extends State<NewAddingPage> {
           );
 
           // Navigate to the MapSelectionScreen, passing the Post object along
-          if (navigatorKey.currentState != null) {
-            navigatorKey.currentState!.push(
+          if (mounted) {
+            Navigator.push(
+              // ignore: use_build_context_synchronously
+              context,
               MaterialPageRoute(
                 builder: (context) => SelectDueDateScreen(post: post),
               ),

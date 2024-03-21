@@ -124,7 +124,6 @@ class _LoginPageState extends State<LoginPage> {
   void _handleSuccessfulSignIn(UserCredential userCredential) async {
     final user = userCredential.user;
     await _storeUserInfo(user!);
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     // Check if the user already exists in Firestore
     final userDoc = widget.firestore.collection('users').doc(user.uid);
@@ -148,8 +147,9 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // Navigate to the appropriate screen
-    if (navigatorKey.currentState != null) {
-      navigatorKey.currentState!.pushReplacementNamed(
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+        context,
         agreement ? '/home' : '/agreement',
       );
     }
