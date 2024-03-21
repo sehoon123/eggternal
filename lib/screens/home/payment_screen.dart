@@ -1,6 +1,7 @@
 import 'package:eggciting/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,6 +19,12 @@ class PaymentScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                onPressed: () async {
+                  FlutterBranchSdk.validateSDKIntegration();
+                },
+                child: const Text('FlutterBranchSdk.validateSDKIntegration()'),
+              ),
               ElevatedButton(
                 onPressed: () async {
                   debugPrint('Go to Google');

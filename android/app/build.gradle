@@ -19,6 +19,8 @@ def lineChannelId = localProperties.getProperty('lineChannelId')
 def applicationName = localProperties.getProperty('applicationName')
 def branchKey = localProperties.getProperty('branchKey')
 def branchSecret = localProperties.getProperty('branchSecret')
+def branchKeyTest = localProperties.getProperty('branchKeyTest')
+def branchSecretTest = localProperties.getProperty('branchSecretTest')
 
 println("kakaoScheme = $kakaoScheme")
 println("androidGeoApiKey = $androidGeoApiKey")
@@ -72,7 +74,9 @@ android {
             lineChannelId: lineChannelId,
             applicationName: applicationName,
             branchKey: branchKey,
-            branchSecret: branchSecret
+            branchSecret: branchSecret,
+            branchKeyTest: branchKeyTest,
+            branchSecretTest: branchSecretTest
         ]
 
     }
@@ -99,6 +103,8 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
     implementation 'com.google.ar:core:1.41.0'
     implementation 'io.branch.sdk.android:library:5.8.0' // Check for latest version before hard-coding
+    implementation 'store.galaxy.samsung.installreferrer:samsung_galaxystore_install_referrer:4.0.0'
+
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
 
 

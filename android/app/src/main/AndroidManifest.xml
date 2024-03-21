@@ -95,9 +95,9 @@
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.BROWSABLE" />
 				<!-- REPLACE `android:host` with your `app.link` domain -->
-				<data android:scheme="https" android:host="eggciting.xyz" />
+				<data android:scheme="https" android:host="wzjxl.app.link" />
 				<!-- REPLACE `android:host` with your `-alternate` domain (required for proper functioning of App Links and Deepviews) -->
-				<data android:scheme="https" android:host="wzjxl-alternate.test-app.link" />
+				<data android:scheme="https" android:host="wzjxl-alternate.app.link" />
 			</intent-filter>
         </activity>
 
@@ -105,7 +105,7 @@
 		<!-- REPLACE `BranchKey` with the value from your Branch Dashboard -->
 		<meta-data android:name="io.branch.sdk.BranchKey" android:value="${branchKey}" />
 		<!-- REPLACE `BranchKey.test` with the value from your Branch Dashboard -->
-		<meta-data android:name="io.branch.sdk.BranchKey.test" android:value="${branchSecret}" />
+		<meta-data android:name="io.branch.sdk.BranchKey.test" android:value="${branchKeyTest}" />
 		<!-- Set to `true` to use `BranchKey.test` -->
 		<meta-data android:name="io.branch.sdk.TestMode" android:value="false" />
 
