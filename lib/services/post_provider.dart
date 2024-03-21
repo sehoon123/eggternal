@@ -13,7 +13,7 @@ class PostsProvider with ChangeNotifier {
   bool _hasMorePosts =
       true; // To check if more posts are available for fetching
   int _postCount = 0;
-  final int _sharedPostCount = 0;
+  int _sharedPostCount = 0;
 
   User? get currentUser => _currentUser;
   List<Post> get posts => _posts;
@@ -35,12 +35,14 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> fetchPosts({bool isInitialFetch = false}) async {
-    final currentLocation = GlobalLocationData().currentLocation;
-
     if (isInitialFetch) {
       _posts.clear();
       _lastDocument = null;
       _hasMorePosts = true;
+      if (!_isMyPostsSelected) {
+        _sharedPostCount =
+            0; // Reset sharedPostCount on initial fetch of shared posts
+      }
     }
 
     if (!_hasMorePosts || _isLoading) return;
@@ -48,55 +50,44 @@ class PostsProvider with ChangeNotifier {
     setIsLoading(true);
 
     try {
-      Query query = FirebaseFirestore.instance.collection('posts').where(
-            _isMyPostsSelected ? 'userId' : 'sharedUser',
-            isEqualTo: _currentUser!.uid,
-          );
+      Query query;
+      if (_isMyPostsSelected) {
+        query = FirebaseFirestore.instance
+            .collection('posts')
+            .where('userId', isEqualTo: _currentUser?.uid);
+      } else {
+        query = FirebaseFirestore.instance
+            .collection('posts')
+            .where('sharedUser', arrayContains: _currentUser?.uid);
+      }
+
       if (_lastDocument != null) {
         query = query.startAfterDocument(_lastDocument!);
       }
 
-      final querySnapshot = await query.get();
+      final querySnapshot =
+          await query.limit(10).get(); // Consider adding a limit
 
       if (querySnapshot.docs.isNotEmpty) {
         _lastDocument = querySnapshot.docs.last;
-        // Convert each DocumentSnapshot to a Map (JSON data) and then to a Post object
-        List<Post> fetchedPosts = querySnapshot.docs.map((doc) {
-          Map<String, dynamic> jsonData = doc.data() as Map<String, dynamic>;
+        List<Post> fetchedPosts = querySnapshot.docs
+            .map((doc) => Post.fromJson(doc.data() as Map<String, dynamic>))
+            .toList();
 
-          // GeoFirePoint location = jsonData['location'];
-          // debugPrint('Post data: $jsonData');
-          return Post.fromJson(jsonData);
-        }).toList();
+        if (!_isMyPostsSelected) {
+          // Update sharedPostCount only when fetching shared posts
+          _sharedPostCount += fetchedPosts.length;
+        }
 
-        fetchedPosts.sort((a, b) {
-          if (a.dueDate.isAfter(b.dueDate)) {
-            return 1;
-          } else {
-            double distanceA = a.location.distance(
-              lat: currentLocation!.latitude,
-              lng: currentLocation.longitude,
-            );
-            double distanceB = b.location.distance(
-              lat: currentLocation.latitude,
-              lng: currentLocation.longitude,
-            );
-            debugPrint('Distance A: $distanceA, ${a.title}');
-            debugPrint('Distance B: $distanceB, ${b.title}');
-            return distanceA.compareTo(distanceB);
-          }
-        });
-
-        // Add the sorted posts to the existing list
         _posts.addAll(fetchedPosts);
       } else {
         _hasMorePosts = false;
       }
 
       _postCount = _posts.length;
-      // Update sharedPostCount logic if needed
     } catch (e) {
       debugPrint('Error fetching posts: $e');
+      _hasMorePosts = false;
     } finally {
       setIsLoading(false);
     }
@@ -114,22 +105,25 @@ class PostsProvider with ChangeNotifier {
 
   Stream<List<Post>> get postsStream {
     // Adjust the query based on whether "My Posts" or "Shared Posts" is selected
-    String field = _isMyPostsSelected ? 'userId' : 'sharedUser';
-    return FirebaseFirestore.instance
-        .collection('posts')
-        .where(field, isEqualTo: _currentUser?.uid)
-        .snapshots()
-        .map((snapshot) {
+    Query query;
+    if (_isMyPostsSelected) {
+      debugPrint('Fetching My Posts for ${_currentUser?.uid}');
+      // For "My Posts", filter by 'userId'
+      query = FirebaseFirestore.instance
+          .collection('posts')
+          .where('userId', isEqualTo: _currentUser?.uid);
+    } else {
+      // For "Shared Posts", filter by 'sharedUser' containing the current user's UID
+      debugPrint('Fetching Shared Posts for ${_currentUser?.uid}');
+      query = FirebaseFirestore.instance
+          .collection('posts')
+          .where('sharedUser', arrayContains: _currentUser?.uid);
+    }
+
+    return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data();
-        // Convert Timestamp objects to String objects
-        // for (final key in data.keys) {
-        //   if (data[key] is Timestamp) {
-        //     data[key] = (data[key] as Timestamp).toDate().toIso8601String();
-        //   }
-        // }
-        // debugPrint('snapshot data: $data');
-        // debugPrint('hi im here: ${Post.fromJson(data).toString()}');
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        // Assuming Post.fromJson can handle the conversion correctly
         return Post.fromJson(data);
       }).toList();
     });

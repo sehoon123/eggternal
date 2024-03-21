@@ -147,6 +147,7 @@ class _MyAppState extends State<MyApp> {
 
     // Listen for deep link events
     FlutterBranchSdk.listSession().listen((linkData) async {
+      debugPrint('Link Data: $linkData');
       // Extract the post ID from the link data
       String? postId = linkData['postId'];
       if (postId != null) {
