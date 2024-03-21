@@ -35,11 +35,9 @@ class PostSuccessScreen extends StatelessWidget {
               right: 16.0,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MapScreen(),
-                    ),
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const MapScreen()),
+                    (Route<dynamic> route) => false,
                   );
                 },
                 child: const Text('Continue'),
