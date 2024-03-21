@@ -7,7 +7,6 @@ import 'package:eggciting/services/notification_service.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -46,8 +45,6 @@ Future<void> requestPermissions() async {
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  FlutterBranchSdk.validateSDKIntegration();
   await dotenv.load();
 
   await requestPermissions();
