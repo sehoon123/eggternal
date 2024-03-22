@@ -113,7 +113,7 @@ class NewAddingPageState extends State<NewAddingPage> {
                 showListCheck: false,
                 showSearchButton: false,
                 sharedConfigurations: const QuillSharedConfigurations(
-                  locale: Locale('en'), // Set English locale
+                  locale: Locale('ko'), // Set English locale
                 ),
                 customButtons: [
                   QuillToolbarCustomButtonOptions(
@@ -145,7 +145,7 @@ class NewAddingPageState extends State<NewAddingPage> {
                           padding: const EdgeInsets.only(bottom: 50),
                           readOnly: false, // true for view only mode
                           sharedConfigurations: const QuillSharedConfigurations(
-                            locale: Locale('en'),
+                            locale: Locale('ko'),
                           ),
                           embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                         ),

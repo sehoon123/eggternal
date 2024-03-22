@@ -41,10 +41,7 @@ Future<void> requestPermissions() async {
     await openAppSettings();
   }
 
-  // await Permission.camera.request();
   await Permission.notification.request();
-  // await Permission.microphone.request();
-  // await Permission.photos.request();
 }
 
 void main() async {
