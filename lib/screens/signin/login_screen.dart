@@ -142,17 +142,13 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
     bool agreement = userData['agreement'] ?? false;
 
-    if (mounted) {
-      Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
-    }
+    Provider.of<PostsProvider>(context, listen: false).setCurrentUser(user);
 
     // Navigate to the appropriate screen
-    if (mounted) {
-      Navigator.pushReplacementNamed(
-        context,
-        agreement ? '/home' : '/agreement',
-      );
-    }
+    Navigator.pushReplacementNamed(
+      context,
+      agreement ? '/home' : '/agreement',
+    );
   }
 
   @override
