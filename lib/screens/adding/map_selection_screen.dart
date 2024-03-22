@@ -33,24 +33,24 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
     // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
     // _locationProvider.startTrackingLocation();
     Timer(const Duration(milliseconds: 500), () {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Location'),
-          content: const Text('Please select a location on the map.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Select Location'),
+            content: const Text('Please select a location on the map.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   @override
@@ -168,6 +168,19 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                     controller: _searchController,
                     textInputAction: TextInputAction.search,
                     onChanged: _searchPlace,
+                    onSubmitted: (value) {
+                      // Check if there are any predictions
+                      if (_predictions.isNotEmpty) {
+                        // Use the first prediction's placeId to move the screen to that location
+                        _moveToSearchedPlace(_predictions.first.placeId!);
+                        // Optionally, set the search bar text to the first prediction's description
+                        _searchController.clear();
+                        // Clear the predictions list to hide the suggestions dropdown
+                        setState(() {
+                          _predictions = [];
+                        });
+                      }
+                    },
                     decoration: InputDecoration(
                       hintText: 'Search for a place...',
                       fillColor: Colors.white,
@@ -190,10 +203,9 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                             title: Text(_predictions[index].description ??
                                 'No description'),
                             onTap: () {
-                              _searchController.text =
-                                  _predictions[index].description ?? '';
                               _moveToSearchedPlace(
                                   _predictions[index].placeId!);
+                              _searchController.clear();
                               setState(() {
                                 _predictions = [];
                               });

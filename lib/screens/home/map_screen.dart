@@ -1,14 +1,14 @@
-import 'package:eggciting/models/global_location_data.dart';
-import 'package:eggciting/models/post.dart';
-import 'package:eggciting/services/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:eggciting/models/global_location_data.dart';
+import 'package:eggciting/models/post.dart';
+import 'package:eggciting/screens/opening/post_details_screen.dart';
+import 'package:eggciting/services/post_provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -18,7 +18,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  GoogleMapController? _mapController;
+  late GoogleMapController _controller;
   final TextEditingController _searchController = TextEditingController();
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
@@ -32,13 +32,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
-    _mapController?.dispose();
     super.dispose();
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    _moveToCurrentUserLocation();
   }
 
   void _searchPlace(String query) async {
@@ -59,9 +53,11 @@ class _MapScreenState extends State<MapScreen> {
     final lat = detail.result.geometry!.location.lat;
     final lng = detail.result.geometry!.location.lng;
 
-    _mapController!.animateCamera(
+    debugPrint('moveToSearchedPlace: $lat, $lng');
+
+    _controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 16),
+        CameraPosition(target: LatLng(lat, lng), zoom: 20),
       ),
     );
   }
@@ -77,10 +73,10 @@ class _MapScreenState extends State<MapScreen> {
 
     // When we reach here, permissions are granted and we can continue accessing the position of the device.
     Position position = await Geolocator.getCurrentPosition();
-    _mapController!.animateCamera(
+    _controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 16),
+            target: LatLng(position.latitude, position.longitude), zoom: 20),
       ),
     );
   }
@@ -94,7 +90,6 @@ class _MapScreenState extends State<MapScreen> {
             StreamBuilder<List<Post>>(
               stream: Provider.of<PostsProvider>(context).postsStream,
               builder: (context, snapshot) {
-                // debugPrint('snapshot: $snapshot');
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
@@ -105,18 +100,34 @@ class _MapScreenState extends State<MapScreen> {
                     myLocationButtonEnabled: false,
                     zoomControlsEnabled: false,
                     myLocationEnabled: true,
-                    onMapCreated: _onMapCreated,
-                    initialCameraPosition: CameraPosition(
-                      target: userLocation ?? const LatLng(0, 0),
-                      zoom: 12,
-                    ),
+                    onMapCreated: (controller) {
+                      _controller = controller;
+                      if (userLocation != null) {
+                        _controller.animateCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: userLocation,
+                              zoom: 20,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    initialCameraPosition: userLocation != null
+                        ? CameraPosition(
+                            target: userLocation,
+                            zoom: 20,
+                          )
+                        : const CameraPosition(
+                            target: LatLng(0, 0),
+                            zoom: 20,
+                          ),
                     onTap: (LatLng position) {
                       FocusScope.of(context).unfocus();
                     },
                     markers: snapshot.data!.map((post) {
                       return Marker(
-                        markerId: MarkerId(post
-                            .key), // Assuming the Post class has an 'id' field
+                        markerId: MarkerId(post.key),
                         position: LatLng(
                             post.location.latitude, post.location.longitude),
                         infoWindow: InfoWindow(title: post.title),
@@ -147,6 +158,15 @@ class _MapScreenState extends State<MapScreen> {
                     controller: _searchController,
                     textInputAction: TextInputAction.search,
                     onChanged: _searchPlace,
+                    onSubmitted: (value) {
+                      if (_predictions.isNotEmpty) {
+                        _moveToSearchedPlace(_predictions.first.placeId!);
+                        _searchController.clear();
+                        setState(() {
+                          _predictions = [];
+                        });
+                      }
+                    },
                     decoration: InputDecoration(
                       hintText: 'Search for a place...',
                       fillColor: Colors.white,
