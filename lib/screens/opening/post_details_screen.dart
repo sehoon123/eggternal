@@ -95,6 +95,26 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
             },
             icon: const Icon(Icons.share),
           ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                // Updating the distance will trigger a rebuild
+                distance = userLocation != null
+                    ? GeoFirePoint.distanceBetween(
+                        to: Coordinates(
+                          widget.post.location.latitude,
+                          widget.post.location.longitude,
+                        ),
+                        from: Coordinates(
+                          userLocation.latitude,
+                          userLocation.longitude,
+                        ),
+                      )
+                    : double.infinity;
+              });
+            },
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: SafeArea(
