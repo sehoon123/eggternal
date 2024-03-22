@@ -163,6 +163,18 @@ class _ListScreenState extends State<ListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Posts'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Consumer<PostsProvider>(
           builder: (context, postsProvider, child) {
