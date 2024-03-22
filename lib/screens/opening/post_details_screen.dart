@@ -149,52 +149,61 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                   height: 16,
                 ),
                 SizedBox(
-                  width:
-                      double.infinity, // Makes the button fit the device width
+                  width: double.infinity,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 0), // Adjust the padding as needed
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: ElevatedButton(
-                      onPressed: distance * 1000 <= thresholdDistance &&
-                              isReadyToOpen
-                          ? () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          ARViewPage(post: widget.post)));
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //         builder: (context) => DisplayPostScreen(
-                              //             post: widget.post)));
-                            }
-                          : null, // Disables the button if distance is greater than thresholdDistance
+                      onPressed: () {
+                        if (distance * 1000 <= thresholdDistance &&
+                            isReadyToOpen) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ARViewPage(post: widget.post),
+                            ),
+                          );
+                        } else {
+                          if (distance * 1000 > thresholdDistance) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('You are too far from the location.'),
+                              ),
+                            );
+                          } else if (!isReadyToOpen) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('The post is not ready to open yet.'),
+                              ),
+                            );
+                          }
+                        }
+                      },
                       style: ButtonStyle(
                         backgroundColor:
                             MaterialStateProperty.resolveWith<Color>(
                           (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.disabled)) {
-                              return Colors.grey; // Color for disabled state
+                            if (distance * 1000 > thresholdDistance ||
+                                !isReadyToOpen) {
+                              return Colors.grey;
                             }
-                            return Theme.of(context)
-                                .primaryColor; // Default color
+                            return Theme.of(context).primaryColor;
                           },
                         ),
                         foregroundColor:
                             MaterialStateProperty.resolveWith<Color>(
                           (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.disabled)) {
-                              return Colors
-                                  .black; // Ensures text color is visible on grey background
+                            if (distance * 1000 > thresholdDistance ||
+                                !isReadyToOpen) {
+                              return Colors.black;
                             }
-                            return Colors.white; // Default text color
+                            return Colors.white;
                           },
                         ),
                         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          const EdgeInsets.symmetric(
-                              vertical:
-                                  15), // Adjust padding, making the button taller
+                          const EdgeInsets.symmetric(vertical: 15),
                         ),
                       ),
                       child: const Text('Open Post'),
