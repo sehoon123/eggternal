@@ -102,10 +102,12 @@ class LocationService(): Service() {
     }
 
     private fun stop() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(1)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             stopForeground(STOP_FOREGROUND_DETACH)
         } else {
-            stopForeground(false)
+            stopForeground(true)
         }
         stopSelf()
     }

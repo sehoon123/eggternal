@@ -199,30 +199,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                       _useBackgroundNotifications = value;
                     });
 
-                    // widget.locationHandler
-                    //     .updateUseBackgroundNotifications(value);
+                    widget.locationHandler
+                        .updateUseBackgroundNotifications(value);
 
-                    if (!value) {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Change Location Permission'),
-                            content: const Text(
-                                'Please go to Settings > Privacy > Location Services and change the permission for this app.'),
-                            actions: <Widget>[
-                              TextButton(
-                                child: const Text('OK'),
-                                onPressed: () async {
-                                  Navigator.of(context).pop();
-                                  await openAppSettings();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
                   },
                 ),
                 const Spacer(), // This will push the logout button to the bottom

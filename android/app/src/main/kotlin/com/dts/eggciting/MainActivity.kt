@@ -106,7 +106,7 @@ class MainActivity: FlutterFragmentActivity(), LocationCallback {
                     attachEvent = events
                 }
 
-                override fun onCancel(arguments: Any) {
+                override fun onCancel(arguments: Any?) {
                     Log.w("TAG_NAME", "Removing listener")
                     attachEvent = null
                     println("StreamHandler onCancel")

@@ -43,6 +43,11 @@ class LocationHandler {
         debugPrint('Error: ${e.message}');
       }
     } else {
+      try {
+        locationChannel.invokeMethod('stopLocation');
+      } on PlatformException catch (e) {
+        debugPrint('Error: ${e.message}');
+      }
       // Use LocationService for location updates
       // Assuming you have a LocationService class similar to the one described in previous responses
       LocationService locationService = LocationService();
