@@ -28,9 +28,9 @@ class MainActivity: FlutterFragmentActivity(), LocationCallback {
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.ACCESS_COARSE_LOCATION
     ).apply {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
+        // if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        //     add(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        // }
     }.toTypedArray()
 
     private val networkEventChannel = "com.dts.eggciting/location"

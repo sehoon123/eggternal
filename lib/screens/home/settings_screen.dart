@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/screens/signin/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,10 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final LocationHandler locationHandler;
+  const SettingsScreen({super.key, required this.locationHandler});
 
   @override
   SettingsScreenState createState() => SettingsScreenState();
@@ -20,6 +23,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   String? _profileImageUrl;
   File? _localImageFile;
+  bool _useBackgroundNotifications = false;
 
   @override
   void initState() {
@@ -55,6 +59,9 @@ class SettingsScreenState extends State<SettingsScreen> {
               'profileImageUrl_${user!.uid}', _profileImageUrl!);
         }
       }
+      _useBackgroundNotifications =
+          prefs.getBool('useBackgroundNotifications') ?? false;
+      setState(() {});
     }
   }
 
@@ -179,6 +186,44 @@ class SettingsScreenState extends State<SettingsScreen> {
                     onPressed: _updateProfile,
                     child: const Text('Update Profile'),
                   ),
+                ),
+                SwitchListTile(
+                  title: const Text('Use Background Notifications'),
+                  value: _useBackgroundNotifications,
+                  onChanged: (bool value) async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    debugPrint('useBackgroundNotifications: $value');
+                    await prefs.setBool('useBackgroundNotifications', value);
+                    setState(() {
+                      _useBackgroundNotifications = value;
+                    });
+
+                    // widget.locationHandler
+                    //     .updateUseBackgroundNotifications(value);
+
+                    if (!value) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Change Location Permission'),
+                            content: const Text(
+                                'Please go to Settings > Privacy > Location Services and change the permission for this app.'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  await openAppSettings();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
                 ),
                 const Spacer(), // This will push the logout button to the bottom
                 ElevatedButton(

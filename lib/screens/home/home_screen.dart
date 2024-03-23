@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/screens/adding/map_selection_screen.dart';
 import 'package:eggciting/screens/home/list_screen.dart';
 import 'package:eggciting/screens/home/map_screen.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final LocationHandler _locationHandler = LocationHandler();
   int _selectedIndex = 0;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
@@ -52,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             case 3:
               return const PaymentScreen();
             case 4:
-              return const SettingsScreen();
+              return SettingsScreen(locationHandler: _locationHandler);
             default:
               return const MapScreen();
           }
@@ -111,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   case 3:
                     return const PaymentScreen();
                   case 4:
-                    return const SettingsScreen();
+                    return SettingsScreen(locationHandler: _locationHandler);
                   default:
                     return const MapScreen();
                 }

@@ -95,61 +95,6 @@ class LocationService(): Service() {
                 val long = location.longitude
                 // Log.i("data", "Location: $lat, $long")
                 locationCallback?.onLocationUpdated(lat, long)
-
-                // val trash = sharedPreferences.all.filterKeys { it.contains("notification")}
-                // trash.forEach { (key, value) ->
-                //     sharedPreferences.edit().remove(key).apply()
-                // }
-
-                // Log.i("SharedPreferences", "All entries: ${sharedPreferences.all}")
-
-                // val allPostDetails = sharedPreferences.all.filterKeys { it.startsWith("flutter.postDetails") }
-                // allPostDetails.forEach { (key, value) ->
-                //     val postDetails = JSONObject(value.toString())
-                //     val storedLocation = postDetails.getString("location").split(",")
-                //     val storedLat = storedLocation[0].toDouble()
-                //     val storedLong = storedLocation[1].toDouble()
-                //     val distance = location.distanceTo(Location("").apply {
-                //         latitude = storedLat
-                //         longitude = storedLong
-                //     })
-
-                //     // Check if a notification has already been shown for this post
-                //     val notificationShownKey = "$key.notificationShown"
-                //     val notificationTimestampKey = "$key.notificationTimestamp"
-
-                //     // Check if the keys exist in SharedPreferences
-                //     val notificationShownExists = notificationPreferences.contains(notificationShownKey)
-                //     val notificationTimestampExists = notificationPreferences.contains(notificationTimestampKey)
-
-                //     // Retrieve the values only if the keys exist
-                //     val notificationShown = if (notificationShownExists) {
-                //         notificationPreferences.getBoolean(notificationShownKey, false)
-                //     } else {
-                //         false // Default value if the key does not exist
-                //     }
-
-                //     val notificationTimestamp = if (notificationTimestampExists) {
-                //         notificationPreferences.getLong(notificationTimestampKey, 0)
-                //     } else {
-                //         0 // Default value if the key does not exist
-                //     }
-
-                //     val currentTime = System.currentTimeMillis()
-                //     val timeDifference = currentTime - notificationTimestamp
-
-                //     if (distance < 200 && (!notificationShown || timeDifference >= 7200000)) {
-                //         triggerNotification("You are near a post ${postDetails.getString("title")}!")
-
-                //         // Update the flag and timestamp in SharedPreferences
-                //         notificationPreferences.edit()
-                //             .putBoolean(notificationShownKey, true)
-                //             .putLong(notificationTimestampKey, currentTime)
-                //             .apply()
-                //     }
-
-                    // Log.i("postDetails", "postDetails: $postDetails")
-                    // Log.i("notificationPreferences", "notificationPreferences: ${notificationPreferences.all}")
             }
             .launchIn(serviceScope)
 
@@ -160,7 +105,7 @@ class LocationService(): Service() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             stopForeground(STOP_FOREGROUND_DETACH)
         } else {
-            stopForeground(true)
+            stopForeground(false)
         }
         stopSelf()
     }
@@ -202,6 +147,6 @@ class LocationService(): Service() {
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(1, notification)
+        notificationManager.notify(0, null)
     }
 }

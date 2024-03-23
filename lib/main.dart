@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/home/map_screen.dart';
@@ -27,6 +28,7 @@ import 'package:eggciting/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 // request permissions
@@ -92,35 +94,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const locationChannel = MethodChannel('locationPlatform');
-  final _eventChannel = const EventChannel('com.dts.eggciting/location');
+  final LocationHandler _locationHandler = LocationHandler();
 
   final FlutterLocalNotificationsPlugin _local =
       FlutterLocalNotificationsPlugin();
 
   StreamSubscription? subscription;
-
-  void _locationStream() {
-    NotificationService notificationService = NotificationService();
-    subscription = _eventChannel.receiveBroadcastStream().listen(
-      (dynamic event) {
-        debugPrint('Flutter Received: $event');
-        final parts = event.toString().split(',');
-        if (parts.length == 2) {
-          final lat = double.tryParse(parts[0]);
-          final lng = double.tryParse(parts[1]);
-          if (lat != null && lng != null) {
-            GlobalLocationData().currentLocation = LatLng(lat, lng);
-            notificationService.monitorLocationAndTriggerNotification();
-          }
-        }
-      },
-      onError: (Object obj, StackTrace stackTrace) {
-        debugPrint('Error: $obj');
-        debugPrint('Stack: $stackTrace');
-      },
-    );
-  }
 
   void _initialization() async {
     AndroidInitializationSettings android =
@@ -135,10 +114,19 @@ class _MyAppState extends State<MyApp> {
     await _local.initialize(settings);
   }
 
+  Future<void> _initializeLocationHandler() async {
+    // Load the initial value of useBackgroundNotifications from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool useBackgroundNotifications =
+        prefs.getBool('useBackgroundNotifications') ?? false;
+    _locationHandler
+        .updateUseBackgroundNotifications(useBackgroundNotifications);
+  }
+
   @override
   void initState() {
     super.initState();
-    _locationStream();
+    _initializeLocationHandler();
     _initialization();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -192,12 +180,6 @@ class _MyAppState extends State<MyApp> {
     }, onError: (error) {
       debugPrint('Error: $error');
     });
-
-    try {
-      locationChannel.invokeMethod('getLocation');
-    } on PlatformException catch (e) {
-      debugPrint('Error: ${e.message}');
-    }
   }
 
   @override

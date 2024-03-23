@@ -23,8 +23,21 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // Provider.of<LocationProvider>(context, listen: false)
-    //     .startTrackingLocation();
+    _checkUserLoggedIn();
+  }
+
+  void _checkUserLoggedIn() async {
+    // Check if the user is already logged in
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // User is logged in, navigate to the appropriate screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(
+          context,
+          '/home', // Replace with the route of your next screen
+        );
+      });
+    }
   }
 
   Future<void> _storeUserInfo(User user) async {
