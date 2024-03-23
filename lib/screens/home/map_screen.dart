@@ -57,7 +57,7 @@ class _MapScreenState extends State<MapScreen> {
 
     _controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 20),
+        CameraPosition(target: LatLng(lat, lng), zoom: 16),
       ),
     );
   }
@@ -76,7 +76,7 @@ class _MapScreenState extends State<MapScreen> {
     _controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 20),
+            target: LatLng(position.latitude, position.longitude), zoom: 16),
       ),
     );
   }
@@ -107,7 +107,7 @@ class _MapScreenState extends State<MapScreen> {
                           CameraUpdate.newCameraPosition(
                             CameraPosition(
                               target: userLocation,
-                              zoom: 20,
+                              zoom: 16,
                             ),
                           ),
                         );
@@ -116,11 +116,11 @@ class _MapScreenState extends State<MapScreen> {
                     initialCameraPosition: userLocation != null
                         ? CameraPosition(
                             target: userLocation,
-                            zoom: 20,
+                            zoom: 16,
                           )
                         : const CameraPosition(
                             target: LatLng(0, 0),
-                            zoom: 20,
+                            zoom: 16,
                           ),
                     onTap: (LatLng position) {
                       FocusScope.of(context).unfocus();

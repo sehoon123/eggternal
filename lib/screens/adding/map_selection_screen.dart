@@ -79,7 +79,7 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
 
     _controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 20),
+        CameraPosition(target: LatLng(lat, lng), zoom: 16),
       ),
     );
     setState(() {
@@ -106,7 +106,7 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
     _controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 20),
+            target: LatLng(position.latitude, position.longitude), zoom: 16),
       ),
     );
   }
@@ -130,7 +130,7 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                     CameraUpdate.newCameraPosition(
                       CameraPosition(
                         target: userLocation,
-                        zoom: 20,
+                        zoom: 16,
                       ),
                     ),
                   );
@@ -151,11 +151,11 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
               initialCameraPosition: userLocation != null
                   ? CameraPosition(
                       target: userLocation,
-                      zoom: 20,
+                      zoom: 16,
                     )
                   : const CameraPosition(
                       target: LatLng(0, 0),
-                      zoom: 20,
+                      zoom: 16,
                     ),
             ),
             Positioned(
