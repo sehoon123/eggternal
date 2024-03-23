@@ -1,3 +1,4 @@
+import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/opening/ar_test.dart';
@@ -20,6 +21,21 @@ class PostDetailsScreen extends StatefulWidget {
 }
 
 class PostDetailsScreenState extends State<PostDetailsScreen> {
+  late LocationHandler _locationHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    _locationHandler = LocationHandler();
+    _locationHandler.startLocationUpdates();
+  }
+
+  @override
+  void dispose() {
+    _locationHandler.stopLocationUpdates();
+    super.dispose();
+  }
+
   bool _isReadyToOpen(DateTime dueDate) {
     final difference = dueDate.difference(DateTime.now());
     return difference.inDays < 0 ||
@@ -84,157 +100,175 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
     // Check if the post is ready to open based on time
     bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Post Details'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              String dynamicLink = await createDynamicLink(widget.post.key);
-              Share.share('Check out this post: $dynamicLink');
-            },
-            icon: const Icon(Icons.share),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                // Updating the distance will trigger a rebuild
-                distance = userLocation != null
-                    ? GeoFirePoint.distanceBetween(
-                        to: Coordinates(
-                          widget.post.location.latitude,
-                          widget.post.location.longitude,
-                        ),
-                        from: Coordinates(
-                          userLocation.latitude,
-                          userLocation.longitude,
-                        ),
-                      )
-                    : double.infinity;
-              });
-            },
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.post.title,
-                style: const TextStyle(fontSize: 30.0),
+    return StreamBuilder<LatLng>(
+      stream: GlobalLocationData().locationStream,
+      builder: (context, snapshot) {
+        final userLocation = snapshot.data;
+        double distance = userLocation != null
+            ? GeoFirePoint.distanceBetween(
+                to: Coordinates(
+                  widget.post.location.latitude,
+                  widget.post.location.longitude,
+                ),
+                from: Coordinates(
+                  userLocation.latitude,
+                  userLocation.longitude,
+                ),
+              )
+            : double.infinity;
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Post Details'),
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  String dynamicLink = await createDynamicLink(widget.post.key);
+                  Share.share('Check out this post: $dynamicLink');
+                },
+                icon: const Icon(Icons.share),
               ),
-              const SizedBox(height: 16.0),
-              // Display user's location if available
-              if (userLocation == null) ...[
-                const Text('Loading user location...'),
-                const LinearProgressIndicator(),
-              ] else ...[
-                // Display distance information
-                Text(
-                    'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
-                // Add additional information about the location as needed
-                const SizedBox(height: 16.0),
-                // Replace the image view section with a map showing the post's location
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16.0),
-                    child: GoogleMap(
-                      myLocationButtonEnabled: true,
-                      myLocationEnabled: true,
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(widget.post.location.latitude,
-                            widget.post.location.longitude),
-                        zoom: 14.0,
-                      ),
-                      markers: {
-                        Marker(
-                          markerId: const MarkerId('postMarker'),
-                          position: LatLng(widget.post.location.latitude,
-                              widget.post.location.longitude),
-                          infoWindow: const InfoWindow(
-                            title: 'Post Location',
-                            snippet: 'This is where the post is located.',
-                          ),
-                        ),
-                      },
-                    ),
-                  ),
-                ),
-                // Check if the user is within the allowed distance
-                const SizedBox(
-                  height: 16,
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (distance * 1000 <= thresholdDistance &&
-                            isReadyToOpen) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ARViewPage(post: widget.post),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    // Updating the distance will trigger a rebuild
+                    distance = userLocation != null
+                        ? GeoFirePoint.distanceBetween(
+                            to: Coordinates(
+                              widget.post.location.latitude,
+                              widget.post.location.longitude,
                             ),
-                          );
-                        } else {
-                          if (distance * 1000 > thresholdDistance) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('You are too far from the location.'),
-                              ),
-                            );
-                          } else if (!isReadyToOpen) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('The post is not ready to open yet.'),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (distance * 1000 > thresholdDistance ||
-                                !isReadyToOpen) {
-                              return Colors.grey;
-                            }
-                            return Theme.of(context).primaryColor;
-                          },
-                        ),
-                        foregroundColor:
-                            MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (distance * 1000 > thresholdDistance ||
-                                !isReadyToOpen) {
-                              return Colors.black;
-                            }
-                            return Colors.white;
-                          },
-                        ),
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                      ),
-                      child: const Text('Open Post'),
-                    ),
-                  ),
-                ),
-              ],
+                            from: Coordinates(
+                              userLocation.latitude,
+                              userLocation.longitude,
+                            ),
+                          )
+                        : double.infinity;
+                  });
+                },
+                icon: const Icon(Icons.refresh),
+              ),
             ],
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.post.title,
+                    style: const TextStyle(fontSize: 30.0),
+                  ),
+                  const SizedBox(height: 16.0),
+                  // Display user's location if available
+                  if (userLocation == null) ...[
+                    const Text('Loading user location...'),
+                    const LinearProgressIndicator(),
+                  ] else ...[
+                    // Display distance information
+                    Text(
+                        'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
+                    // Add additional information about the location as needed
+                    const SizedBox(height: 16.0),
+                    // Replace the image view section with a map showing the post's location
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: GoogleMap(
+                          myLocationButtonEnabled: true,
+                          myLocationEnabled: true,
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(widget.post.location.latitude,
+                                widget.post.location.longitude),
+                            zoom: 14.0,
+                          ),
+                          markers: {
+                            Marker(
+                              markerId: const MarkerId('postMarker'),
+                              position: LatLng(widget.post.location.latitude,
+                                  widget.post.location.longitude),
+                              infoWindow: const InfoWindow(
+                                title: 'Post Location',
+                                snippet: 'This is where the post is located.',
+                              ),
+                            ),
+                          },
+                        ),
+                      ),
+                    ),
+                    // Check if the user is within the allowed distance
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (distance * 1000 <= thresholdDistance &&
+                                isReadyToOpen) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ARViewPage(post: widget.post),
+                                ),
+                              );
+                            } else {
+                              if (distance * 1000 > thresholdDistance) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('You are too far from the location.'),
+                                  ),
+                                );
+                              } else if (!isReadyToOpen) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('The post is not ready to open yet.'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
+                              (Set<MaterialState> states) {
+                                if (distance * 1000 > thresholdDistance ||
+                                    !isReadyToOpen) {
+                                  return Colors.grey;
+                                }
+                                return Theme.of(context).primaryColor;
+                              },
+                            ),
+                            foregroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
+                              (Set<MaterialState> states) {
+                                if (distance * 1000 > thresholdDistance ||
+                                    !isReadyToOpen) {
+                                  return Colors.black;
+                                }
+                                return Colors.white;
+                              },
+                            ),
+                            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                              const EdgeInsets.symmetric(vertical: 15),
+                            ),
+                          ),
+                          child: const Text('Open Post'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      }
     );
   }
 }
