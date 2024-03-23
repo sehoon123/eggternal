@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/screens/opening/post_details_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,8 +109,7 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  double _calculateDistance(GeoFirePoint postLocation) {
-    final userLocation = GlobalLocationData().currentLocation;
+  double _calculateDistance(LatLng? userLocation, GeoFirePoint postLocation) {
     if (userLocation != null) {
       return postLocation.distance(
         lat: userLocation.latitude,
@@ -264,12 +265,6 @@ class _ListScreenState extends State<ListScreen> {
                               double.parse(details!['location'].split(',')[0]),
                               double.parse(details['location'].split(',')[1]),
                             );
-                            final userLocation =
-                                GlobalLocationData().currentLocation;
-                            final distance = userLocation != null
-                                ? _calculateDistance(postLocation)
-                                : -1;
-
                             return Column(
                               children: [
                                 Container(
@@ -297,8 +292,16 @@ class _ListScreenState extends State<ListScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text('User: ${snapshot.data}'),
-                                              Text(
-                                                  'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}'),
+                                              ValueListenableBuilder<LatLng?>(
+                                                valueListenable: GlobalLocationData().currentLocationNotifier,
+                                                builder: (context, userLocation, child) {
+                                                  final distance = userLocation != null
+                                                      ? _calculateDistance(userLocation, postLocation)
+                                                      : -1;
+                                                  return Text(
+                                                      'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}');
+                                                }
+                                              ),
                                               Text('Time Left: $timeLeft'),
                                             ],
                                           ),

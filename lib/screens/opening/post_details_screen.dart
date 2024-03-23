@@ -80,20 +80,6 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userLocation = GlobalLocationData().currentLocation;
-    double distance = userLocation != null
-        ? GeoFirePoint.distanceBetween(
-            to: Coordinates(
-              widget.post.location.latitude,
-              widget.post.location.longitude,
-            ),
-            from: Coordinates(
-              userLocation.latitude,
-              userLocation.longitude,
-            ),
-          )
-        : double.infinity;
-
     // Set your threshold distance
     double thresholdDistance = 30.0; // in meters
 
