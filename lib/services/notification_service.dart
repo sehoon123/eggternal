@@ -60,43 +60,76 @@ class NotificationService {
             (NotificationResponse notificationResponse) async {});
   }
 
+  Future<void> saveNotifiedLocation(String locationId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'notifiedLocation_$locationId',
+      DateTime.now().toIso8601String(),
+    );
+  }
+
+  Future<Map<String, DateTime>> getNotifiedLocations() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Map<String, DateTime> notifiedLocations = {};
+
+    // Retrieve all keys from SharedPreferences
+    Set<String> keys = prefs.getKeys();
+
+    // Filter keys that match the pattern 'notifiedLocation_*'
+    Iterable<String> notifiedLocationKeys =
+        keys.where((key) => key.startsWith('notifiedLocation_'));
+
+    // Iterate over each key, decode the date string, and add to the map
+    for (String key in notifiedLocationKeys) {
+      String? storedDateString = prefs.getString(key);
+      if (storedDateString != null) {
+        DateTime storedDate = DateTime.parse(storedDateString);
+        // Extract the locationId from the key itself
+        String locationId = key.substring('notifiedLocation_'.length);
+        // Add the locationId and the stored date to the map
+        notifiedLocations[locationId] = storedDate;
+      }
+    }
+
+    return notifiedLocations;
+  }
+
   Future<void> monitorLocationAndTriggerNotification() async {
     // Request location permissions
     final location = GlobalLocationData().currentLocation;
 
     debugPrint('Current Location in monitor : $location');
 
-    getStoredLocations().then(
-      (List<TimecapsuleLocation> storedLocations) {
-        List<TimecapsuleLocation> nearbyLocations = [];
-        for (var storedLocation in storedLocations) {
-          List<String> coordinates = storedLocation.location.split(',');
-          double targetLatitude = double.parse(coordinates[0]);
-          double targetLongitude = double.parse(coordinates[1]);
+    List<TimecapsuleLocation> storedLocations = await getStoredLocations();
+    List<TimecapsuleLocation> nearbyLocations = [];
+    Map<String, DateTime> notifiedLocations = await getNotifiedLocations();
 
-          if (isNearTargetLocation(
-                location,
-                targetLatitude,
-                targetLongitude,
-              ) &&
-              (!notifiedLocations.containsKey(storedLocation.id) ||
-                  DateTime.now()
-                          .difference(notifiedLocations[storedLocation.id]!)
-                          .inHours >
-                      2) &&
-              DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))) {
-            nearbyLocations.add(storedLocation);
-            // debugPrint(
-            //     'date After ${DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))}');
-            notifiedLocations[storedLocation.id] = DateTime.now();
-          }
-        }
-        if (nearbyLocations.isNotEmpty) {
-          debugPrint('Nearby Locations: $nearbyLocations');
-          showNotification();
-        }
-      },
-    );
+    for (var storedLocation in storedLocations) {
+      List<String> coordinates = storedLocation.location.split(',');
+      double targetLatitude = double.parse(coordinates[0]);
+      double targetLongitude = double.parse(coordinates[1]);
+
+      if (isNearTargetLocation(
+            location,
+            targetLatitude,
+            targetLongitude,
+          ) &&
+          (!notifiedLocations.containsKey(storedLocation.id) ||
+              DateTime.now()
+                      .difference(notifiedLocations[storedLocation.id]!)
+                      .inHours >
+                  2) &&
+          DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))) {
+        nearbyLocations.add(storedLocation);
+        // debugPrint(
+        //     'date After ${DateTime.now().isAfter(DateTime.parse(storedLocation.dueDate))}');
+        await saveNotifiedLocation(storedLocation.id);
+      }
+    }
+    if (nearbyLocations.isNotEmpty) {
+      debugPrint('Nearby Locations: $nearbyLocations');
+      await showNotification();
+    }
   }
 
   bool isNearTargetLocation(
