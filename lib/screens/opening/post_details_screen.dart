@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
@@ -42,12 +44,20 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
         (difference.inDays == 0 && difference.inHours <= 0);
   }
 
-  Future<String> createDynamicLink(String postId) async {
+  Future<String> createDynamicLink(Post post) async {
+    Map<String, dynamic> postMap = post.toJson();
+    postMap['location'] = {
+      'geopoint': {
+        'latitude': post.location.latitude,
+        'longitude': post.location.longitude,
+      },
+    };
+    debugPrint('lat, long: ${post.location.latitude}, ${post.location.longitude}');
     // Create BranchLinkProperties with the desired properties
     BranchLinkProperties linkProperties = BranchLinkProperties(
       channel: 'facebook', // The channel through which the link was shared
       feature: 'sharing', // The feature that the link is associated with
-      alias: 'post-$postId', // A unique alias for the link
+      alias: 'post-${post.key}', // A unique alias for the link
       stage: 'new user', // The stage of the user's lifecycle
       matchDuration:
           43200, // The duration in seconds for which the link should be matched
@@ -57,16 +67,16 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
     );
 
     // Add any additional control parameters if needed
-    linkProperties.addControlParam(postId, 'postId');
+    linkProperties.addControlParam('post', jsonEncode(postMap));
 
     // Create a BranchUniversalObject for the post
     BranchUniversalObject buo = BranchUniversalObject(
-      canonicalIdentifier: 'content/$postId',
+      canonicalIdentifier: 'content/${post.key}',
       title: 'Check out this post!',
       contentDescription: 'This is a great post you should check out.',
       imageUrl: 'https://example.com/post-image.jpg',
       contentMetadata: BranchContentMetaData()
-        ..addCustomMetadata('postId', postId),
+        ..addCustomMetadata('post', jsonEncode(postMap)),
     );
 
     // Create the dynamic link
@@ -87,177 +97,177 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
     bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
 
     return StreamBuilder<LatLng>(
-      stream: GlobalLocationData().locationStream,
-      builder: (context, snapshot) {
-        final userLocation = snapshot.data;
-        final lastKnownLocation = GlobalLocationData().lastKnownLocation;
-        final locationToUse = userLocation ?? lastKnownLocation;
+        stream: GlobalLocationData().locationStream,
+        builder: (context, snapshot) {
+          final userLocation = snapshot.data;
+          final lastKnownLocation = GlobalLocationData().lastKnownLocation;
+          final locationToUse = userLocation ?? lastKnownLocation;
 
-        double distance = locationToUse != null
-            ? GeoFirePoint.distanceBetween(
-                to: Coordinates(
-                  widget.post.location.latitude,
-                  widget.post.location.longitude,
-                ),
-                from: Coordinates(
-                  locationToUse.latitude,
-                  locationToUse.longitude,
-                ),
-              )
-            : double.infinity;
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Post Details'),
-            actions: [
-              IconButton(
-                onPressed: () async {
-                  String dynamicLink = await createDynamicLink(widget.post.key);
-                  Share.share('Check out this post: $dynamicLink');
-                },
-                icon: const Icon(Icons.share),
-              ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    // Updating the distance will trigger a rebuild
-                    distance = locationToUse != null
-                        ? GeoFirePoint.distanceBetween(
-                            to: Coordinates(
-                              widget.post.location.latitude,
-                              widget.post.location.longitude,
-                            ),
-                            from: Coordinates(
-                              locationToUse.latitude,
-                              locationToUse.longitude,
-                            ),
-                          )
-                        : double.infinity;
-                  });
-                },
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.post.title,
-                    style: const TextStyle(fontSize: 30.0),
+          double distance = locationToUse != null
+              ? GeoFirePoint.distanceBetween(
+                  to: Coordinates(
+                    widget.post.location.latitude,
+                    widget.post.location.longitude,
                   ),
-                  const SizedBox(height: 16.0),
-                  // Display user's location if available
-                  if (locationToUse == null) ...[
-                    const Text('Loading user location...'),
-                    const LinearProgressIndicator(),
-                  ] else ...[
-                    // Display distance information
+                  from: Coordinates(
+                    locationToUse.latitude,
+                    locationToUse.longitude,
+                  ),
+                )
+              : double.infinity;
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Post Details'),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    String dynamicLink = await createDynamicLink(widget.post);
+                    Share.share('Check out this post: $dynamicLink');
+                  },
+                  icon: const Icon(Icons.share),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      // Updating the distance will trigger a rebuild
+                      distance = locationToUse != null
+                          ? GeoFirePoint.distanceBetween(
+                              to: Coordinates(
+                                widget.post.location.latitude,
+                                widget.post.location.longitude,
+                              ),
+                              from: Coordinates(
+                                locationToUse.latitude,
+                                locationToUse.longitude,
+                              ),
+                            )
+                          : double.infinity;
+                    });
+                  },
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                        'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
-                    // Add additional information about the location as needed
+                      widget.post.title,
+                      style: const TextStyle(fontSize: 30.0),
+                    ),
                     const SizedBox(height: 16.0),
-                    // Replace the image view section with a map showing the post's location
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16.0),
-                        child: GoogleMap(
-                          myLocationButtonEnabled: true,
-                          myLocationEnabled: true,
-                          initialCameraPosition: CameraPosition(
-                            target: LatLng(widget.post.location.latitude,
-                                widget.post.location.longitude),
-                            zoom: 14.0,
-                          ),
-                          markers: {
-                            Marker(
-                              markerId: const MarkerId('postMarker'),
-                              position: LatLng(widget.post.location.latitude,
+                    // Display user's location if available
+                    if (locationToUse == null) ...[
+                      const Text('Loading user location...'),
+                      const LinearProgressIndicator(),
+                    ] else ...[
+                      // Display distance information
+                      Text(
+                          'Distance from user: ${distance <= 1 ? '${(distance * 1000).toStringAsFixed(0)} meters' : '${distance.toStringAsFixed(2)} km'}'),
+                      // Add additional information about the location as needed
+                      const SizedBox(height: 16.0),
+                      // Replace the image view section with a map showing the post's location
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
+                          child: GoogleMap(
+                            myLocationButtonEnabled: true,
+                            myLocationEnabled: true,
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(widget.post.location.latitude,
                                   widget.post.location.longitude),
-                              infoWindow: const InfoWindow(
-                                title: 'Post Location',
-                                snippet: 'This is where the post is located.',
+                              zoom: 14.0,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: const MarkerId('postMarker'),
+                                position: LatLng(widget.post.location.latitude,
+                                    widget.post.location.longitude),
+                                infoWindow: const InfoWindow(
+                                  title: 'Post Location',
+                                  snippet: 'This is where the post is located.',
+                                ),
+                              ),
+                            },
+                          ),
+                        ),
+                      ),
+                      // Check if the user is within the allowed distance
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (distance * 1000 <= thresholdDistance &&
+                                  isReadyToOpen) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ARViewPage(post: widget.post),
+                                  ),
+                                );
+                              } else {
+                                if (distance * 1000 > thresholdDistance) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'You are too far from the location.'),
+                                    ),
+                                  );
+                                } else if (!isReadyToOpen) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'The post is not ready to open yet.'),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                                  if (distance * 1000 > thresholdDistance ||
+                                      !isReadyToOpen) {
+                                    return Colors.grey;
+                                  }
+                                  return Theme.of(context).primaryColor;
+                                },
+                              ),
+                              foregroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                                  if (distance * 1000 > thresholdDistance ||
+                                      !isReadyToOpen) {
+                                    return Colors.black;
+                                  }
+                                  return Colors.white;
+                                },
+                              ),
+                              padding:
+                                  MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                const EdgeInsets.symmetric(vertical: 15),
                               ),
                             ),
-                          },
-                        ),
-                      ),
-                    ),
-                    // Check if the user is within the allowed distance
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (distance * 1000 <= thresholdDistance &&
-                                isReadyToOpen) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ARViewPage(post: widget.post),
-                                ),
-                              );
-                            } else {
-                              if (distance * 1000 > thresholdDistance) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('You are too far from the location.'),
-                                  ),
-                                );
-                              } else if (!isReadyToOpen) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('The post is not ready to open yet.'),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.resolveWith<Color>(
-                              (Set<MaterialState> states) {
-                                if (distance * 1000 > thresholdDistance ||
-                                    !isReadyToOpen) {
-                                  return Colors.grey;
-                                }
-                                return Theme.of(context).primaryColor;
-                              },
-                            ),
-                            foregroundColor:
-                                MaterialStateProperty.resolveWith<Color>(
-                              (Set<MaterialState> states) {
-                                if (distance * 1000 > thresholdDistance ||
-                                    !isReadyToOpen) {
-                                  return Colors.black;
-                                }
-                                return Colors.white;
-                              },
-                            ),
-                            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                              const EdgeInsets.symmetric(vertical: 15),
-                            ),
+                            child: const Text('Open Post'),
                           ),
-                          child: const Text('Open Post'),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        );
-      }
-    );
+          );
+        });
   }
 }

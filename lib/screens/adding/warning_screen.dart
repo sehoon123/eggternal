@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/adding/post_success_screen.dart';
+import 'package:eggciting/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -46,53 +47,67 @@ class _WarningScreenState extends State<WarningScreen> {
   }
 
   Future<void> _uploadPost() async {
-    var uuid = const Uuid();
-    String key = uuid.v4();
+    try {
+      var uuid = const Uuid();
+      String key = uuid.v4();
 
-    // Upload images to Firebase Storage and get their download URLs
-    Map<String, String> imagePathToUrlMap = {};
-    for (String imagePath in widget.post.imageUrls) {
-      File imageFile = File(imagePath);
-      // Upload the image to Firebase Storage
-      String imageUrl = await _uploadFile(imageFile);
-      imagePathToUrlMap[imagePath] =
-          imageUrl; // Map the local path to the Firebase URL
-    }
+      // Upload images to Firebase Storage and get their download URLs
+      Map<String, String> imagePathToUrlMap = {};
+      for (String imagePath in widget.post.imageUrls) {
+        File imageFile = File(imagePath);
+        // Upload the image to Firebase Storage
+        String imageUrl = await _uploadFile(imageFile);
+        imagePathToUrlMap[imagePath] =
+            imageUrl; // Map the local path to the Firebase URL
+      }
 
-    // Replace the local image paths in the contentDelta with the Firebase Storage URLs
-    List<dynamic> contentDeltaList = jsonDecode(widget.post.contentDelta);
-    for (var item in contentDeltaList) {
-      if (item is Map && item.containsKey('insert') && item['insert'] is Map) {
-        Map<String, dynamic> insertMap = item['insert'] as Map<String, dynamic>;
-        if (insertMap.containsKey('image') &&
-            imagePathToUrlMap.containsKey(insertMap['image'])) {
-          insertMap['image'] = imagePathToUrlMap[insertMap[
-              'image']]!; // Replace the local path with the Firebase URL
+      // Replace the local image paths in the contentDelta with the Firebase Storage URLs
+      List<dynamic> contentDeltaList = jsonDecode(widget.post.contentDelta);
+      for (var item in contentDeltaList) {
+        if (item is Map &&
+            item.containsKey('insert') &&
+            item['insert'] is Map) {
+          Map<String, dynamic> insertMap =
+              item['insert'] as Map<String, dynamic>;
+          if (insertMap.containsKey('image') &&
+              imagePathToUrlMap.containsKey(insertMap['image'])) {
+            insertMap['image'] = imagePathToUrlMap[insertMap[
+                'image']]!; // Replace the local path with the Firebase URL
+          }
         }
       }
+      String updatedContentDelta = jsonEncode(contentDeltaList);
+
+      // Prepare the post data
+      Map<String, dynamic> postData = {
+        'key': key,
+        'title': widget.post.title,
+        'contentDelta': updatedContentDelta, // Use the updated contentDelta
+        'dueDate': widget.post.dueDate.toIso8601String(),
+        'createdAt': widget.post.createdAt.toIso8601String(),
+        'location': GeoPoint(
+            widget.post.location.latitude, widget.post.location.longitude),
+        'imageUrls':
+            imagePathToUrlMap.values.toList(), // Use the list of Firebase URLs
+        'userId': widget.post.userId,
+        'sharedUser': widget.post.sharedUser,
+        // Add any other necessary fields
+      };
+
+      // Get a reference to the user document
+      DocumentReference userDoc = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.post.userId);
+
+      // Update the user document by adding the post data to the 'posts' map field
+      await userDoc.update({
+        'posts.$key': postData,
+      });
+
+      debugPrint('Post uploaded successfully with key: $key');
+    } catch (e) {
+      debugPrint('Error uploading post: $e');
     }
-    String updatedContentDelta = jsonEncode(contentDeltaList);
-
-    // Add the post to Firestore with the updated contentDelta
-    await FirebaseFirestore.instance.collection('posts').doc(key).set({
-      'key': key,
-      'title': widget.post.title,
-      'contentDelta': updatedContentDelta, // Use the updated contentDelta
-      'dueDate': widget.post.dueDate,
-      'createdAt': widget.post.createdAt,
-      'location': GeoPoint(
-          widget.post.location.latitude, widget.post.location.longitude),
-      'imageUrls':
-          imagePathToUrlMap.values.toList(), // Use the list of Firebase URLs
-      'userId': widget.post.userId,
-      'sharedUser': widget.post.sharedUser,
-      // Add any other necessary fields
-    });
-
-
-    await removeAllLocationPrefs(); // Remove all location prefs
-    // await prefs.setString('location_$key',
-    //     '${widget.post.location.latitude},${widget.post.location.longitude}');
   }
 
   Future<void> removeAllLocationPrefs() async {
@@ -162,10 +177,9 @@ class _WarningScreenState extends State<WarningScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PostSuccessScreen(
-                              imageAssetPaths: [
-                                'assets/images/logo.png'
-                              ]), // Replace with actual image paths
+                          builder: (context) => PostSuccessScreen(
+                            imageAssetPaths: const ['assets/images/logo.png'],
+                          ), // Replace with actual image paths
                         ),
                       );
                     });

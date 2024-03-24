@@ -45,12 +45,21 @@ class _ListScreenState extends State<ListScreen> {
     super.dispose();
   }
 
-  Future<String> createDynamicLink(String postId) async {
+  Future<String> createDynamicLink(Post post) async {
+    Map<String, dynamic> postMap = post.toJson();
+    postMap['location'] = {
+      'geopoint': {
+        'latitude': post.location.latitude,
+        'longitude': post.location.longitude,
+      },
+    };
+    debugPrint(
+        'lat, long: ${post.location.latitude}, ${post.location.longitude}');
     // Create BranchLinkProperties with the desired properties
     BranchLinkProperties linkProperties = BranchLinkProperties(
       channel: 'facebook', // The channel through which the link was shared
       feature: 'sharing', // The feature that the link is associated with
-      alias: 'post-$postId', // A unique alias for the link
+      alias: 'post-${post.key}', // A unique alias for the link
       stage: 'new user', // The stage of the user's lifecycle
       matchDuration:
           43200, // The duration in seconds for which the link should be matched
@@ -60,16 +69,16 @@ class _ListScreenState extends State<ListScreen> {
     );
 
     // Add any additional control parameters if needed
-    linkProperties.addControlParam(postId, 'postId');
+    linkProperties.addControlParam('post', jsonEncode(postMap));
 
     // Create a BranchUniversalObject for the post
     BranchUniversalObject buo = BranchUniversalObject(
-      canonicalIdentifier: 'content/$postId',
+      canonicalIdentifier: 'content/${post.key}',
       title: 'Check out this post!',
       contentDescription: 'This is a great post you should check out.',
       imageUrl: 'https://example.com/post-image.jpg',
       contentMetadata: BranchContentMetaData()
-        ..addCustomMetadata('postId', postId),
+        ..addCustomMetadata('post', jsonEncode(postMap)),
     );
 
     // Create the dynamic link
@@ -336,8 +345,7 @@ class _ListScreenState extends State<ListScreen> {
                                             icon: const Icon(Icons.share),
                                             onPressed: () async {
                                               String dynamicLink =
-                                                  await createDynamicLink(
-                                                      post.key);
+                                                  await createDynamicLink(post);
                                               Share.share(
                                                   'Check out this post: $dynamicLink');
                                             },

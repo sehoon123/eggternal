@@ -16,6 +16,9 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.firestore});
   final FirebaseFirestore firestore;
 
+  static _HomeScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_HomeScreenState>();
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -24,6 +27,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final LocationHandler _locationHandler = LocationHandler();
   int _selectedIndex = 0;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  void updateSelectedIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -36,10 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
-
-    if (index == 1) {
-      refreshListScreenData();
-    }
 
     _navigatorKey.currentState!.pushReplacement(
       MaterialPageRoute(
@@ -61,11 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
-  }
-
-  void refreshListScreenData() {
-    Provider.of<PostsProvider>(context, listen: false)
-        .fetchPosts(isInitialFetch: true);
   }
 
   Future<void> _loadUserNickname() async {

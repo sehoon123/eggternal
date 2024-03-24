@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
@@ -127,53 +129,100 @@ class _MyAppState extends State<MyApp> {
         .updateUseBackgroundNotifications(useBackgroundNotifications);
   }
 
+  Post _createPostFromJson(Map<String, dynamic> json) {
+    // Convert the location from a map to a GeoFirePoint
+    GeoFirePoint location = GeoFirePoint(
+      json['location']['geopoint']['latitude'],
+      json['location']['geopoint']['longitude'],
+    );
+
+    // Create a new Post object with the converted location
+    return Post(
+      key: json['key'] ?? 'No Key',
+      title: json['title'] ?? 'No Title',
+      contentDelta: json['contentDelta'] ?? '{}',
+      dueDate: _convertToDateTime(json['dueDate']),
+      createdAt: _convertToDateTime(json['createdAt']),
+      userId: json['userId'] ?? 'No User ID',
+      location: location,
+      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      sharedUser: List<String>.from(json['sharedUser'] ?? []),
+    );
+  }
+
+  DateTime _convertToDateTime(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate().toLocal();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      return DateTime.now(); // Default value or throw an error
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _initializeLocationHandler();
     _initialization();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-    // Listen for deep link events
     SchedulerBinding.instance.addPostFrameCallback(
       (_) {
         FlutterBranchSdk.listSession().listen((linkData) async {
           debugPrint('Link Data: $linkData');
-          // Extract the post ID from the link data
-          String? postId = linkData['postId'];
-          if (postId != null) {
+          // Extract the post data from the link data
+          Map<String, dynamic>? postData = jsonDecode(linkData['post']);
+          if (postData != null) {
             // Fetch the current user's ID
             String? currentUserId = FirebaseAuth.instance.currentUser!.uid;
             debugPrint('Current User ID in main.dart: $currentUserId');
-            // Fetch the post from Firestore
-            DocumentSnapshot postSnapshot =
-                await widget.firestore.collection('posts').doc(postId).get();
 
-            if (postSnapshot.exists) {
-              // Convert the post document to a Post object
-              Post post =
-                  Post.fromJson(postSnapshot.data() as Map<String, dynamic>);
+            // Convert the post data to a Post object
+            Post post = _createPostFromJson(postData);
 
-              // Check if the current user is already in the sharedUser list
-              if (!post.sharedUser.contains(currentUserId)) {
-                // Add the current user to the sharedUser list
-                post.sharedUser.add(currentUserId);
+            debugPrint('post: $post');
 
-                // Save the updated post back to Firestore
-                await widget.firestore
-                    .collection('posts')
-                    .doc(postId)
-                    .update({'sharedUser': post.sharedUser});
-              }
+            // Get a reference to the user document
+            DocumentReference userDoc = FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUserId);
+            DocumentSnapshot userSnapshot = await userDoc.get();
 
-              debugPrint("moving to post details screen, post: ${post.key}");
-              MyApp.navigatorKey.currentState?.push(
-                MaterialPageRoute(
-                  builder: (context) => PostDetailsScreen(
-                    post: post,
+            if (userSnapshot.exists) {
+              // Check if the post is already in the user's posts
+              Map<String, dynamic>? userPosts =
+                  (userSnapshot.data() as Map<String, dynamic>?)?['posts'];
+              if (userPosts != null &&
+                  userPosts.containsKey('shared_${post.key}')) {
+                // The post is already in the user's posts, so we can proceed to the PostDetailsScreen
+                debugPrint("moving to post details screen, post: ${post.key}");
+                MyApp.navigatorKey.currentState?.push(
+                  MaterialPageRoute(
+                    builder: (context) => PostDetailsScreen(
+                      post: post,
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                // The post is not in the user's posts, so we need to add it
+                // Create a map representing the post data
+                Map<String, dynamic> postMap = post.toJson();
+
+                // Update the user document by adding the post data to the 'posts' map field
+                await userDoc.update({
+                  'posts.shared_${post.key}': postMap,
+                });
+
+                // Now that the post is added to the user's posts, we can proceed to the PostDetailsScreen
+                debugPrint("moving to post details screen, post: ${post.key}");
+                MyApp.navigatorKey.currentState?.push(
+                  MaterialPageRoute(
+                    builder: (context) => PostDetailsScreen(
+                      post: post,
+                    ),
+                  ),
+                );
+              }
             }
           }
         }, onError: (error) {
@@ -181,6 +230,7 @@ class _MyAppState extends State<MyApp> {
         });
       },
     );
+    // Listen for deep link events
   }
 
   @override
@@ -212,9 +262,6 @@ class _MyAppState extends State<MyApp> {
         '/mapSelection': (context) => const MapSelectionScreen(),
         '/mapScreen': (context) => const MapScreen(),
         '/list': (context) => const ListScreen(),
-        '/postSuccess': (context) => const PostSuccessScreen(
-              imageAssetPaths: ['assets/images/logo.png'],
-            ),
         '/payment': (context) => const PaymentScreen(),
       },
     );

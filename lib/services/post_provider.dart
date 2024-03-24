@@ -50,43 +50,45 @@ class PostsProvider with ChangeNotifier {
     setIsLoading(true);
 
     try {
-      Query query;
-      if (_isMyPostsSelected) {
-        query = FirebaseFirestore.instance
-            .collection('posts')
-            .where('userId', isEqualTo: _currentUser?.uid);
-      } else {
-        query = FirebaseFirestore.instance
-            .collection('posts')
-            .where('sharedUser', arrayContains: _currentUser?.uid);
-      }
+      // Assuming _currentUser is not null and has a valid uid
+      final userDocSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentUser?.uid)
+          .get();
 
-      if (_lastDocument != null) {
-        query = query.startAfterDocument(_lastDocument!);
-      }
+      if (userDocSnapshot.exists) {
+        Map<String, dynamic> userData =
+            userDocSnapshot.data() as Map<String, dynamic>;
+        Map<String, dynamic> userPosts = userData['posts'] ?? {};
 
-      final querySnapshot =
-          await query.get(); // Consider adding a limit
-
-      if (querySnapshot.docs.isNotEmpty) {
-        _lastDocument = querySnapshot.docs.last;
-        List<Post> fetchedPosts = querySnapshot.docs
-            .map((doc) => Post.fromJson(doc.data() as Map<String, dynamic>))
-            .toList();
-
-        if (!_isMyPostsSelected) {
-          // Update sharedPostCount only when fetching shared posts
-          _sharedPostCount += fetchedPosts.length;
+        // Filter posts based on _isMyPostsSelected
+        Iterable<MapEntry<String, dynamic>> filteredEntries;
+        if (_isMyPostsSelected) {
+          // For "My Posts", include all posts not starting with "shared_"
+          filteredEntries = userPosts.entries
+              .where((entry) => !entry.key.startsWith('shared_'));
+        } else {
+          // For "Shared Posts", only include posts starting with "shared_"
+          filteredEntries = userPosts.entries
+              .where((entry) => entry.key.startsWith('shared_'));
         }
 
+        List<Post> fetchedPosts = filteredEntries.map((entry) {
+          // Assuming each entry.value is a Map<String, dynamic> that represents a post
+          return Post.fromJson(entry.value);
+        }).toList();
+
         _posts.addAll(fetchedPosts);
+        _postCount = _posts.length;
+
+        // Since we're fetching all posts at once from the user document, we might want to set _hasMorePosts to false
+        _hasMorePosts = false;
       } else {
+        debugPrint('User document does not exist');
         _hasMorePosts = false;
       }
-
-      _postCount = _posts.length;
     } catch (e) {
-      debugPrint('Error fetching posts: $e');
+      debugPrint('Error fetching posts from user document: $e');
       _hasMorePosts = false;
     } finally {
       setIsLoading(false);
@@ -104,28 +106,45 @@ class PostsProvider with ChangeNotifier {
   }
 
   Stream<List<Post>> get postsStream {
-    // Adjust the query based on whether "My Posts" or "Shared Posts" is selected
-    Query query;
-    if (_isMyPostsSelected) {
-      debugPrint('Fetching My Posts for ${_currentUser?.uid}');
-      // For "My Posts", filter by 'userId'
-      query = FirebaseFirestore.instance
-          .collection('posts')
-          .where('userId', isEqualTo: _currentUser?.uid);
-    } else {
-      // For "Shared Posts", filter by 'sharedUser' containing the current user's UID
-      debugPrint('Fetching Shared Posts for ${_currentUser?.uid}');
-      query = FirebaseFirestore.instance
-          .collection('posts')
-          .where('sharedUser', arrayContains: _currentUser?.uid);
+    // Ensure we have a current user
+    if (_currentUser?.uid == null) {
+      debugPrint('No current user set');
+      return Stream.value([]); // Return an empty stream if no user is set
     }
 
-    return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        // Assuming Post.fromJson can handle the conversion correctly
-        return Post.fromJson(data);
+    // Stream the user document
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUser!.uid)
+        .snapshots()
+        .map((snapshot) {
+      if (!snapshot.exists) {
+        debugPrint('User document does not exist');
+        return []; // Return an empty list if the user document doesn't exist
+      }
+
+      Map<String, dynamic> userData = snapshot.data()!;
+      Map<String, dynamic> userPosts = userData['posts'] ?? {};
+
+      // Filter posts based on _isMyPostsSelected
+      Iterable<MapEntry<String, dynamic>> filteredEntries;
+      if (_isMyPostsSelected) {
+        // For "My Posts", include all posts not starting with "shared_"
+        filteredEntries = userPosts.entries
+            .where((entry) => !entry.key.startsWith('shared_'));
+      } else {
+        // For "Shared Posts", only include posts starting with "shared_"
+        filteredEntries =
+            userPosts.entries.where((entry) => entry.key.startsWith('shared_'));
+      }
+
+      // Convert the filtered posts map to a list of Post objects
+      List<Post> posts = filteredEntries.map((entry) {
+        // Assuming each entry.value is a Map<String, dynamic> that represents a post
+        return Post.fromJson(Map<String, dynamic>.from(entry.value));
       }).toList();
+
+      return posts;
     });
   }
 }

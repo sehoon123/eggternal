@@ -15,7 +15,7 @@ class Post {
   Post({
     required this.key,
     required this.title,
-    required this.contentDelta, // Use contentDelta instead of content
+    required this.contentDelta,
     required this.dueDate,
     required this.createdAt,
     required this.userId,
@@ -25,58 +25,50 @@ class Post {
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
-    String key = json['key'] ?? 'No Key';
-    String title = json['title'] ?? 'No Title';
-    String contentDelta =
-        json['contentDelta'] ?? '{}'; // Default to an empty Delta
-    // Correctly handle Timestamp objects for dueDate and createdAt
-    DateTime dueDate = json['dueDate'] != null
-        ? (json['dueDate'] as Timestamp)
-            .toDate()
-            .toLocal() // Convert Timestamp to DateTime and then to local time
-        : DateTime.now();
-    DateTime createdAt = json['createdAt'] != null
-        ? (json['createdAt'] as Timestamp)
-            .toDate()
-            .toLocal() // Convert Timestamp to DateTime and then to local time
-        : DateTime.now();
-    String userId = json['userId'] ?? 'No User ID';
-    GeoFirePoint location = json['location'] != null
-        ? GeoFirePoint(json['location'].latitude, json['location'].longitude)
-        : GeoFirePoint(0, 0);
-    List<String> imageUrls =
-        json['imageUrls'] != null ? List<String>.from(json['imageUrls']) : [];
-    List<String> sharedUser =
-        json['sharedUser'] != null ? List<String>.from(json['sharedUser']) : [];
-
+    // Assuming all required fields are present. Add error handling as needed.
     return Post(
-      key: key,
-      title: title,
-      contentDelta: contentDelta,
-      dueDate: dueDate,
-      createdAt: createdAt,
-      userId: userId,
-      location: location,
-      imageUrls: imageUrls,
-      sharedUser: sharedUser,
+      key: json['key'] ?? 'No Key',
+      title: json['title'] ?? 'No Title',
+      contentDelta: json['contentDelta'] ?? '{}',
+      dueDate: _convertToDateTime(json['dueDate']),
+      createdAt: _convertToDateTime(json['createdAt']),
+      userId: json['userId'] ?? 'No User ID',
+      location: _convertToGeoFirePoint(json['location']),
+      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      sharedUser: List<String>.from(json['sharedUser'] ?? []),
     );
   }
 
-  // Method to convert a Post object to a Map (JSON data)
   Map<String, dynamic> toJson() {
     return {
       'key': key,
       'title': title,
-      'contentDelta': contentDelta, // Use contentDelta
+      'contentDelta': contentDelta,
       'dueDate': dueDate.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'userId': userId,
-      'location': {
-        'latitude': location.latitude,
-        'longitude': location.longitude,
-      },
+      'location': location.data,
       'imageUrls': imageUrls,
       'sharedUser': sharedUser,
     };
+  }
+
+  static DateTime _convertToDateTime(dynamic field) {
+    if (field is Timestamp) {
+      return field.toDate().toLocal();
+    } else if (field is String) {
+      return DateTime.parse(field);
+    } else {
+      return DateTime.now(); // Default value or throw an error
+    }
+  }
+
+  static GeoFirePoint _convertToGeoFirePoint(dynamic field) {
+    if (field is GeoPoint) {
+      // Directly access latitude and longitude properties of GeoPoint
+      return GeoFirePoint(field.latitude, field.longitude);
+    } else {
+      return GeoFirePoint(0, 0); // Default value or throw an error
+    }
   }
 }
