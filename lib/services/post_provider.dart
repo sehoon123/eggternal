@@ -66,7 +66,7 @@ class PostsProvider with ChangeNotifier {
       }
 
       final querySnapshot =
-          await query.limit(10).get(); // Consider adding a limit
+          await query.get(); // Consider adding a limit
 
       if (querySnapshot.docs.isNotEmpty) {
         _lastDocument = querySnapshot.docs.last;

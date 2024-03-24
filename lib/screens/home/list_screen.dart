@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:eggciting/models/global_location_data.dart';
+import 'package:eggciting/models/post.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +86,25 @@ class _ListScreenState extends State<ListScreen> {
     prefs.getKeys().forEach((key) {
       debugPrint('$key: ${prefs.get(key)}');
     });
+  }
+
+  List<Post> _sortPosts(List<Post> posts, LatLng? userLocation) {
+    final now = DateTime.now();
+    return posts.toList()
+      ..sort((a, b) {
+        // Compare if the due date has passed or not
+        bool isDueDatePassedA = a.dueDate.isBefore(now);
+        bool isDueDatePassedB = b.dueDate.isBefore(now);
+        if (isDueDatePassedA != isDueDatePassedB) {
+          // If one due date has passed and the other hasn't, prioritize the one that hasn't passed
+          return isDueDatePassedA ? -1 : 1;
+        }
+
+        // If both due dates have passed or both haven't passed, compare distances
+        double distanceA = _calculateDistance(userLocation, a.location);
+        double distanceB = _calculateDistance(userLocation, b.location);
+        return distanceA.compareTo(distanceB);
+      });
   }
 
   Future<String> _getUsername(String userId) async {
@@ -233,7 +253,9 @@ class _ListScreenState extends State<ListScreen> {
                     controller: _scrollController,
                     itemCount: postsProvider.posts.length,
                     itemBuilder: (context, index) {
-                      final post = postsProvider.posts[index];
+                      final sortedPosts = _sortPosts(postsProvider.posts,
+                          GlobalLocationData().currentLocation);
+                      final post = sortedPosts[index];
                       final timeLeft = _calculateTimeLeft(post.dueDate);
 
                       return FutureBuilder<Map<String, dynamic>?>(
@@ -293,15 +315,20 @@ class _ListScreenState extends State<ListScreen> {
                                             children: [
                                               Text('User: ${snapshot.data}'),
                                               ValueListenableBuilder<LatLng?>(
-                                                valueListenable: GlobalLocationData().currentLocationNotifier,
-                                                builder: (context, userLocation, child) {
-                                                  final distance = userLocation != null
-                                                      ? _calculateDistance(userLocation, postLocation)
-                                                      : -1;
-                                                  return Text(
-                                                      'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}');
-                                                }
-                                              ),
+                                                  valueListenable:
+                                                      GlobalLocationData()
+                                                          .currentLocationNotifier,
+                                                  builder: (context,
+                                                      userLocation, child) {
+                                                    final distance =
+                                                        userLocation != null
+                                                            ? _calculateDistance(
+                                                                userLocation,
+                                                                postLocation)
+                                                            : -1;
+                                                    return Text(
+                                                        'Distance: ${distance > 1 ? '${distance.toStringAsFixed(2)} km' : '${(distance * 1000).toStringAsFixed(0)} m'}');
+                                                  }),
                                               Text('Time Left: $timeLeft'),
                                             ],
                                           ),
