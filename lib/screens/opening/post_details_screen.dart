@@ -90,15 +90,18 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
       stream: GlobalLocationData().locationStream,
       builder: (context, snapshot) {
         final userLocation = snapshot.data;
-        double distance = userLocation != null
+        final lastKnownLocation = GlobalLocationData().lastKnownLocation;
+        final locationToUse = userLocation ?? lastKnownLocation;
+
+        double distance = locationToUse != null
             ? GeoFirePoint.distanceBetween(
                 to: Coordinates(
                   widget.post.location.latitude,
                   widget.post.location.longitude,
                 ),
                 from: Coordinates(
-                  userLocation.latitude,
-                  userLocation.longitude,
+                  locationToUse.latitude,
+                  locationToUse.longitude,
                 ),
               )
             : double.infinity;
@@ -117,15 +120,15 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                 onPressed: () {
                   setState(() {
                     // Updating the distance will trigger a rebuild
-                    distance = userLocation != null
+                    distance = locationToUse != null
                         ? GeoFirePoint.distanceBetween(
                             to: Coordinates(
                               widget.post.location.latitude,
                               widget.post.location.longitude,
                             ),
                             from: Coordinates(
-                              userLocation.latitude,
-                              userLocation.longitude,
+                              locationToUse.latitude,
+                              locationToUse.longitude,
                             ),
                           )
                         : double.infinity;
@@ -147,7 +150,7 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                   ),
                   const SizedBox(height: 16.0),
                   // Display user's location if available
-                  if (userLocation == null) ...[
+                  if (locationToUse == null) ...[
                     const Text('Loading user location...'),
                     const LinearProgressIndicator(),
                   ] else ...[

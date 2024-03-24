@@ -11,6 +11,7 @@ import 'package:eggciting/services/notification_service.dart';
 import 'package:eggciting/services/post_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -89,6 +90,9 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key, required this.firestore});
   final FirebaseFirestore firestore;
 
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -131,55 +135,52 @@ class _MyAppState extends State<MyApp> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     // Listen for deep link events
-    FlutterBranchSdk.listSession().listen((linkData) async {
-      debugPrint('Link Data: $linkData');
-      // Extract the post ID from the link data
-      String? postId = linkData['postId'];
-      if (postId != null) {
-        // Fetch the current user's ID
-        String? currentUserId = FirebaseAuth.instance.currentUser!.uid;
-        debugPrint('Current User ID in main.dart: $currentUserId');
-        // Fetch the post from Firestore
-        DocumentSnapshot postSnapshot =
-            await widget.firestore.collection('posts').doc(postId).get();
+    SchedulerBinding.instance.addPostFrameCallback(
+      (_) {
+        FlutterBranchSdk.listSession().listen((linkData) async {
+          debugPrint('Link Data: $linkData');
+          // Extract the post ID from the link data
+          String? postId = linkData['postId'];
+          if (postId != null) {
+            // Fetch the current user's ID
+            String? currentUserId = FirebaseAuth.instance.currentUser!.uid;
+            debugPrint('Current User ID in main.dart: $currentUserId');
+            // Fetch the post from Firestore
+            DocumentSnapshot postSnapshot =
+                await widget.firestore.collection('posts').doc(postId).get();
 
-        if (postSnapshot.exists) {
-          // Convert the post document to a Post object
-          Post post =
-              Post.fromJson(postSnapshot.data() as Map<String, dynamic>);
+            if (postSnapshot.exists) {
+              // Convert the post document to a Post object
+              Post post =
+                  Post.fromJson(postSnapshot.data() as Map<String, dynamic>);
 
-          // Check if the current user is already in the sharedUser list
-          if (!post.sharedUser.contains(currentUserId)) {
-            // Add the current user to the sharedUser list
-            post.sharedUser.add(currentUserId);
+              // Check if the current user is already in the sharedUser list
+              if (!post.sharedUser.contains(currentUserId)) {
+                // Add the current user to the sharedUser list
+                post.sharedUser.add(currentUserId);
 
-            // Save the updated post back to Firestore
-            await widget.firestore
-                .collection('posts')
-                .doc(postId)
-                .update({'sharedUser': post.sharedUser});
-          }
-
-          // Navigate to the post details screen with the post ID
-          FutureBuilder(
-            future: Future.delayed(Duration.zero),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PostDetailsScreen(post: post),
-                  ),
-                );
+                // Save the updated post back to Firestore
+                await widget.firestore
+                    .collection('posts')
+                    .doc(postId)
+                    .update({'sharedUser': post.sharedUser});
               }
-              return Container();
-            },
-          );
-        }
-      }
-    }, onError: (error) {
-      debugPrint('Error: $error');
-    });
+
+              debugPrint("moving to post details screen, post: ${post.key}");
+              MyApp.navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (context) => PostDetailsScreen(
+                    post: post,
+                  ),
+                ),
+              );
+            }
+          }
+        }, onError: (error) {
+          debugPrint('Error: $error');
+        });
+      },
+    );
   }
 
   @override
@@ -191,6 +192,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: MyApp.navigatorKey,
       title: 'Eggciting',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

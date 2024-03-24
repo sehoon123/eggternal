@@ -96,26 +96,29 @@ class _MapScreenState extends State<MapScreen> {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
                   final userLocation = GlobalLocationData().currentLocation;
+                  final lastKnownLocation = GlobalLocationData().lastKnownLocation;
+                  final locationToUse = userLocation ?? lastKnownLocation;
+
                   return GoogleMap(
                     myLocationButtonEnabled: false,
                     zoomControlsEnabled: false,
                     myLocationEnabled: true,
                     onMapCreated: (controller) {
                       _controller = controller;
-                      if (userLocation != null) {
+                      if (locationToUse != null) {
                         _controller.animateCamera(
                           CameraUpdate.newCameraPosition(
                             CameraPosition(
-                              target: userLocation,
+                              target: locationToUse,
                               zoom: 16,
                             ),
                           ),
                         );
                       }
                     },
-                    initialCameraPosition: userLocation != null
+                    initialCameraPosition: locationToUse != null
                         ? CameraPosition(
-                            target: userLocation,
+                            target: locationToUse,
                             zoom: 16,
                           )
                         : const CameraPosition(
