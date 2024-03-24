@@ -129,37 +129,6 @@ class _MyAppState extends State<MyApp> {
         .updateUseBackgroundNotifications(useBackgroundNotifications);
   }
 
-  Post _createPostFromJson(Map<String, dynamic> json) {
-    // Convert the location from a map to a GeoFirePoint
-    GeoFirePoint location = GeoFirePoint(
-      json['location']['geopoint']['latitude'],
-      json['location']['geopoint']['longitude'],
-    );
-
-    // Create a new Post object with the converted location
-    return Post(
-      key: json['key'] ?? 'No Key',
-      title: json['title'] ?? 'No Title',
-      contentDelta: json['contentDelta'] ?? '{}',
-      dueDate: _convertToDateTime(json['dueDate']),
-      createdAt: _convertToDateTime(json['createdAt']),
-      userId: json['userId'] ?? 'No User ID',
-      location: location,
-      imageUrls: List<String>.from(json['imageUrls'] ?? []),
-      sharedUser: List<String>.from(json['sharedUser'] ?? []),
-    );
-  }
-
-  DateTime _convertToDateTime(dynamic field) {
-    if (field is Timestamp) {
-      return field.toDate().toLocal();
-    } else if (field is String) {
-      return DateTime.parse(field);
-    } else {
-      return DateTime.now(); // Default value or throw an error
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -178,7 +147,7 @@ class _MyAppState extends State<MyApp> {
             debugPrint('Current User ID in main.dart: $currentUserId');
 
             // Convert the post data to a Post object
-            Post post = _createPostFromJson(postData);
+            Post post = Post.fromSharedJson(postData);
 
             debugPrint('post: $post');
 
