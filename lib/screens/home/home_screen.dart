@@ -13,8 +13,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.firestore});
+  const HomeScreen({super.key, required this.firestore, this.initialIndex = 0});
   final FirebaseFirestore firestore;
+  final int initialIndex;
 
   static _HomeScreenState? of(BuildContext context) =>
       context.findAncestorStateOfType<_HomeScreenState>();
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUserNickname();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _selectedIndex = widget.initialIndex;
   }
 
   void _onItemTapped(int index) {

@@ -174,11 +174,11 @@ class _WarningScreenState extends State<WarningScreen> {
                   } else {
                     // Navigate to the PostSuccessScreen
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostSuccessScreen(
-                            imageAssetPaths: const ['assets/images/logo.png'],
+                          builder: (context) => const PostSuccessScreen(
+                            imageAssetPaths: ['assets/images/logo.png'],
                           ), // Replace with actual image paths
                         ),
                       );

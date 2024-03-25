@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eggciting/screens/home/home_screen.dart';
 import 'package:eggciting/screens/home/map_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -15,14 +17,11 @@ class PostSuccessScreen extends StatelessWidget {
             // Centered image
             Center(
               child: Container(
-                width: MediaQuery.of(context).size.width *
-                    0.9, //   80% of screen width
-                height: MediaQuery.of(context).size.height *
-                    0.5, //   60% of screen height
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.5,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage(imageAssetPaths
-                        .first), // Assuming you want the first image
+                    image: AssetImage(imageAssetPaths.first),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -35,10 +34,14 @@ class PostSuccessScreen extends StatelessWidget {
               right: 16.0,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const MapScreen()),
-                    (Route<dynamic> route) => false,
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MapScreen(),
+                    ),
+                    (route) => false,
                   );
+                  HomeScreen.of(context)?.updateSelectedIndex(0);
                 },
                 child: const Text('Continue'),
               ),
