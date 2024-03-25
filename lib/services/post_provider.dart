@@ -79,7 +79,12 @@ class PostsProvider with ChangeNotifier {
         }).toList();
 
         _posts.addAll(fetchedPosts);
-        _postCount = _posts.length;
+
+        if (_isMyPostsSelected) {
+          _postCount = _posts.length;
+        } else {
+          _sharedPostCount = _posts.length;
+        }
 
         // Since we're fetching all posts at once from the user document, we might want to set _hasMorePosts to false
         _hasMorePosts = false;
