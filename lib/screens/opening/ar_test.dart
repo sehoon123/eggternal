@@ -67,12 +67,59 @@ class ARViewPageState extends State<ARViewPage> {
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: onLocalObjectAtOriginButtonPressed,
-      //   tooltip: 'Add Local Object',
-      //   child: const Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: regenerateARObject,
+        tooltip: 'Regenerate AR Object',
+        child: const Icon(Icons.refresh),
+      ),
     );
+  }
+
+  void regenerateARObject() async {
+    // Check if the ARObjectManager is initialized
+    if (arObjectManager == null) {
+      debugPrint("ARObjectManager is not initialized");
+      return;
+    }
+
+    // If the local object node already exists, remove it
+    if (localObjectNode != null) {
+      arObjectManager!.removeNode(localObjectNode!);
+      localObjectNode = null;
+      debugPrint("Local object removed");
+    }
+
+    // Assuming you have a method to get the current camera position and orientation
+    // This is a placeholder for such a method, which you might need to implement
+    // based on the AR framework you're using.
+    var cameraPosition = await getCurrentCameraPosition();
+
+    // Generate random offsets for the x, y, and z coordinates
+    var randomX = (Random().nextDouble() * 3.0) - 1.5;
+    var randomY = 0.0; // Adjust as needed
+    var randomZ = (Random().nextDouble() * 0.5) - 1.5;
+
+    // Calculate the new position by adding the random offsets to the camera position
+    var newPosition =
+        cameraPosition + vector.Vector3(randomX, randomY, randomZ);
+
+    // Create a new ARNode for the virtual object
+    var newNode = ARNode(
+      type: NodeType.localGLTF2,
+      uri: "assets/3D/Chicken_01/Chicken_01.gltf",
+      scale: vector.Vector3(0.3, 0.3, 0.3),
+      position: newPosition, // Position at the camera's current position
+      rotation: vector.Vector4(1.0, 0.0, 0.0, 0.0), // No rotation
+    );
+
+    // Add the new node to the ARObjectManager
+    bool? didAddLocalNode = await arObjectManager!.addNode(newNode);
+    if (didAddLocalNode == true) {
+      localObjectNode = newNode;
+      debugPrint("Local object added");
+    } else {
+      debugPrint("Failed to add local node");
+    }
   }
 
   void onARViewCreated(
