@@ -46,12 +46,12 @@ class PaymentScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () async {
-                  await updateDB();
-                },
-                child: const Text('update db'),
-              ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     await updateDB();
+              //   },
+              //   child: const Text('update db'),
+              // ),
               ElevatedButton(
                 onPressed: () async {
                   debugPrint('Go to Google');
