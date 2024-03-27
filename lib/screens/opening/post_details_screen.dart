@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
 import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/opening/ar_test.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share/share.dart';
@@ -44,6 +47,51 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
         (difference.inDays == 0 && difference.inHours <= 0);
   }
 
+  void updatePostOpenedStatus(String postKey) async {
+    String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) {
+      // Handle the case where there is no current user
+      return;
+    }
+
+    // Reference to the Firestore instance
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // Reference to the current user's document
+    DocumentReference userDoc =
+        firestore.collection('users').doc(currentUserId);
+
+    // Get the user's document snapshot to access the posts
+    DocumentSnapshot userSnapshot = await userDoc.get();
+
+    if (userSnapshot.exists) {
+      Map<String, dynamic>? userPosts =
+          (userSnapshot.data() as Map<String, dynamic>?)?['posts'];
+
+      if (userPosts != null && userPosts.containsKey(postKey)) {
+        // If the regular post exists, update its isOpened field
+        debugPrint('Updating post $postKey to be opened.');
+        await userDoc.update({
+          'posts.$postKey.isOpened': true,
+        });
+      } else if (userPosts != null &&
+          userPosts.containsKey('shared_$postKey')) {
+        // If the shared post exists, update its isOpened field
+        debugPrint('Updating shared post $postKey to be opened.');
+        await userDoc.update({
+          'posts.shared_$postKey.isOpened': true,
+        });
+      } else {
+        // Handle the case where neither document exists
+        debugPrint(
+            "Neither regular nor shared post exists for key: $postKey under user: $currentUserId");
+      }
+    } else {
+      // Handle the case where the user document does not exist
+      debugPrint("User document does not exist for user: $currentUserId");
+    }
+  }
+
   Future<String> createDynamicLink(Post post) async {
     Map<String, dynamic> postMap = post.toJson();
     postMap['location'] = {
@@ -52,7 +100,8 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
         'longitude': post.location.longitude,
       },
     };
-    debugPrint('lat, long: ${post.location.latitude}, ${post.location.longitude}');
+    debugPrint(
+        'lat, long: ${post.location.latitude}, ${post.location.longitude}');
     // Create BranchLinkProperties with the desired properties
     BranchLinkProperties linkProperties = BranchLinkProperties(
       channel: 'facebook', // The channel through which the link was shared
@@ -91,7 +140,7 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     // Set your threshold distance
-    double thresholdDistance = 30.0; // in meters
+    double thresholdDistance = 50.0; // in meters
 
     // Check if the post is ready to open based on time
     bool isReadyToOpen = _isReadyToOpen(widget.post.dueDate);
@@ -207,6 +256,7 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                             onPressed: () {
                               if (distance * 1000 <= thresholdDistance &&
                                   isReadyToOpen) {
+                                updatePostOpenedStatus(widget.post.key);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -215,7 +265,16 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                                   ),
                                 );
                               } else {
-                                if (distance * 1000 > thresholdDistance) {
+                                if (distance * 1000 > thresholdDistance &&
+                                    !isReadyToOpen) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'You are too far from the location and the post is not ready to open yet.'),
+                                    ),
+                                  );
+                                } else if (distance * 1000 >
+                                    thresholdDistance) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
