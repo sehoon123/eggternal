@@ -91,6 +91,7 @@ class _WarningScreenState extends State<WarningScreen> {
             imagePathToUrlMap.values.toList(), // Use the list of Firebase URLs
         'userId': widget.post.userId,
         'sharedUser': widget.post.sharedUser,
+        'isOpened': false,
         // Add any other necessary fields
       };
 

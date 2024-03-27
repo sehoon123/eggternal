@@ -11,6 +11,7 @@ class Post {
   final GeoFirePoint location;
   final List<String> imageUrls;
   final List<String> sharedUser;
+  final bool isOpened;
 
   Post({
     required this.key,
@@ -22,6 +23,7 @@ class Post {
     required this.location,
     required this.imageUrls,
     required this.sharedUser,
+    required this.isOpened,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class Post {
       location: _convertToGeoFirePoint(json['location']),
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
       sharedUser: List<String>.from(json['sharedUser'] ?? []),
+      isOpened: json['isOpened'] ?? false,
     );
   }
 
@@ -57,6 +60,7 @@ class Post {
       location: location,
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
       sharedUser: List<String>.from(json['sharedUser'] ?? []),
+      isOpened: json['isOpened'] ?? false,
     );
   }
     // Assuming all required fields are present. Add error handling as needed.

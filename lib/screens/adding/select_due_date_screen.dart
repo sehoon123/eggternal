@@ -141,6 +141,7 @@ class SelectDueDateScreenState extends State<SelectDueDateScreen> {
                           location: widget.post.location,
                           imageUrls: widget.post.imageUrls,
                           sharedUser: widget.post.sharedUser,
+                          isOpened: false,
                         );
 
                         // Navigate to the next screen, passing the updated Post object along

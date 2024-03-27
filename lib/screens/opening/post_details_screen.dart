@@ -7,6 +7,7 @@ import 'package:eggciting/models/post.dart';
 import 'package:eggciting/screens/opening/ar_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
@@ -203,9 +204,12 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.post.title,
-                      style: const TextStyle(fontSize: 30.0),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        widget.post.title,
+                        style: const TextStyle(fontSize: 30.0),
+                      ),
                     ),
                     const SizedBox(height: 16.0),
                     // Display user's location if available

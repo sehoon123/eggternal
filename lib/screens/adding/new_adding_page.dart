@@ -201,6 +201,7 @@ class NewAddingPageState extends State<NewAddingPage> {
             ),
             imageUrls: imagePaths,
             sharedUser: [], // Adjust as needed
+            isOpened: false,
           );
 
           // Navigate to the MapSelectionScreen, passing the Post object along
