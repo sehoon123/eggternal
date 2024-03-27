@@ -104,7 +104,7 @@ class NewAddingPageState extends State<NewAddingPage> {
                 showSubscript: false,
                 showSuperscript: false,
                 showInlineCode: false,
-                showColorButton: false,
+                showColorButton: true,
                 showBackgroundColorButton: false,
                 showIndent: false,
                 showListBullets: false,
