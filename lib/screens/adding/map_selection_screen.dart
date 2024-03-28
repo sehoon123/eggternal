@@ -138,6 +138,13 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                       ),
                     ),
                   );
+                  setState(() {
+                    _selectedPosition = userLocation;
+                    _markers.add(Marker(
+                      markerId: const MarkerId('selectedLocation'),
+                      position: userLocation,
+                    ));
+                  });
                 }
               },
               onTap: (position) {
