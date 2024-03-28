@@ -134,6 +134,10 @@ class _WarningScreenState extends State<WarningScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Warning'),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Stack(
           children: [

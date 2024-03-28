@@ -116,6 +116,10 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
     // final userLocation = _locationProvider.userLocation;
     final userLocation = GlobalLocationData().currentLocation;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Location'),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Stack(
           children: [

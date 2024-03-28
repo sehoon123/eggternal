@@ -1,5 +1,5 @@
+// post_details_screen.dart
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eggciting/handler/location_handler.dart';
 import 'package:eggciting/models/global_location_data.dart';
@@ -35,6 +35,7 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
     _locationHandler = LocationHandler();
     _locationHandler.startLocationUpdates();
   }
+
 
   @override
   void dispose() {
@@ -237,11 +238,13 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                             markers: {
                               Marker(
                                 markerId: const MarkerId('postMarker'),
-                                position: LatLng(widget.post.location.latitude,
+                                position: LatLng(
+                                    widget.post.location.latitude,
                                     widget.post.location.longitude),
                                 infoWindow: const InfoWindow(
                                   title: 'Post Location',
-                                  snippet: 'This is where the post is located.',
+                                  snippet:
+                                      'This is where the post is located.',
                                 ),
                               ),
                             },
@@ -255,7 +258,8 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16.0),
                           child: ElevatedButton(
                             onPressed: () {
                               if (distance * 1000 <= thresholdDistance &&
@@ -316,8 +320,8 @@ class PostDetailsScreenState extends State<PostDetailsScreen> {
                                   return Colors.white;
                                 },
                               ),
-                              padding:
-                                  MaterialStateProperty.all<EdgeInsetsGeometry>(
+                              padding: MaterialStateProperty.all<
+                                  EdgeInsetsGeometry>(
                                 const EdgeInsets.symmetric(vertical: 15),
                               ),
                             ),

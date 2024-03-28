@@ -27,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final LocationHandler _locationHandler = LocationHandler();
   int _selectedIndex = 0;
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  final PageController _pageController = PageController();
 
   void updateSelectedIndex(int index) {
     setState(() {
@@ -41,32 +41,21 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUserNickname();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _selectedIndex = widget.initialIndex;
+    _pageController.addListener(() {
+      int currentIndex = _pageController.page!.round();
+      if (currentIndex != _selectedIndex) {
+        setState(() {
+          _selectedIndex = currentIndex;
+        });
+      }
+    });
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    _navigatorKey.currentState!.pushReplacement(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          switch (index) {
-            case 0:
-              return const MapScreen();
-            case 1:
-              return const ListScreen();
-            case 2:
-              return const MapSelectionScreen();
-            case 3:
-              return const PaymentScreen();
-            case 4:
-              return SettingsScreen(locationHandler: _locationHandler);
-            default:
-              return const MapScreen();
-          }
-        },
-      ),
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
     );
   }
 
@@ -98,68 +87,73 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Navigator(
-          key: _navigatorKey,
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute(
-              builder: (BuildContext context) {
-                switch (_selectedIndex) {
-                  case 0:
-                    return const MapScreen();
-                  case 1:
-                    return const ListScreen();
-                  case 2:
-                    return const MapSelectionScreen();
-                  case 3:
-                    return const PaymentScreen();
-                  case 4:
-                    return SettingsScreen(locationHandler: _locationHandler);
-                  default:
-                    return const MapScreen();
-                }
-              },
-            );
-          },
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageController.page!.round() == 0) {
+          return true;
+        } else {
+          _pageController.previousPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+          return false;
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: PageView(
+            controller: _pageController,
+            children: <Widget>[
+              const MapScreen(),
+              const ListScreen(),
+              const MapSelectionScreen(),
+              const PaymentScreen(),
+              SettingsScreen(locationHandler: _locationHandler),
+            ],
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-        unselectedItemColor: Colors.grey,
-        unselectedIconTheme: const IconThemeData(
-          color: Colors.grey,
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          unselectedItemColor: Colors.grey,
+          unselectedIconTheme: const IconThemeData(
+            color: Colors.grey,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            color: Colors.grey,
+          ),
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list_outlined),
+              label: 'List',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_box_outlined),
+              label: 'Add',
+            ),
+            BottomNavigationBarItem(
+              backgroundColor: Colors.deepPurple,
+              icon: Icon(Icons.credit_card_outlined),
+              label: 'Pay',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+          onTap: _onItemTapped,
         ),
-        unselectedLabelStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_outlined),
-            label: 'List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box_outlined),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
-            icon: Icon(Icons.credit_card_outlined),
-            label: 'Pay',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
       ),
     );
   }

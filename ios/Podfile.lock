@@ -25,6 +25,7 @@ PODS:
   - BlueCryptor (1.0.32)
   - BlueECC (1.2.5)
   - BlueRSA (1.0.200)
+  - BranchSDK (3.3.0)
   - BSGridCollectionViewLayout (1.2.5)
   - BSImagePicker (2.10.3):
     - BSGridCollectionViewLayout (= 1.2.5)
@@ -122,6 +123,9 @@ PODS:
     - FirebaseCoreExtension (~> 10.0)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - Flutter (1.0.0)
+  - flutter_branch_sdk (7.1.0):
+    - BranchSDK (~> 3.3.0)
+    - Flutter
   - flutter_image_compress_common (1.0.0):
     - Flutter
     - Mantle
@@ -207,7 +211,7 @@ PODS:
     - Flutter
   - irondash_engine_context (0.0.1):
     - Flutter
-  - kakao_flutter_sdk_common (1.8.0):
+  - kakao_flutter_sdk_common (1.9.1-2):
     - Flutter
   - KituraContracts (1.2.1):
     - LoggerAPI (~> 1.7)
@@ -292,6 +296,7 @@ DEPENDENCIES:
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `10.20.0`)
   - Flutter (from `Flutter`)
+  - flutter_branch_sdk (from `.symlinks/plugins/flutter_branch_sdk/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
@@ -327,6 +332,7 @@ SPEC REPOS:
     - BlueCryptor
     - BlueECC
     - BlueRSA
+    - BranchSDK
     - BSGridCollectionViewLayout
     - BSImagePicker
     - BSImageView
@@ -389,6 +395,8 @@ EXTERNAL SOURCES:
     :tag: 10.20.0
   Flutter:
     :path: Flutter
+  flutter_branch_sdk:
+    :path: ".symlinks/plugins/flutter_branch_sdk/ios"
   flutter_image_compress_common:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_inappwebview:
@@ -456,6 +464,7 @@ SPEC CHECKSUMS:
   BlueCryptor: b0aee3d9b8f367b49b30de11cda90e1735571c24
   BlueECC: 0d18e93347d3ec6d41416de21c1ffa4d4cd3c2cc
   BlueRSA: dfeef51db96bcc4edec654956c1581adbda4e6a3
+  BranchSDK: 262dbab56b767807f49f45191c8499cd9c4b4d76
   BSGridCollectionViewLayout: 333dcb457a5a3bdd9212607ab5756553dcfe06cb
   BSImagePicker: 07404254f2fcdaf5a2eb403c0f8c337267ce8738
   BSImageView: a149459433a2687157d034c78e059d30ac7f2544
@@ -484,6 +493,7 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 2fbf73618288b7a36b2014b957745dcdd781389e
   FirebaseStorage: 8505bae8ac6662474b5b50e07759fb2765c15746
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_branch_sdk: 1ca1798cfb9ff9acf11028dee0592e3fa0234649
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
   flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
@@ -505,7 +515,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 8a1b34ad97ebe6f909fb8b9b77fba99943007556
   image_picker_ios: 99dfe1854b4fa34d0364e74a78448a0151025425
   irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
-  kakao_flutter_sdk_common: f1f155e0e8a195ec73e0f69acc0b0af510a0e926
+  kakao_flutter_sdk_common: ac22d95194585407db3fbc5f838d67ced11ea0f0
   KituraContracts: e845e60dc8627ad0a76fa55ef20a45451d8f830b
   leveldb-library: 06a69cc7582d64b29424a63e085e683cc188230a
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
