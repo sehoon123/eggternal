@@ -52,10 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    _pageController.animateToPage(
+    _pageController.jumpToPage(
       index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
     );
   }
 
@@ -89,14 +87,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_pageController.page!.round() == 0) {
-          return true;
-        } else {
-          _pageController.previousPage(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+        if (_selectedIndex == 0) {
+          return await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Confirm Exit'),
+                  content: const Text('Do you really want to quit the app?'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('No'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                ),
+              ) ??
+              false; // If the dialog is dismissed, return false
+        }
+
+        // Check if the current page is part of the bottom navigation bar
+        if (_selectedIndex == 1 ||
+            _selectedIndex == 2 ||
+            _selectedIndex == 3 ||
+            _selectedIndex == 4) {
+          // If it is, navigate to MapScreen and return false to prevent the default back button behavior
+          _pageController.jumpToPage(
+            0, // Index of MapScreen
           );
-          return false;
+          return false; // Prevent the app from closing
+        } else {
+          // Otherwise, allow the default back button behavior
+          return true;
         }
       },
       child: Scaffold(
