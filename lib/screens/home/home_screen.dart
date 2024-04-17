@@ -51,10 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Determine whether swipe should be enabled based on the current page index
+  ScrollPhysics _getScrollPhysics(int index) {
+    if (index == 2 || index == 0) {
+      // Assuming MapSelectionScreen is at index 2
+      return const NeverScrollableScrollPhysics(); // Disable swipe for MapSelectionScreen
+    }
+    return const AlwaysScrollableScrollPhysics(); // Enable swipe for other screens
+  }
+
   void _onItemTapped(int index) {
-    _pageController.jumpToPage(
-      index,
-    );
+    _pageController.jumpToPage(index);
+    if (index == 1) {
+      Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+    }
   }
 
   Future<void> _loadUserNickname() async {
@@ -127,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: PageView(
             controller: _pageController,
+            physics: _getScrollPhysics(_selectedIndex),
             children: <Widget>[
               const MapScreen(),
               const ListScreen(),

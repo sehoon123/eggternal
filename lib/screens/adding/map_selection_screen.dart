@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapSelectionScreen extends StatefulWidget {
   const MapSelectionScreen({super.key});
@@ -30,27 +31,39 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
-    // _locationProvider.startTrackingLocation();
-    Timer(const Duration(milliseconds: 500), () {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Select Location'),
-            content: const Text('Please select a location on the map.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
+    _checkFirstVisit();
+  }
+
+  // _locationProvider = Provider.of<LocationProvider>(context, listen: false);
+  // _locationProvider.startTrackingLocation();
+  Future<void> _checkFirstVisit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isFirstVisit = prefs.getBool('isFirstVisitMapSelectionScreen') ?? true;
+
+    if (isFirstVisit) {
+      Timer(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Select Location'),
+                content: const Text('Please select a location on the map.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
           );
-        },
-      );
-    });
+        }
+      });
+      await prefs.setBool('isFirstVisitMapSelectionScreen', false);
+    }
   }
 
   @override

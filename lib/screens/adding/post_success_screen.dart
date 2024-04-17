@@ -38,14 +38,14 @@ class PostSuccessScreen extends StatelessWidget {
               right: 16.0,
               child: ElevatedButton(
                 onPressed: () {
+                  HomeScreen.of(context)?.updateSelectedIndex(0);
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MapScreen(),
-                    ),
+                        builder: (context) =>
+                            HomeScreen(firestore: FirebaseFirestore.instance)),
                     (route) => false,
                   );
-                  HomeScreen.of(context)?.updateSelectedIndex(0);
                 },
                 child: const Text('Continue'),
               ),
