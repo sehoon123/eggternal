@@ -31,13 +31,23 @@ class _ListScreenState extends State<ListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostsProvider>(context, listen: false).fetchPosts();
-    });
+    refreshData();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+    // });
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
-    // debugPrintSharedPreferences();
-    // Removed _scrollController.addListener(_onScroll); as it's not needed for non-lazy loading
+  void refreshData() {
+    // Assuming you have a method in your provider to fetch all necessary data
+    final postsProvider = Provider.of<PostsProvider>(context, listen: false);
+    postsProvider.fetchPosts(isInitialFetch: true).then((_) {
+      // This will cause the widget to rebuild with new data
+      if (mounted) setState(() {});
+    }).catchError((error) {
+      // Handle errors if necessary
+      debugPrint('Error fetching posts: $error');
+    });
   }
 
   @override
@@ -201,7 +211,7 @@ class _ListScreenState extends State<ListScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+              refreshData();
             },
           ),
         ],

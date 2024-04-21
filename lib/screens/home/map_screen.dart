@@ -48,8 +48,8 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _moveToSearchedPlace(String placeId) async {
-    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(placeId);
+  void _moveToSearchedPlace(Prediction prediction) async {
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(prediction.placeId!);
     final lat = detail.result.geometry!.location.lat;
     final lng = detail.result.geometry!.location.lng;
 
@@ -60,6 +60,11 @@ class _MapScreenState extends State<MapScreen> {
         CameraPosition(target: LatLng(lat, lng), zoom: 16),
       ),
     );
+
+    setState(() {
+      _searchController.text = prediction.description ?? '';
+      _predictions = [];
+    });
   }
 
   Future<void> _moveToCurrentUserLocation() async {
@@ -163,8 +168,7 @@ class _MapScreenState extends State<MapScreen> {
                     onChanged: _searchPlace,
                     onSubmitted: (value) {
                       if (_predictions.isNotEmpty) {
-                        _moveToSearchedPlace(_predictions.first.placeId!);
-                        _searchController.clear();
+                        _moveToSearchedPlace(_predictions.first);
                         setState(() {
                           _predictions = [];
                         });
@@ -192,9 +196,7 @@ class _MapScreenState extends State<MapScreen> {
                             title: Text(_predictions[index].description ??
                                 'No description'),
                             onTap: () {
-                              _moveToSearchedPlace(
-                                  _predictions[index].placeId!);
-                              _searchController.clear();
+                              _moveToSearchedPlace(_predictions[index]);
                               setState(() {
                                 _predictions = [];
                               });

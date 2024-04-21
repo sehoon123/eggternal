@@ -63,7 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     _pageController.jumpToPage(index);
     if (index == 1) {
-      Provider.of<PostsProvider>(context, listen: false).fetchPosts();
+      Provider.of<PostsProvider>(context, listen: false)
+          .fetchPosts(isInitialFetch: true);
     }
   }
 
