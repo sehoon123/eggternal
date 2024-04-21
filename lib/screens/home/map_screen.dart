@@ -184,7 +184,23 @@ class _MapScreenState extends State<MapScreen> {
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
                       ),
-                      suffixIcon: const Icon(Icons.search),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchController.text.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                // _searchedLocation = null;
+                                _predictions = [];
+                              });
+                            },
+                            ),
+                          const Icon(Icons.search),
+                        ],
+                      ),
                     ),
                   ),
                   if (_predictions.isNotEmpty)

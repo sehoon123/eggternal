@@ -86,7 +86,8 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
   }
 
   void _moveToSearchedPlace(Prediction prediction) async {
-    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(prediction.placeId!);
+    PlacesDetailsResponse detail =
+        await _places.getDetailsByPlaceId(prediction.placeId!);
     final lat = detail.result.geometry!.location.lat;
     final lng = detail.result.geometry!.location.lng;
 
@@ -214,7 +215,22 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
                       ),
-                      suffixIcon: const Icon(Icons.search),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchController.text.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _predictions = [];
+                                });
+                              },
+                            ),
+                          const Icon(Icons.search),
+                        ],
+                      ),
                     ),
                   ),
                   if (_predictions.isNotEmpty)
@@ -228,8 +244,7 @@ class MapSelectionScreenState extends State<MapSelectionScreen> {
                             title: Text(_predictions[index].description ??
                                 'No description'),
                             onTap: () {
-                              _moveToSearchedPlace(
-                                  _predictions[index]);
+                              _moveToSearchedPlace(_predictions[index]);
                               setState(() {
                                 _predictions = [];
                               });
