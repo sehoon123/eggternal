@@ -23,6 +23,7 @@ class _MapScreenState extends State<MapScreen> {
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: dotenv.env['androidGeoApiKey']!);
   List<Prediction> _predictions = [];
+  LatLng? _searchedLocation;
 
   @override
   void initState() {
@@ -62,6 +63,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     setState(() {
+      _searchedLocation = LatLng(lat, lng);
       _searchController.text = prediction.description ?? '';
       _predictions = [];
     });
@@ -102,7 +104,7 @@ class _MapScreenState extends State<MapScreen> {
                 } else if (snapshot.hasData) {
                   final userLocation = GlobalLocationData().currentLocation;
                   final lastKnownLocation = GlobalLocationData().lastKnownLocation;
-                  final locationToUse = userLocation ?? lastKnownLocation;
+                  final locationToUse = _searchedLocation ?? userLocation ?? lastKnownLocation;
 
                   return GoogleMap(
                     myLocationButtonEnabled: false,
