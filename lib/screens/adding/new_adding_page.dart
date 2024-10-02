@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
-import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+// import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart'; // Add this import
@@ -102,31 +102,31 @@ class NewAddingPageState extends State<NewAddingPage> {
       body: SafeArea(
         child: Column(
           children: [
-            QuillToolbar.simple(
-              configurations: QuillSimpleToolbarConfigurations(
-                controller: _controller,
-                showSubscript: false,
-                showSuperscript: false,
-                showInlineCode: false,
-                showColorButton: true,
-                showBackgroundColorButton: false,
-                showIndent: false,
-                showListBullets: false,
-                showListNumbers: false,
-                showCodeBlock: false,
-                showListCheck: false,
-                showSearchButton: false,
-                sharedConfigurations: const QuillSharedConfigurations(
-                  locale: Locale('ko'), // Set English locale
-                ),
-                customButtons: [
-                  QuillToolbarCustomButtonOptions(
-                    icon: const Icon(Icons.image),
-                    onPressed: _pickImage,
-                  ),
-                ],
-              ),
-            ),
+            // QuillToolbar.simple(
+            //   configurations: QuillSimpleToolbarConfigurations(
+            //     controller: _controller,
+            //     showSubscript: false,
+            //     showSuperscript: false,
+            //     showInlineCode: false,
+            //     showColorButton: true,
+            //     showBackgroundColorButton: false,
+            //     showIndent: false,
+            //     showListBullets: false,
+            //     showListNumbers: false,
+            //     showCodeBlock: false,
+            //     showListCheck: false,
+            //     showSearchButton: false,
+            //     sharedConfigurations: const QuillSharedConfigurations(
+            //       locale: Locale('ko'), // Set English locale
+            //     ),
+            //     customButtons: [
+            //       QuillToolbarCustomButtonOptions(
+            //         icon: const Icon(Icons.image),
+            //         onPressed: _pickImage,
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Expanded(
               child: Listener(
                 onPointerMove: (event) {
@@ -147,11 +147,10 @@ class NewAddingPageState extends State<NewAddingPage> {
                           scrollBottomInset: 10,
                           showCursor: true,
                           padding: const EdgeInsets.only(bottom: 50),
-                          readOnly: false, // true for view only mode
-                          sharedConfigurations: const QuillSharedConfigurations(
-                            locale: Locale('ko'),
-                          ),
-                          embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                          // sharedConfigurations: const QuillSharedConfigurations(
+                          //   locale: Locale('ko'),
+                          // ),
+                          // embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                         ),
                       );
                     }),

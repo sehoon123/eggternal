@@ -52,7 +52,7 @@ Future<void> requestPermissions() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterBranchSdk.init(
-    useTestKey: false,
+    // useTestKey: false,
     enableLogging: true,
   );
 

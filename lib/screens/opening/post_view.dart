@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as fq;
 import 'package:eggciting/models/post.dart';
-import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+// import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:geocoding/geocoding.dart';
 
 class DisplayPostScreen extends StatefulWidget {
@@ -329,11 +329,10 @@ class _DisplayPostScreenState extends State<DisplayPostScreen> {
                         child: fq.QuillEditor.basic(
                           configurations: fq.QuillEditorConfigurations(
                             controller: _controller,
-                            readOnly: true,
                             showCursor: false,
                             scrollable: true,
                             autoFocus: false,
-                            embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                            // embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                           ),
                         ),
                       );
